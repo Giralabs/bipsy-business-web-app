@@ -1,0 +1,113 @@
+<footer class="footer">
+  <div class="footer__inner">
+
+    <!-- ----- BRAND ----- -->
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a routerLink="/" aria-label="Bipsy Business, inicio" class="footer__brand-link">
+          <img class="footer__logo theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
+          <img class="footer__logo theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+        </a>
+        <p class="footer__claim">
+          La app para gestionar tu negocio con cita: agenda, clientes, equipo y finanzas.
+          Tus clientes reservan en Bipsy; tú lo recibes todo aquí.
+        </p>
+
+        <div class="footer__apps">
+          <p class="footer__mini-title">Descarga la app</p>
+          <div class="footer__stores">
+            <a [href]="stores.googlePlay.url" target="_blank" rel="noopener" class="footer__store">
+              <img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" />
+            </a>
+            <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="footer__store">
+              <img [src]="stores.appStore.image" [alt]="stores.appStore.label" />
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__social-wrap">
+          <p class="footer__mini-title">Síguenos</p>
+          <div class="footer__socials">
+            @for (social of socials; track social.id) {
+              <a [href]="social.url" target="_blank" rel="noopener" class="footer__social" [attr.aria-label]="social.label">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ----- LINK COLUMNS ----- -->
+      <div class="footer__cols">
+        @for (col of columns; track col.title) {
+          <nav class="footer__col" [attr.aria-label]="col.title">
+            <h2 class="footer__title">{{ col.title }}</h2>
+            @for (item of col.links; track item.label) {
+              @if (item.fragment) {
+                <a [routerLink]="item.link" [fragment]="item.fragment">{{ item.label }}</a>
+              } @else {
+                <a [routerLink]="item.link">{{ item.label }}</a>
+              }
+            }
+          </nav>
+        }
+      </div>
+    </div>
+
+    <!-- ----- LEGAL INFORMATION -----
+         Provider identification (LSSI-CE art. 10) and the subscription terms
+         the stores require to be stated before purchase. -->
+    <div class="footer__legal">
+      <div class="footer__legal-block">
+        <span class="material-symbols-rounded">badge</span>
+        <p>
+          <strong>Titular del servicio:</strong> {{ company.legalName }} ({{ company.name }}) ·
+          NIF {{ company.taxId }} · {{ company.address }} ·
+          <a [href]="'mailto:' + company.email">{{ company.email }}</a>
+        </p>
+      </div>
+      <div class="footer__legal-block">
+        <span class="material-symbols-rounded">autorenew</span>
+        <p>
+          <strong>Suscripción:</strong> {{ trialDays }} días de prueba gratis, una por negocio. Después se renueva
+          automáticamente cada mes a través de Google Play o App Store salvo que la canceles desde la tienda.
+          Sin permanencia. El precio final con impuestos lo muestra la tienda antes de pagar.
+          <a routerLink="/legal/condiciones-suscripcion">Condiciones de suscripción</a>.
+        </p>
+      </div>
+      <div class="footer__legal-block">
+        <span class="material-symbols-rounded">shield</span>
+        <p>
+          <strong>Tus datos:</strong> tratamos los datos de tus clientes y de tu equipo por cuenta de tu negocio.
+          <a routerLink="/legal/encargo-tratamiento">Encargo del tratamiento</a> ·
+          <a routerLink="/legal/privacidad">Privacidad</a> ·
+          <a routerLink="/legal/cookies">Cookies</a>.
+        </p>
+      </div>
+    </div>
+
+    <!-- ----- BOTTOM ----- -->
+    <div class="footer__bottom">
+      <a class="footer__by" href="https://giralabs.es" target="_blank" rel="noopener">
+        <span>Una aplicación de</span>
+        <img src="assets_giralabs/giralabs_wordmark_dark.webp" alt="Giralabs" class="footer__by-logo theme-dark-only" />
+        <img src="assets_giralabs/giralabs_wordmark_light.webp" alt="Giralabs" class="footer__by-logo theme-light-only" />
+      </a>
+
+      <p class="footer__marks">
+        Google Play y el logotipo de Google Play son marcas de Google LLC. Apple y App Store son marcas de Apple Inc.
+      </p>
+
+      <p class="footer__copy">
+        <span class="footer__lang"><span class="material-symbols-rounded">language</span>Español (España)</span>
+        © {{ year }} {{ company.name }}. Todos los derechos reservados.
+      </p>
+    </div>
+  </div>
+
+  <!-- The giant wordmark that closes the page. Decorative. -->
+  <div class="footer__giant" aria-hidden="true">
+    <img class="theme-dark-only" src="assets_bipsy_business/Wordmarks/wordmark_dark_nobackground_trim.webp" alt="" />
+    <img class="theme-light-only" src="assets_bipsy_business/Wordmarks/wordmark_light_nobackground_trim.webp" alt="" />
+  </div>
+</footer>

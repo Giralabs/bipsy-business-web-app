@@ -1,0 +1,121 @@
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true">
+    <div class="aura aura--mint hero__aura hero__aura--1"></div>
+    <div class="aura aura--biz hero__aura hero__aura--2"></div>
+    <img class="hero__lotus theme-dark-only" src="assets_bipsy_business/Brand Marks/apricot_dark_symbol_nobackground_trim.webp" alt="" />
+    <img class="hero__lotus theme-light-only" src="assets_bipsy_business/Brand Marks/apricot_light_symbol_nobackground_trim.webp" alt="" />
+  </div>
+
+  <div class="hero__inner">
+    <!-- ----- COPY ----- -->
+    <div class="hero__copy">
+      <a routerLink="/funcionalidades/gestion-de-equipo" class="hero__badge hero__in" style="--d:0">
+        <span class="pill pill--solid">Gratis</span>
+        Tu equipo entra con un código de invitación
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+
+      <h1 class="display-xl hero__title">
+        <span class="hero__line hero__in" style="--d:1">La agenda de</span>
+        <span class="hero__line hero__rotator hero__in" style="--d:2" aria-live="polite">
+          @for (word of words; track word; let i = $index) {
+            <span class="hero__word" [class.hero__word--on]="i === wordIndex"
+                  [class.hero__word--out]="i === (wordIndex + words.length - 1) % words.length"
+                  [attr.aria-hidden]="i !== wordIndex">{{ word }}</span>
+          }
+        </span>
+        <span class="hero__line hero__in" style="--d:3">se llena <span class="hero__sola">sola.</span></span>
+      </h1>
+
+      <p class="lead hero__lead hero__in" style="--d:4">
+        Reservas online a cualquier hora, clientes, equipo y cuentas en una sola app.
+        Tus clientes reservan desde Bipsy y tú lo gestionas todo desde Bipsy Business.
+      </p>
+
+      <div class="btn-row hero__actions hero__in" style="--d:5">
+        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine hero__cta">
+          Probar {{ trialDays }} días gratis
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+        <a routerLink="/funcionalidades" class="btn btn--secondary btn--lg">
+          <span class="material-symbols-rounded">play_circle</span>
+          Ver cómo funciona
+        </a>
+      </div>
+
+      <ul class="hero__trust hero__in" style="--d:6">
+        <li><span class="material-symbols-rounded fill">verified</span>Sin permanencia</li>
+        <li><span class="material-symbols-rounded fill">group</span>Equipo sin coste extra</li>
+        <li><span class="material-symbols-rounded fill">percent</span>0 % de comisión por reserva</li>
+      </ul>
+
+      <div class="hero__stores hero__in" style="--d:7">
+        <a [href]="stores.googlePlay.url" target="_blank" rel="noopener"><img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" /></a>
+        <a [href]="stores.appStore.url" target="_blank" rel="noopener"><img [src]="stores.appStore.image" [alt]="stores.appStore.label" /></a>
+      </div>
+    </div>
+
+    <!-- ----- VISUAL ----- -->
+    <div class="hero__visual" #visual>
+      <div class="hero__orbit" aria-hidden="true">
+        <span class="hero__orbit-dot hero__orbit-dot--1"></span>
+        <span class="hero__orbit-dot hero__orbit-dot--2"></span>
+      </div>
+
+      <div class="hero__stage">
+        <!-- Mr. Bip's Blender animation. Frames + manifest.json go in
+             public/mr_bip/hero/ (npm run hero:manifest). Until then, the slot. -->
+        <app-frame-sequence folder="mr_bip/hero" label="Mr. Bip, la mascota de Bipsy Business, dando la bienvenida">
+          <app-bip-slot code="MB-00" pose="Animación del hero: Mr. Bip saluda y presenta la app" ratio="4 / 5" />
+        </app-frame-sequence>
+      </div>
+
+      <div class="hero__float hero__float--booking" style="--depth:26; --delay:900ms">
+        <div class="ph-float">
+          <span class="ph-float__icon"><span class="material-symbols-rounded">event_available</span></span>
+          <span class="ph-float__text"><small>Nueva reserva · hoy 17:30</small><b>Laura S. · Corte + barba</b></span>
+        </div>
+      </div>
+
+      <div class="hero__float hero__float--paid" style="--depth:16; --delay:1200ms">
+        <div class="ph-float">
+          <span class="ph-float__icon ph-float__icon--success"><span class="material-symbols-rounded">euro</span></span>
+          <span class="ph-float__text"><small>Cobrado</small><b>22,00 €</b></span>
+        </div>
+      </div>
+
+      <div class="hero__float hero__float--review" style="--depth:34; --delay:1500ms">
+        <div class="ph-float">
+          <span class="ph-float__icon ph-float__icon--warn"><span class="material-symbols-rounded">star</span></span>
+          <span class="ph-float__text"><span class="ph-float__stars">★★★★★</span><b>«¡Como siempre, genial!»</b></span>
+        </div>
+      </div>
+
+      <div class="hero__float hero__float--wait" style="--depth:22; --delay:1800ms">
+        <div class="ph-float">
+          <span class="ph-float__icon ph-float__icon--biz"><span class="material-symbols-rounded">hourglass_top</span></span>
+          <span class="ph-float__text"><small>Lista de espera</small><b>Hueco de las 12:00 ocupado</b></span>
+        </div>
+      </div>
+
+      <div class="hero__float hero__float--team" style="--depth:12; --delay:2100ms">
+        <div class="ph-float">
+          <span class="hero__avatars"><span>MA</span><span>JR</span><span>LM</span></span>
+          <span class="ph-float__text"><small>Equipo</small><b>Javi ha fichado · 10:00</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ----- TRADES MARQUEE ----- -->
+  <div class="marquee" aria-label="Negocios que usan Bipsy Business">
+    <div class="marquee__track">
+      @for (type of marquee; track $index) {
+        <a class="marquee__chip" [routerLink]="['/negocios', type.slug]" [attr.tabindex]="$index >= marquee.length / 2 ? -1 : null"
+           [attr.aria-hidden]="$index >= marquee.length / 2 ? true : null">
+          <span class="material-symbols-rounded">{{ type.icon }}</span>{{ type.name }}
+        </a>
+      }
+    </div>
+  </div>
+</section>

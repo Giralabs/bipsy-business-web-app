@@ -1,0 +1,67 @@
+:host { display: block; }
+
+/* ----- PRICING TEASER ---------------------------------------------- */
+.pricing {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  max-width: 920px;
+  margin-inline: auto;
+}
+
+.pricing > div { height: 100%; }
+
+.pricing__more { margin-top: 32px; display: flex; justify-content: center; }
+
+/* ----- FAQ ------------------------------------------------------------ */
+.faq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: start;
+}
+
+.faq-grid .section-head { position: sticky; top: calc(var(--header-h) + 40px); margin-bottom: 0; }
+.faq-grid__help { margin-top: 28px; }
+
+/* ----- BLOG TEASER --------------------------------------------------- */
+.blog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+.blog-head .section-head { margin-bottom: 0; }
+
+.posts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+
+.post { display: flex; flex-direction: column; gap: 12px; }
+
+.post__cover {
+  position: relative;
+  height: 180px;
+  margin-bottom: 8px;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(192, 238, 211, 0.35), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(135, 150, 168, 0.5), transparent 55%),
+    #2E343B;
+  color: #C0EED3;
+}
+.post__cover[data-cat='Equipo'] { background: radial-gradient(circle at 80% 20%, rgba(192, 238, 211, 0.3), transparent 55%), radial-gradient(circle at 20% 80%, rgba(135, 150, 168, 0.6), transparent 55%), #44544B; }
+.post__cover[data-cat='Agenda'] { background: radial-gradient(circle at 50% 0%, rgba(192, 238, 211, 0.45), transparent 60%), #2E343B; }
+.post__cover .material-symbols-rounded { font-size: 64px; transition: transform 600ms var(--ease-back); }
+.post:hover .post__cover .material-symbols-rounded { transform: scale(1.15) rotate(-8deg); }
+
+.post__meta { display: flex; align-items: center; gap: 10px; font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
+.post__title { font-family: var(--ff-display); font-size: 1.375rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.5px; }
+.post__excerpt { font-size: 0.9375rem; font-weight: 500; line-height: 1.55; color: var(--clr-text-2); }
+
+@media (max-width: 960px) {
+  .faq-grid { grid-template-columns: 1fr; }
+  .faq-grid .section-head { position: static; }
+  .posts { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .pricing { grid-template-columns: 1fr; }
+}

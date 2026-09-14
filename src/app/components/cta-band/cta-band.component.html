@@ -1,0 +1,40 @@
+<section class="section section--tight">
+  <div class="container">
+    <div class="band" appReveal revealFrom="scale">
+      <div class="band__aura band__aura--mint" aria-hidden="true"></div>
+      <div class="band__aura band__aura--biz" aria-hidden="true"></div>
+      <img class="band__lotus theme-dark-only" src="assets_bipsy_business/Brand Marks/apricot_dark_symbol_nobackground.webp" alt="" aria-hidden="true" />
+      <img class="band__lotus theme-light-only" src="assets_bipsy_business/Brand Marks/apricot_light_symbol_nobackground.webp" alt="" aria-hidden="true" />
+
+      <div class="band__body">
+        <span class="band__pill">
+          <span class="material-symbols-rounded fill">redeem</span>
+          {{ trialDays }} días gratis · sin permanencia
+        </span>
+        <h2 class="display band__title">{{ title }}</h2>
+        <p class="lead band__text">{{ text }}</p>
+
+        <div class="btn-row band__actions">
+          <a routerLink="/registro" class="btn btn--lg band__cta btn--shine">
+            Probar gratis
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+          <a routerLink="/precios" class="btn btn--lg band__ghost">Ver precios</a>
+        </div>
+
+        <div class="band__stores">
+          <a [href]="stores.googlePlay.url" target="_blank" rel="noopener" class="band__store">
+            <img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" />
+          </a>
+          <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="band__store">
+            <img [src]="stores.appStore.image" [alt]="stores.appStore.label" />
+          </a>
+        </div>
+      </div>
+
+      <div class="band__art">
+        <app-bip-slot code="MB-05" pose="Con los brazos abiertos, dando la bienvenida" ratio="4 / 5" />
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,112 @@
+<app-page-hero
+  eyebrow="Precios"
+  icon="sell"
+  title="Un plan por negocio. Tu equipo, gratis."
+  [lead]="'Sin comisión por reserva, sin coste por trabajador y sin permanencia. Pruébalo ' + trialDays + ' días gratis y decide después.'"
+  [crumbs]="[{ label: 'Precios' }]" />
+
+<section class="section section--tight plans-wrap">
+  <div class="container">
+    <div class="plans">
+      <div class="plans__bip" appReveal revealFrom="left">
+        <app-bip-slot code="MB-06" pose="Sosteniendo una hucha con una sonrisa de oreja a oreja" ratio="3 / 4" />
+      </div>
+      @for (plan of plans; track plan.code; let i = $index) {
+        <div appReveal [revealDelay]="i * 120 + 80">
+          <app-plan-card [plan]="plan" />
+        </div>
+      }
+    </div>
+
+    <ul class="notes" appReveal>
+      @for (note of notes; track note) {
+        <li><span class="material-symbols-rounded">info</span>{{ note }}</li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- ----- TEAM FREE BANNER ----- -->
+<section class="section section--tight">
+  <div class="container">
+    <div class="free card" appReveal revealFrom="scale">
+      <div class="free__num" aria-hidden="true">0 €</div>
+      <div>
+        <h2 class="headline">Por cada trabajador que añadas</h2>
+        <p class="body">
+          Otras apps cobran por usuario. En Bipsy Business pagas un plan por negocio y tus trabajadores entran
+          gratis con tu código de invitación, cada uno con su agenda y los permisos que tú decidas.
+        </p>
+      </div>
+      <a routerLink="/funcionalidades/gestion-de-equipo" class="btn btn--primary btn--lg">
+        Ver cómo se invita
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ----- COMPARISON ----- -->
+<section class="section section--band">
+  <div class="container">
+    <div class="section-head section-head--center" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">compare</span>Comparativa</span>
+      <h2 class="display">Qué incluye cada plan</h2>
+    </div>
+
+    <div class="table-wrap" appReveal>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th scope="col"><span class="sr-only">Función</span></th>
+            @for (plan of plans; track plan.code) {
+              <th scope="col" [class.compare__featured]="plan.recommended">
+                <span class="compare__plan">{{ plan.name }}</span>
+                <span class="compare__price">{{ plan.price }} €<small>/mes</small></span>
+              </th>
+            }
+          </tr>
+        </thead>
+        @for (group of comparison; track group.label) {
+          <tbody>
+            <tr class="compare__group"><th scope="rowgroup" colspan="3">{{ group.label }}</th></tr>
+            @for (row of group.rows; track row.label) {
+              <tr>
+                <th scope="row">
+                  {{ row.label }}
+                  @if (row.hint) { <small>{{ row.hint }}</small> }
+                </th>
+                @for (value of [row.bipsy, row.quality]; track $index; let qi = $index) {
+                  <td [class.compare__featured]="qi === 1">
+                    @if (isText(value)) {
+                      <span class="compare__text">{{ value }}</span>
+                    } @else if (value) {
+                      <span class="material-symbols-rounded compare__yes" aria-label="Incluido">check_circle</span>
+                    } @else {
+                      <span class="material-symbols-rounded compare__no" aria-label="No incluido">remove</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        }
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ----- FAQ ----- -->
+<section class="section">
+  <div class="container narrow">
+    <div class="section-head section-head--center" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">help</span>Dudas sobre el pago</span>
+      <h2 class="display">Preguntas sobre planes y pagos</h2>
+    </div>
+    <div appReveal>
+      <app-faq-list [items]="faq" idPrefix="pricing-faq" />
+    </div>
+  </div>
+</section>
+
+<app-cta-band />

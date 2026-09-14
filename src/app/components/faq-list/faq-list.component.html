@@ -1,0 +1,23 @@
+<div class="faq">
+  @for (item of items; track item.q; let i = $index) {
+    <div class="faq__item" [class.faq__item--open]="openIndex === i">
+      <h3 class="faq__heading">
+        <button type="button" class="faq__q" (click)="toggle(i)"
+                [attr.aria-expanded]="openIndex === i"
+                [attr.aria-controls]="idPrefix + '-a-' + i"
+                [id]="idPrefix + '-q-' + i">
+          <span>{{ item.q }}</span>
+          <span class="faq__icon" aria-hidden="true">
+            <span class="material-symbols-rounded">add</span>
+          </span>
+        </button>
+      </h3>
+      <div class="faq__a" role="region" [id]="idPrefix + '-a-' + i"
+           [attr.aria-labelledby]="idPrefix + '-q-' + i">
+        <div class="faq__a-inner">
+          <p>{{ item.a }}</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

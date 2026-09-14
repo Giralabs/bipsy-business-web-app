@@ -1,0 +1,53 @@
+:host { display: block; }
+
+.art { width: 100%; max-width: 340px; }
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* A fixed width and not a percentage: the actions row shrinks to its
+     content, so 100 % of it was the width of the placeholder. */
+  width: 520px;
+  max-width: 100%;
+  height: 60px;
+  padding: 0 20px;
+  border-radius: var(--r-pill);
+  background: var(--clr-surface);
+  box-shadow: var(--shadow-pop);
+  transition: box-shadow var(--dur-medium) ease;
+}
+.search:focus-within { box-shadow: var(--shadow-pop), 0 0 0 2px var(--clr-accent); }
+.search .material-symbols-rounded { color: var(--clr-text-3); }
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--clr-text);
+}
+.search input::placeholder { color: var(--clr-text-3); }
+
+.cats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 56px; }
+.cat { display: flex; flex-direction: column; gap: 6px; }
+.cat b { margin-top: 10px; font-size: 1rem; }
+
+.groups { display: grid; gap: 48px; max-width: 900px; margin-inline: auto; }
+.group__title { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.group__title .material-symbols-rounded { font-size: 28px; color: var(--clr-accent-text); }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 16px; text-align: center; }
+.empty > .material-symbols-rounded { font-size: 56px; color: var(--clr-text-3); }
+
+.contact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.contact__card .title { margin-top: 16px; }
+.contact__card .body { margin-top: 6px; }
+.contact__card a { color: var(--clr-text); font-weight: 700; overflow-wrap: anywhere; }
+
+@media (max-width: 1024px) { .cats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .contact { grid-template-columns: 1fr; } .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

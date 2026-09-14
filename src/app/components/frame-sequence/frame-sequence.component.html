@@ -1,0 +1,12 @@
+@switch (state) {
+  @case ('playing') {
+    <canvas #canvas class="sequence__canvas" [style.aspect-ratio]="aspectRatio"
+            role="img" [attr.aria-label]="label"></canvas>
+  }
+  @case ('placeholder') {
+    <ng-content />
+  }
+  @default {
+    <div class="sequence__loading" [style.aspect-ratio]="aspectRatio" aria-hidden="true"></div>
+  }
+}

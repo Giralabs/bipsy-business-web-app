@@ -1,0 +1,60 @@
+<app-page-hero
+  eyebrow="Bipsy para tus clientes"
+  icon="phone_iphone"
+  title="La app gratuita con la que te reservan"
+  lead="Tus clientes buscan, reservan y gestionan sus citas desde Bipsy, en Android, iPhone o la web. Sin crear otra cuenta para cada negocio y sin pagar nada."
+  [split]="true"
+  [crumbs]="[{ label: 'Bipsy para tus clientes' }]">
+  <ng-container ngProjectAs="[actions]">
+    <a [href]="stores.googlePlay.url" target="_blank" rel="noopener" class="store"><img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" /></a>
+    <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="store"><img [src]="stores.appStore.image" [alt]="stores.appStore.label" /></a>
+    <a [href]="clientWeb" target="_blank" rel="noopener" class="btn btn--secondary">
+      <span class="material-symbols-rounded">language</span>Reservar desde la web
+    </a>
+  </ng-container>
+  <div art class="art">
+    <div class="art__phone"><app-phone screen="reserva" /></div>
+    <div class="art__bip">
+      <app-bip-slot code="BIP-02" mascot="client" pose="Bip (sudadera) saludando con la mano" ratio="3 / 4" [compact]="true" />
+    </div>
+  </div>
+</app-page-hero>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="brand" appReveal>
+      <img class="brand__logo theme-dark-only" src="assets_bipsy/Combination Marks/combinationmark_mint_horizontal_nobackground.webp" alt="Bipsy" />
+      <img class="brand__logo theme-light-only" src="assets_bipsy/Combination Marks/combinationmark_carbon_horizontal_nobackground.webp" alt="Bipsy" />
+      <p class="lead">Lo que pueden hacer tus clientes</p>
+    </div>
+    <div class="grid">
+      @for (f of features; track f.title; let i = $index) {
+        <article class="card card--glow item" appTilt appReveal [revealDelay]="(i % 4) * 70">
+          <span class="icon-tile"><span class="material-symbols-rounded">{{ f.icon }}</span></span>
+          <h2 class="title item__title">{{ f.title }}</h2>
+          <p class="body">{{ f.text }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section section--band">
+  <div class="container ways">
+    <div class="section-head" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">route</span>Cómo llegan</span>
+      <h2 class="display">Así llegan tus clientes a Bipsy</h2>
+      <p class="lead">Los de siempre, invitados por ti. Los nuevos, buscando lo que haces cerca de casa.</p>
+    </div>
+    <ol class="ways__list">
+      @for (w of ways; track w.title; let i = $index) {
+        <li class="card ways__item" appReveal [revealDelay]="i * 120">
+          <span class="ways__icon"><span class="material-symbols-rounded">{{ w.icon }}</span></span>
+          <span><b>{{ w.title }}</b><span>{{ w.text }}</span></span>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
+
+<app-cta-band title="Pon tu negocio donde tus clientes ya buscan cita" />

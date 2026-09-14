@@ -1,0 +1,72 @@
+@if (post) {
+  @for (p of [post]; track p.slug) {
+    <article class="article">
+      <header class="article__head">
+        <div class="article__bg" aria-hidden="true">
+          <div class="aura aura--mint article__aura"></div>
+        </div>
+        <div class="article__inner">
+          <nav class="crumbs" aria-label="Estás en">
+            <a routerLink="/">Inicio</a>
+            <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+            <a routerLink="/blog">Blog</a>
+          </nav>
+          <p class="meta"><span class="pill pill--accent">{{ p.category }}</span>
+            <time [attr.datetime]="p.date">{{ p.dateLabel }}</time> · {{ p.readMinutes }} min de lectura</p>
+          <h1 class="article__title">{{ p.title }}</h1>
+          <p class="lead article__lead">{{ p.excerpt }}</p>
+        </div>
+        <div class="article__cover" aria-hidden="true">
+          <span class="material-symbols-rounded">{{ p.icon }}</span>
+        </div>
+      </header>
+
+      <div class="article__body">
+        @for (section of p.sections; track section.heading) {
+          <section appReveal>
+            <h2>{{ section.heading }}</h2>
+            @for (para of section.paragraphs; track $index) {
+              <p>{{ para }}</p>
+            }
+            @if (section.bullets?.length) {
+              <ul>
+                @for (b of section.bullets; track $index) {
+                  <li><span class="material-symbols-rounded">check_circle</span>{{ b }}</li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        @if (feature) {
+          <a class="related card" [routerLink]="['/funcionalidades', feature.slug]" appReveal>
+            <span class="icon-tile"><span class="material-symbols-rounded">{{ feature.icon }}</span></span>
+            <span class="related__text">
+              <small>Funcionalidad relacionada</small>
+              <b>{{ feature.name }}</b>
+              <span>{{ feature.summary }}</span>
+            </span>
+            <span class="material-symbols-rounded related__go">arrow_forward</span>
+          </a>
+        }
+      </div>
+    </article>
+
+    <section class="section section--band">
+      <div class="container">
+        <h2 class="headline more__title" appReveal>Sigue leyendo</h2>
+        <div class="more">
+          @for (m of more; track m.slug; let i = $index) {
+            <a class="card more__card" [routerLink]="['/blog', m.slug]" appReveal [revealDelay]="i * 80">
+              <span class="icon-tile"><span class="material-symbols-rounded">{{ m.icon }}</span></span>
+              <span class="more__name">{{ m.title }}</span>
+              <span class="caption">{{ m.readMinutes }} min · {{ m.category }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <app-cta-band />
+}

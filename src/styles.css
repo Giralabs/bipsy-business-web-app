@@ -1,0 +1,560 @@
+/* ============================================================
+   BIPSY BUSINESS WEB — Global design system
+
+   Mirror of the BUSINESS Flutter app (apps/gipsi_business), which
+   runs in "lift" surface mode: a surface reads as a surface because
+   it is LIGHTER than the ground — no glass, border or shadow.
+
+   Source of truth for every value here:
+   packages/gipsi_shared_ui/lib/src/tokens/{colors,radii,spacing,durations}.dart
+   packages/gipsi_shared_ui/lib/src/theme/gipsi_typography.dart
+
+   What this site adds on top of the app is MOTION: entrances,
+   floating cards and the hero glow. The palette stays the app's.
+   ============================================================ */
+
+:root {
+  /* ----- GROUND & SURFACES (GipsiColors lift*) -------------------- */
+  --clr-base: #23282E;          /* liftBackgroundDark — the ground */
+  --clr-band: #2E343B;          /* GipsiColors.base — a raised band of the page */
+  --clr-surface: #333A41;       /* liftSurfaceDark — the card */
+  --clr-surface-2: #3F464E;     /* darkSurfaceElevated — card on a band, hover */
+  --clr-field: rgba(255, 255, 255, 0.07);   /* darkFieldFill — on a card */
+  --clr-subtle: rgba(255, 255, 255, 0.12);  /* darkSubtleFill — on the ground */
+  --clr-border: #454C54;        /* darkBorder */
+  --clr-hairline: rgba(255, 255, 255, 0.06);
+
+  /* ----- ACCENT (colorScheme.primary / onPrimary) ----------------- */
+  --clr-accent: #C0EED3;        /* mint on dark */
+  --clr-accent-hover: #D4F7E3;
+  --clr-on-accent: #2E343B;
+  --clr-accent-dim: rgba(192, 238, 211, 0.12);
+  --clr-accent-text: #C0EED3;
+
+  /* ----- BRAND (fixed in both themes) ------------------------------ */
+  --clr-mint: #C0EED3;          /* GipsiColors.primary */
+  --clr-mint-2: #A0E3BD;        /* primaryGradient end */
+  --clr-sage: #83A38E;          /* GipsiColors.secondary */
+  --clr-forest: #44544B;        /* GipsiColors.contrast */
+  --clr-mint-glow: rgba(192, 238, 211, 0.22);  /* ambientGlowDark, a bit stronger for the web hero */
+
+  /* Bipsy Business slate: the colour of the lotus in the business logo and of
+     Mr. Bip himself, sampled from combinationmark_horizontal_dark. */
+  --clr-biz: #8796A8;
+  --clr-biz-2: #99A7B4;
+  --clr-biz-glow: rgba(135, 150, 168, 0.30);
+  --clr-biz-text: #99A7B4;
+
+  /* ----- TEXT (darkText*) ------------------------------------------ */
+  --clr-text: #F5F7F6;
+  --clr-text-2: #B5C3BE;
+  --clr-text-3: #7F8E89;
+
+  /* ----- SEMANTIC -------------------------------------------------- */
+  --clr-success: #5FB98A;
+  --clr-warn: #E8B657;
+  --clr-warn-text: #FF9F0A;     /* darkWarningText */
+  --clr-danger: #E67676;
+  --clr-danger-text: #FF8A80;   /* darkDangerText */
+  --clr-info: #7FB2C7;
+  --clr-star: #FFB020;          /* ratingStar */
+  --clr-grey-state: #8E8E93;    /* CupertinoColors.systemGrey — "Pasada" */
+
+  /* ----- CHROME ---------------------------------------------------- */
+  /* Hard rule (.agents/AGENTS.md): never #1c2128 / #1d2127 for the navbar. */
+  --clr-nav-bg: rgba(21, 23, 26, 0.72);
+  --clr-nav-bg-solid: rgba(21, 23, 26, 0.9);
+  --clr-phone-bezel: #15171A;
+  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --clr-slot-stripe: rgba(255, 255, 255, 0.025);
+  --clr-slot-edge: rgba(255, 255, 255, 0.08);
+
+  /* ----- RADII (GipsiRadii) ---------------------------------------- */
+  --r-xs: 10px;
+  --r-sm: 16px;
+  --r-md: 20px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-xxl: 36px;
+  --r-pill: 999px;
+
+  /* ----- TYPE ------------------------------------------------------ */
+  --ff: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* ----- MOTION (GipsiDurations + the app's curves) ----------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);      /* easeOutCubic-ish, used for entrances */
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1); /* easeOutBack, the app's "pop" */
+  --dur-fast: 180ms;
+  --dur-medium: 280ms;
+  --dur-slow: 420ms;
+
+  /* ----- LAYOUT ---------------------------------------------------- */
+  /* One column for the whole site, same rule as bipsy-web-app. */
+  --container: min(1240px, 100% - 48px);
+  --header-h: 72px;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* The ground is NOT white and must not get closer: a white card on
+       #F7F8F7 was 1.06:1 — invisible without a shadow (GipsiColors). */
+    --clr-base: #ECEEED;          /* liftBackgroundLight */
+    --clr-band: #FFFFFF;
+    --clr-surface: #FFFFFF;       /* liftSurfaceLight */
+    --clr-surface-2: #F0F3F1;     /* lightFieldFill — card on a white band */
+    --clr-field: #F0F3F1;
+    --clr-subtle: #D9E0DC;        /* lightSubtleFill */
+    --clr-border: #E4E8E6;        /* lightBorder */
+    --clr-hairline: rgba(0, 0, 0, 0.06);
+
+    /* Slate accent with mint on top: the light theme's primary/onPrimary. */
+    --clr-accent: #2E343B;
+    --clr-accent-hover: #44544B;
+    --clr-on-accent: #C0EED3;
+    --clr-accent-dim: rgba(46, 52, 59, 0.08);
+    --clr-accent-text: #2E343B;
+
+    --clr-mint-glow: rgba(131, 163, 142, 0.26);   /* ambientGlowLight */
+    --clr-biz-glow: rgba(135, 150, 168, 0.30);
+    /* The logo slate is 2.6:1 on the light ground: fine for artwork, not for
+       text. Same hue, darkened until it reads at 4.8:1. */
+    --clr-biz-text: #5B6878;
+
+    --clr-text: #1A2529;
+    --clr-text-2: #4C5A54;
+    --clr-text-3: #8A958F;
+
+    --clr-warn-text: #A85B00;     /* lightWarningText */
+    --clr-danger-text: #D70015;   /* lightDangerText */
+
+    --clr-nav-bg: rgba(255, 255, 255, 0.72);
+    --clr-nav-bg-solid: rgba(255, 255, 255, 0.92);
+    --shadow-float: 0 24px 60px rgba(29, 41, 47, 0.14);
+    --shadow-pop: 0 12px 32px rgba(29, 41, 47, 0.12);
+    --clr-slot-stripe: rgba(0, 0, 0, 0.03);
+    --clr-slot-edge: rgba(0, 0, 0, 0.06);
+
+    color-scheme: light;
+  }
+}
+
+/* ----- RESET -------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  /* Anchors land below the sticky header, not under it. */
+  scroll-padding-top: calc(var(--header-h) + 24px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--clr-base);
+  color: var(--clr-text);
+  font-family: var(--ff);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img, svg, canvas, video { display: block; max-width: 100%; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+
+::selection { background: var(--clr-mint); color: #2E343B; }
+
+:focus-visible {
+  outline: 2px solid var(--clr-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--clr-base); }
+::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--clr-text-3); }
+
+/* ----- ICONS (Material Symbols Rounded ≈ Flutter's rounded icons) ---- */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.material-symbols-rounded.fill {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ----- THEME VISIBILITY ----------------------------------------------
+   These helpers only HIDE, they never impose a display value: a helper
+   that forces `display: block` breaks the flex row of whatever it shows
+   (lesson learnt in bipsy-web-app). */
+.theme-light-only { display: none !important; }
+
+@media (prefers-color-scheme: light) {
+  .theme-light-only { display: revert !important; }
+  .theme-dark-only { display: none !important; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: var(--clr-accent);
+  color: var(--clr-on-accent);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.skip-link:focus { transform: none; opacity: 1; pointer-events: auto; }
+
+/* ----- LAYOUT ------------------------------------------------------- */
+.container { width: var(--container); margin-inline: auto; }
+
+.section { position: relative; padding-block: clamp(72px, 10vw, 128px); }
+.section--tight { padding-block: clamp(48px, 7vw, 88px); }
+.section--band { background: var(--clr-band); }
+
+/* On a band, cards step up one level: the same "card on a card" rule the app
+   applies with fieldFill. */
+.section--band .card { background: var(--clr-surface-2); }
+
+@media (prefers-color-scheme: light) {
+  .section--band .card { background: var(--clr-surface-2); }
+}
+
+/* ----- TYPOGRAPHY (GipsiTypography, scaled up for desktop) ---------- */
+.display-xl {
+  font-family: var(--ff-display);
+  font-size: clamp(2.75rem, 6.2vw, 5.4rem);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+}
+
+.display {
+  font-family: var(--ff-display);
+  font-size: clamp(2.1rem, 4.4vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.04em;
+}
+
+.headline {
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.title { font-size: 1.125rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.2px; }
+
+.lead {
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--clr-text-2);
+}
+
+.body { font-size: 0.9375rem; font-weight: 500; line-height: 1.6; color: var(--clr-text-2); }
+.caption { font-size: 0.8125rem; font-weight: 500; line-height: 1.5; color: var(--clr-text-3); }
+
+/* "CITAS DE HOY" — labelSmall uppercase with wide tracking. */
+.overline {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+
+.text-accent { color: var(--clr-accent-text); }
+.text-biz { color: var(--clr-biz-text); }
+
+/* The mint highlighter under a word: the one decorative flourish of the
+   headings, drawn in when the heading is revealed. */
+.mark {
+  position: relative;
+  white-space: nowrap;
+  z-index: 0;
+}
+.mark::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  bottom: 0.06em;
+  height: 0.34em;
+  z-index: -1;
+  border-radius: 0.2em;
+  background: var(--clr-mint);
+  opacity: 0.28;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 900ms var(--ease-out) 300ms;
+}
+@media (prefers-color-scheme: light) {
+  .mark::after { opacity: 0.55; }
+}
+.is-revealed .mark::after, .mark.is-revealed::after { transform: scaleX(1); }
+
+/* ----- SECTION HEADINGS -------------------------------------------- */
+.section-head { max-width: 760px; margin-bottom: clamp(40px, 5vw, 64px); }
+.section-head--center { margin-inline: auto; text-align: center; }
+.section-head .display { margin-top: 16px; }
+.section-head .lead { margin-top: 18px; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 10px;
+  border-radius: var(--r-pill);
+  background: var(--clr-subtle);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--clr-text);
+}
+
+.eyebrow .material-symbols-rounded { font-size: 18px; color: var(--clr-accent-text); }
+
+.section--band .eyebrow { background: var(--clr-field); }
+
+/* ----- BUTTONS (GipsiButton, lift mode) ------------------------------
+   No border, no halo: a button reads by its fill, like a card by its
+   lightness. Pressed state scales to .96 exactly like the app. */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--r-xl);
+  font-family: var(--ff);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease,
+    transform 100ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+.btn .material-symbols-rounded { font-size: 20px; }
+
+.btn--lg { height: 58px; padding: 0 28px; font-size: 0.9375rem; }
+.btn--sm { height: 40px; padding: 0 18px; font-size: 0.8125rem; }
+.btn--sm .material-symbols-rounded { font-size: 18px; }
+
+.btn--primary { background: var(--clr-accent); color: var(--clr-on-accent); }
+.btn--primary:hover { background: var(--clr-accent-hover); }
+
+.btn--secondary { background: var(--clr-surface); color: var(--clr-text); }
+.btn--secondary:hover { background: var(--clr-surface-2); }
+
+/* On the translucent header the card fill disappears in light mode:
+   subtleFill is the one measured for that (bipsy-web-app, same lesson). */
+.btn--subtle { background: var(--clr-subtle); color: var(--clr-text); }
+.btn--subtle:hover { background: var(--clr-surface-2); }
+
+.btn--ghost { background: transparent; color: var(--clr-text); }
+.btn--ghost:hover { background: var(--clr-subtle); }
+
+.btn--block { width: 100%; }
+
+/* A light sweep across the primary CTA every few seconds. Web-only. */
+.btn--shine::after {
+  content: '';
+  position: absolute;
+  inset: -20% auto -20% -60%;
+  width: 40%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg);
+  animation: shine 4.8s ease-in-out 1.2s infinite;
+}
+@media (prefers-color-scheme: light) {
+  .btn--shine::after { background: linear-gradient(100deg, transparent, rgba(192, 238, 211, 0.35), transparent); }
+}
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ----- PILLS (GipsiStatusPill) -------------------------------------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--clr-subtle);
+  color: var(--clr-text);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+.pill .material-symbols-rounded { font-size: 14px; }
+.pill--accent { background: var(--clr-accent-dim); color: var(--clr-accent-text); }
+.pill--success { background: rgba(95, 185, 138, 0.16); color: var(--clr-success); }
+.pill--warn { background: rgba(232, 182, 87, 0.18); color: var(--clr-warn-text); }
+.pill--biz { background: rgba(135, 150, 168, 0.18); color: var(--clr-biz-text); }
+.pill--solid { background: var(--clr-accent); color: var(--clr-on-accent); }
+
+/* ----- CARDS ------------------------------------------------------- */
+.card {
+  position: relative;
+  background: var(--clr-surface);
+  border-radius: var(--r-xl);
+  padding: clamp(22px, 2.4vw, 32px);
+  transition: background-color var(--dur-medium) ease, transform var(--dur-slow) var(--ease-out);
+}
+
+a.card { display: block; text-decoration: none; color: inherit; }
+a.card:hover, .card--hover:hover { background: var(--clr-surface-2); }
+
+/* The pointer light painted by appTilt. */
+.card--glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), var(--clr-accent-dim), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--dur-medium) ease;
+  pointer-events: none;
+}
+.card--glow:hover::before { opacity: 1; }
+
+.icon-tile {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-accent-dim);
+  color: var(--clr-accent-text);
+  flex-shrink: 0;
+}
+.icon-tile .material-symbols-rounded { font-size: 26px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+.icon-tile--biz { background: rgba(135, 150, 168, 0.18); color: var(--clr-biz-text); }
+
+.check-list { list-style: none; display: grid; gap: 10px; }
+.check-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9375rem; font-weight: 500; color: var(--clr-text-2); line-height: 1.5; }
+.check-list .material-symbols-rounded { font-size: 20px; color: var(--clr-accent-text); font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+
+/* ----- AMBIENT GLOW ------------------------------------------------- */
+/* The app's ambientGlow, animated: two slow auras behind heroes. */
+.aura {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: -1;
+  animation: aura-drift 18s ease-in-out infinite alternate;
+}
+.aura--mint { background: var(--clr-mint-glow); }
+.aura--biz { background: var(--clr-biz-glow); animation-duration: 22s; animation-direction: alternate-reverse; }
+
+/* ----- REVEAL (see RevealDirective) -------------------------------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity 800ms var(--ease-out) var(--reveal-delay, 0ms),
+    transform 1000ms var(--ease-out) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal='left'] { transform: translate3d(-48px, 0, 0); }
+[data-reveal='right'] { transform: translate3d(48px, 0, 0); }
+[data-reveal='scale'] { transform: scale(0.94); }
+[data-reveal].is-revealed { opacity: 1; transform: none; }
+
+/* ----- KEYFRAMES ---------------------------------------------------- */
+@keyframes shine {
+  0%, 60% { left: -60%; }
+  100% { left: 130%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -12px, 0); }
+}
+
+@keyframes aura-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6%, -4%, 0) scale(1.08); }
+  100% { transform: translate3d(-5%, 5%, 0) scale(0.96); }
+}
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--clr-accent-dim); }
+  70% { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ----- REDUCED MOTION ----------------------------------------------
+   Everything still arrives at its final state, just without travelling:
+   the same rule GipsiDurations.of applies in the app. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  [data-reveal] { transform: none; }
+}

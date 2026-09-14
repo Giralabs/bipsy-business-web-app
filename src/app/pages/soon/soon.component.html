@@ -1,0 +1,33 @@
+<section class="soon">
+  <div class="soon__bg" aria-hidden="true">
+    <div class="aura aura--mint soon__a1"></div>
+    <div class="aura aura--biz soon__a2"></div>
+  </div>
+
+  <div class="soon__inner">
+    <div class="soon__art">
+      <app-bip-slot code="MB-17" pose="Con casco de obra y una llave inglesa, terminando algo" ratio="1 / 1" />
+    </div>
+
+    <div class="soon__copy">
+      <span class="eyebrow"><span class="material-symbols-rounded fill">construction</span>Muy pronto en la web</span>
+      @if (kind === 'signup') {
+        <h1 class="soon__title">Estamos preparando el alta desde la web</h1>
+        <p class="lead">Mientras tanto, date de alta desde la app en cinco pasos y empieza tus {{ trialDays }} días gratis hoy mismo.</p>
+      } @else {
+        <h1 class="soon__title">El acceso desde la web llega muy pronto</h1>
+        <p class="lead">De momento, entra en tu negocio desde la app de Bipsy Business en tu móvil.</p>
+      }
+
+      <div class="soon__stores">
+        <a [href]="stores.googlePlay.url" target="_blank" rel="noopener"><img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" /></a>
+        <a [href]="stores.appStore.url" target="_blank" rel="noopener"><img [src]="stores.appStore.image" [alt]="stores.appStore.label" /></a>
+      </div>
+
+      <a routerLink="/" class="btn btn--secondary soon__back">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Volver al inicio
+      </a>
+    </div>
+  </div>
+</section>

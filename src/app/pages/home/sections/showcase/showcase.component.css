@@ -1,0 +1,153 @@
+:host { display: block; }
+
+/* ----- TABS: a wide segmented control ------------------------------ */
+.showcase__tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto clamp(32px, 5vw, 56px);
+  padding: 6px;
+  border-radius: var(--r-pill);
+  background: var(--clr-surface);
+}
+
+.showcase__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 18px 0 14px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--clr-text-2);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color var(--dur-medium) ease, color var(--dur-medium) ease;
+}
+
+.showcase__tab .material-symbols-rounded { font-size: 20px; }
+.showcase__tab:hover { color: var(--clr-text); background: var(--clr-field); }
+
+.showcase__tab--on,
+.showcase__tab--on:hover { background: var(--clr-accent); color: var(--clr-on-accent); }
+
+.showcase__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: light) {
+  .showcase__bar { background: rgba(255, 255, 255, 0.18); }
+}
+
+.showcase__fill {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  transform-origin: left;
+  animation: showcase-progress 7s linear forwards;
+}
+
+.showcase__tabs--paused .showcase__fill { animation-play-state: paused; }
+
+@keyframes showcase-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ----- STAGE ------------------------------------------------------------ */
+.showcase__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+}
+
+.showcase__phone {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-block: 20px;
+}
+
+.showcase__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--clr-mint-glow), transparent);
+  transform: translate(-50%, -50%);
+  animation: aura-drift 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.showcase__device {
+  position: relative;
+  animation: device-in 700ms var(--ease-out) both;
+}
+
+@keyframes device-in {
+  from { opacity: 0; transform: translateY(24px) rotate(-2deg) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.showcase__copy { animation: copy-in 700ms var(--ease-out) both; }
+
+@keyframes copy-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+.showcase__title { margin-top: 20px; }
+.showcase__lead { margin-top: 14px; }
+
+.showcase__points { list-style: none; display: grid; gap: 18px; margin-top: 28px; }
+
+.showcase__points li {
+  display: flex;
+  gap: 14px;
+  animation: copy-in 600ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 90ms + 200ms);
+}
+
+.showcase__point-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-surface);
+  color: var(--clr-accent-text);
+  font-size: 20px;
+}
+
+.showcase__points b { display: block; font-size: 1rem; font-weight: 700; }
+.showcase__points li > span:last-child > span { display: block; margin-top: 2px; font-size: 0.9375rem; font-weight: 500; line-height: 1.55; color: var(--clr-text-2); }
+
+.showcase__more { margin-top: 32px; }
+.showcase__more .material-symbols-rounded { transition: transform var(--dur-medium) var(--ease-back); }
+.showcase__more:hover .material-symbols-rounded { transform: translateX(4px); }
+
+@media (max-width: 900px) {
+  .showcase__tabs { border-radius: var(--r-xl); }
+  .showcase__stage { grid-template-columns: 1fr; }
+  .showcase__copy { order: -1; text-align: center; }
+  .showcase__points { text-align: left; max-width: 520px; margin-inline: auto; }
+}
+
+@media (max-width: 560px) {
+  .showcase__tab { height: 40px; padding: 0 12px 0 10px; font-size: 0.8125rem; }
+}

@@ -1,0 +1,83 @@
+:host { display: block; height: 100%; }
+
+@property --plan-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.plan {
+  position: relative;
+  height: 100%;
+  border-radius: var(--r-xxl);
+  background: var(--clr-surface);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.plan:hover { transform: translateY(-6px); }
+
+/* Featured: a 2 px rotating border in mint and slate, painted as a conic
+   gradient behind an inner surface. */
+.plan--featured {
+  padding: 2px;
+  background: conic-gradient(from var(--plan-angle), var(--clr-mint), var(--clr-biz), var(--clr-mint-2), var(--clr-biz-2), var(--clr-mint));
+  animation: plan-spin 6s linear infinite;
+}
+
+.plan--featured .plan__inner { border-radius: calc(var(--r-xxl) - 2px); background: var(--clr-surface); }
+
+@keyframes plan-spin { to { --plan-angle: 360deg; } }
+
+.plan__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.plan__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.plan__name {
+  font-family: var(--ff-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+.plan__tagline { margin-top: 6px; font-size: 0.9375rem; font-weight: 600; color: var(--clr-text-2); }
+
+.plan__price { margin-top: 24px; display: flex; align-items: flex-end; gap: 6px; color: var(--clr-accent-text); }
+
+.plan__euros {
+  font-family: var(--ff-display);
+  font-size: clamp(3.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+}
+
+.plan__rest { display: flex; flex-direction: column; padding-bottom: 4px; }
+.plan__cents { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.plan__per { font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
+
+.plan__pills { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.plan__cta { margin-top: 24px; }
+
+.plan__desc { margin-top: 20px; font-size: 0.875rem; font-weight: 500; line-height: 1.55; color: var(--clr-text-2); }
+
+.plan__includes {
+  margin: 20px 0 12px;
+  padding-top: 20px;
+  box-shadow: inset 0 0.5px 0 var(--clr-border);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--clr-text);
+}
+
+.check-list { gap: 8px; }
+.check-list li { font-size: 0.875rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .plan--featured { animation: none; }
+}

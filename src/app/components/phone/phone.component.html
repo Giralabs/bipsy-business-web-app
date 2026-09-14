@@ -1,0 +1,323 @@
+<div class="ph" aria-hidden="true">
+  <div class="ph__screen">
+    <span class="ph__island"></span>
+    <div class="ph__status">
+      <span>9:41</span>
+      <span class="ph__status-icons">
+        <span class="material-symbols-rounded">signal_cellular_alt</span>
+        <span class="material-symbols-rounded">wifi</span>
+        <span class="material-symbols-rounded">battery_full</span>
+      </span>
+    </div>
+
+    @switch (screen) {
+
+      <!-- ----- AGENDA · Hoy ----- -->
+      @case ('agenda') {
+        <div class="ph__body ph-enter">
+          <div class="ph-head" style="--i:0">
+            <div>
+              <p class="ph-greet">Hola, {{ businessName }}</p>
+              <p class="ph-big">Tu agenda</p>
+            </div>
+            <span class="ph-avatar ph-avatar--brand">{{ initials(businessName) }}</span>
+          </div>
+          <div style="--i:1; display:flex; align-items:center; justify-content:space-between; height:34px">
+            <span class="ph-pill ph-pill--warn"><span class="material-symbols-rounded">notifications_active</span>2 pendientes</span>
+            <span class="material-symbols-rounded ph-muted" style="font-size:16px">info</span>
+          </div>
+          <div class="ph-seg" style="--i:2; --n:3; --at:0">
+            <span class="ph-seg__thumb"></span><span>Hoy</span><span>Pendientes</span><span>Agenda</span>
+          </div>
+          <p style="--i:3; margin-top:10px; display:flex; align-items:center; gap:5px; font-size:10px; font-weight:600; color:var(--clr-text-2)">
+            <span class="material-symbols-rounded" style="font-size:14px; color:var(--clr-accent-text)">schedule</span>
+            Hoy abierto 09:30-14:00 · 16:30-20:30
+          </p>
+          <p class="ph-over" style="--i:4">Citas de hoy</p>
+          <div style="--i:5">
+            @for (b of bookings; track b.time) {
+              <div class="ph-bk" [class.ph-bk--cycle]="b.cycles">
+                <div class="ph-bk__main">
+                  <div class="ph-bk__time"><b>{{ b.time }}</b><small>{{ duration(b.minutes) }}</small></div>
+                  <div class="ph-bk__body">
+                    <b>{{ b.customer }}</b>
+                    <span>{{ b.service }}</span>
+                    <span class="ph-bk__meta">
+                      <span class="material-symbols-rounded">person</span>{{ b.worker }}
+                      @if (b.note) { <span class="material-symbols-rounded">sticky_note_2</span> }
+                    </span>
+                  </div>
+                </div>
+                <div class="ph-bk__state" [attr.data-state]="b.state">
+                  <span class="material-symbols-rounded ph-bk__icon">{{ icon(b.state) }}</span>
+                  @if (b.cycles) { <span class="material-symbols-rounded ph-bk__icon--next">check</span> }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ----- CLIENTES ----- -->
+      @case ('clientes') {
+        <div class="ph__body ph-enter">
+          <div class="ph-head ph-head--center" style="--i:0">
+            <p class="ph-big">Clientes</p>
+            <span class="ph-round"><span class="material-symbols-rounded">contacts</span></span>
+          </div>
+          <div style="--i:1; margin-top:10px; display:flex; align-items:center; gap:6px; height:32px; padding:0 10px; border-radius:10px; background:var(--clr-subtle); font-size:11px; color:var(--clr-text-3)">
+            <span class="material-symbols-rounded" style="font-size:16px">search</span>Nombre, teléfono o email
+          </div>
+          @for (group of customers; track group.letter; let gi = $index) {
+            <div [style.--i]="gi + 2">
+              <p class="ph-over">{{ group.letter }}</p>
+              <div class="ph-group">
+                @for (c of group.people; track c.name) {
+                  <div class="ph-row">
+                    <span class="ph-avatar">{{ initials(c.name) }}</span>
+                    <span class="ph-row__main"><b>{{ c.name }}</b><small>{{ c.meta }}</small></span>
+                    <span class="material-symbols-rounded ph-chev">chevron_right</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ----- FINANZAS ----- -->
+      @case ('finanzas') {
+        <div class="ph__body ph-enter">
+          <div class="ph-nav" style="--i:0">
+            <span class="material-symbols-rounded">chevron_left</span>Finanzas<span class="material-symbols-rounded">tune</span>
+          </div>
+          <div class="ph-seg" style="--i:1; --n:3; --at:2">
+            <span class="ph-seg__thumb"></span><span>Hoy</span><span>Semana</span><span>Mes</span>
+          </div>
+          <div class="ph-card" style="--i:2; margin-top:10px">
+            <p style="font-size:10px; font-weight:600; color:var(--clr-text-2)">Ingresos de septiembre</p>
+            <p style="font-family:var(--ff-display); font-size:26px; font-weight:800; letter-spacing:-1px; line-height:1.15">3.482,50 €</p>
+            <span class="ph-pill ph-pill--success"><span class="material-symbols-rounded">trending_up</span>12 % más que agosto</span>
+            <div class="ph-bars">
+              @for (h of bars; track $index) {
+                <span [style.--h]="h" [style.--d]="$index"></span>
+              }
+            </div>
+          </div>
+          <div class="ph-group" style="--i:3; margin-top:10px">
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">point_of_sale</span></span><span class="ph-row__main"><b>Caja del día</b><small>Abierta desde las 09:15</small></span><span class="ph-row__end">215,00 €</span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">pending_actions</span></span><span class="ph-row__main"><b>Pendiente de cobro</b><small>Citas terminadas</small></span><span class="ph-pill ph-pill--accent">3</span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">receipt_long</span></span><span class="ph-row__main"><b>Gastos</b><small>Con foto del ticket</small></span><span class="ph-row__end">642,10 €</span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">groups</span></span><span class="ph-row__main"><b>Comisiones</b><small>María, Javi y Lucía</small></span><span class="material-symbols-rounded ph-chev">chevron_right</span></div>
+          </div>
+        </div>
+      }
+
+      <!-- ----- EQUIPO ----- -->
+      @case ('equipo') {
+        <div class="ph__body ph-enter">
+          <div class="ph-nav" style="--i:0">
+            <span class="material-symbols-rounded">chevron_left</span>Equipo<span class="material-symbols-rounded">person_add</span>
+          </div>
+          <div class="ph-card" style="--i:1; display:flex; align-items:center; gap:9px; padding:10px 12px">
+            <span class="material-symbols-rounded" style="font-size:18px; color:var(--clr-accent-text)">group</span>
+            <span style="flex:1; font-size:11.5px; font-weight:600">2 personas han fichado</span>
+            <span class="material-symbols-rounded ph-chev">chevron_right</span>
+          </div>
+          <p class="ph-over" style="--i:2">Tu equipo</p>
+          <div class="ph-group" style="--i:3">
+            @for (w of team; track w.name) {
+              <div class="ph-row">
+                <span class="ph-avatar">{{ initials(w.name) }}</span>
+                <span class="ph-row__main"><b>{{ w.name }}</b><small>{{ w.status }}</small></span>
+                <span class="ph-dot" [class.ph-dot--on]="w.on"></span>
+              </div>
+            }
+          </div>
+          <p class="ph-over" style="--i:4">Solicitudes</p>
+          <div class="ph-card" style="--i:5">
+            <div style="display:flex; align-items:center; gap:9px">
+              <span class="ph-avatar">LM</span>
+              <span class="ph-row__main"><b style="font-size:11.5px">Lucía Martín</b><small>Vacaciones · 14 – 18 oct</small></span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px">
+              <span class="ph-btn">Rechazar</span><span class="ph-btn ph-btn--primary">Aprobar</span>
+            </div>
+          </div>
+          <div class="ph-invite" style="--i:6">
+            <span class="ph-invite__label">Código de invitación</span>
+            <span class="ph-invite__code">482 913</span>
+            <span class="ph-pill ph-pill--success"><span class="material-symbols-rounded">volunteer_activism</span>Gratis</span>
+          </div>
+        </div>
+      }
+
+      <!-- ----- FICHA PÚBLICA ----- -->
+      @case ('ficha') {
+        <div class="ph__body ph__body--flush ph-enter">
+          <div class="ph-cover" style="--i:0">
+            <span class="ph-cover__btn" style="left:12px"><span class="material-symbols-rounded">arrow_back</span></span>
+            <span class="ph-cover__btn" style="right:12px"><span class="material-symbols-rounded">favorite</span></span>
+          </div>
+          <div style="--i:1; padding:0 14px; margin-top:-30px; position:relative">
+            <span class="ph-avatar ph-avatar--xl ph-avatar--brand" style="box-shadow:0 0 0 4px var(--clr-base)">{{ initials(businessName) }}</span>
+            <p style="margin-top:8px; font-family:var(--ff-display); font-size:19px; font-weight:800; letter-spacing:-0.5px">{{ businessName }}</p>
+            <p style="display:flex; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--clr-text-2)">
+              <span class="material-symbols-rounded" style="font-size:13px; color:var(--clr-star); font-variation-settings:'FILL' 1">star</span>
+              4,9 · 128 reseñas · 0,8 km
+            </p>
+            <div style="display:flex; gap:5px; margin-top:8px; flex-wrap:wrap">
+              <span class="ph-pill">Cita previa</span><span class="ph-pill">Bizum</span><span class="ph-pill">Accesible</span>
+            </div>
+          </div>
+          <div style="--i:2; padding:0 14px">
+            <p class="ph-over">Portfolio</p>
+            <div class="ph-shots"><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div style="--i:3; padding:0 14px">
+            <p class="ph-over">Servicios</p>
+            <div class="ph-group">
+              @for (s of serviceList.slice(0, 3); track s.name) {
+                <div class="ph-row">
+                  <span class="ph-row__main"><b>{{ s.name }}</b><small>{{ duration(s.minutes) }} · {{ s.price }}</small></span>
+                  <span class="ph-btn ph-btn--primary" style="height:26px; font-size:10px">Reservar</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ----- LISTA DE ESPERA ----- -->
+      @case ('espera') {
+        <div class="ph__body ph-enter">
+          <div class="ph-nav" style="--i:0">
+            <span class="material-symbols-rounded">chevron_left</span>Lista de espera<span class="material-symbols-rounded">settings</span>
+          </div>
+          <div class="ph-card ph-offer" style="--i:1">
+            <span class="ph-pill ph-pill--accent"><span class="material-symbols-rounded">bolt</span>Hueco libre</span>
+            <p style="margin-top:8px; font-family:var(--ff-display); font-size:20px; font-weight:800; letter-spacing:-0.6px">Mañana · 17:30</p>
+            <p style="font-size:10.5px; font-weight:600; color:var(--clr-text-2)">{{ serviceList[0].name }} · Javi</p>
+            <span class="ph-btn ph-btn--primary" style="margin-top:10px"><span class="material-symbols-rounded" style="font-size:15px">send</span>Ofrecer a la lista</span>
+          </div>
+          <div style="--i:2; display:flex; align-items:center; justify-content:space-between">
+            <p class="ph-over">Esperando · 3</p>
+            <span class="ph-pill">En orden · 24 h</span>
+          </div>
+          <div class="ph-group" style="--i:3">
+            @for (w of waiting; track w.name; let wi = $index) {
+              <div class="ph-row">
+                <span class="ph-avatar" style="font-size:12px">{{ wi + 1 }}</span>
+                <span class="ph-row__main"><b>{{ w.name }}</b><small>{{ w.when }}</small></span>
+                <span class="ph-pill" [class.ph-pill--warn]="wi === 0">{{ w.status }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ----- MENSAJES ----- -->
+      @case ('chat') {
+        <div class="ph__body ph-enter" style="padding-bottom:110px">
+          <div class="ph-nav" style="--i:0; grid-template-columns:30px auto 1fr; gap:8px; text-align:left">
+            <span class="material-symbols-rounded">chevron_left</span>
+            <span class="ph-avatar" style="width:28px; height:28px; font-size:10px">CR</span>
+            <span style="display:flex; flex-direction:column; line-height:1.1">Carla Ruiz<small style="font-size:9px; font-weight:600; color:var(--clr-success)">en línea</small></span>
+          </div>
+          <div class="ph-thread">
+            <p class="ph-sys" style="--i:1"><span class="material-symbols-rounded">event_available</span>Cita reservada · jue 18, 17:30</p>
+            <p class="ph-bubble" style="--i:2">¡Hola! ¿Me podéis hacer algo así?</p>
+            <p class="ph-bubble ph-bubble--photo" style="--i:3"><span class="material-symbols-rounded">image</span></p>
+            <p class="ph-bubble ph-bubble--out" style="--i:4">¡Claro! Te lo dejamos igual. Nos vemos el jueves<small>17:02 <span class="material-symbols-rounded">done_all</span></small></p>
+            <p class="ph-sys" style="--i:5"><span class="material-symbols-rounded">update</span>Cita movida a las 18:00</p>
+            <p class="ph-bubble" style="--i:6">¡Perfecto, gracias!</p>
+          </div>
+          <div class="ph-composer"><span>Escribe un mensaje</span><span class="ph-composer__send"><span class="material-symbols-rounded">arrow_upward</span></span></div>
+        </div>
+      }
+
+      <!-- ----- RESERVA (app de clientes) ----- -->
+      @case ('reserva') {
+        <div class="ph__body ph-enter">
+          <div class="ph-nav" style="--i:0">
+            <span class="material-symbols-rounded">chevron_left</span>Elige hora<span style="font-size:10px; font-weight:700; color:var(--clr-text-3)">3/4</span>
+          </div>
+          <div class="ph-progress" style="--i:1"><span></span></div>
+          <p class="ph-over" style="--i:2">Septiembre</p>
+          <div class="ph-days" style="--i:3">
+            @for (day of days; track day.n) {
+              <span [class.ph-days__on]="day.n === 16"><small>{{ day.d }}</small>{{ day.n }}</span>
+            }
+          </div>
+          <p class="ph-over" style="--i:4">Tarde</p>
+          <div class="ph-slots" style="--i:5">
+            @for (slot of slots; track slot.t) {
+              <span [class.ph-slots__off]="slot.off" [class.ph-slots__on]="slot.t === '17:30'">{{ slot.t }}</span>
+            }
+          </div>
+          <div class="ph-card" style="--i:6; margin-top:12px; display:flex; gap:8px">
+            <span class="material-symbols-rounded" style="font-size:18px; color:var(--clr-accent-text)">shield</span>
+            <span style="font-size:10px; font-weight:500; line-height:1.45; color:var(--clr-text-2)">
+              Cancela gratis hasta 24 h antes. Después, o si no te presentas, se cobran <b style="color:var(--clr-text)">5,50 €</b>.
+              <span style="display:flex; align-items:center; gap:5px; margin-top:6px; font-weight:700; color:var(--clr-text)">
+                <span class="ph-check"><span class="material-symbols-rounded">check</span></span>Entiendo y acepto
+              </span>
+            </span>
+          </div>
+          <span class="ph-btn ph-btn--primary ph-btn--big" style="--i:7; margin-top:12px">Confirmar reserva</span>
+        </div>
+      }
+
+      <!-- ----- PERSONALIZACIÓN (Quality) ----- -->
+      @case ('quality') {
+        <div class="ph__body ph-enter">
+          <div class="ph-nav" style="--i:0">
+            <span class="material-symbols-rounded">chevron_left</span>Personalización<span class="material-symbols-rounded">visibility</span>
+          </div>
+          <div class="ph-seg" style="--i:1; --n:2; --at:1">
+            <span class="ph-seg__thumb"></span><span>Tu ficha</span><span>En búsquedas</span>
+          </div>
+          <div class="ph-q" style="--i:2">
+            <div class="ph-q__card">
+              <div class="ph-q__cover"></div>
+              <div class="ph-q__body">
+                <span class="ph-avatar ph-avatar--brand ph-q__avatar">{{ initials(businessName) }}</span>
+                <span class="ph-row__main">
+                  <b class="ph-q__name">{{ businessName }}</b>
+                  <small>★ 4,9 · 0,8 km</small>
+                </span>
+              </div>
+            </div>
+            <div class="ph-q__plain">
+              <div class="ph-q__plain-cover"></div>
+              <div class="ph-q__body"><span class="ph-avatar">PL</span><span class="ph-row__main"><b>Peluquería Luna</b><small>★ 4,6 · 1,2 km</small></span></div>
+            </div>
+          </div>
+          <p class="ph-over" style="--i:3">Efecto de portada · Aurora</p>
+          <div class="ph-fx" style="--i:4">
+            @for (fx of effects; track fx; let fi = $index) {
+              <span [class.ph-fx__on]="fx === 'Aurora'"><i [class]="'ph-fx__anim ph-fx__anim--' + fi"></i>{{ fx }}</span>
+            }
+          </div>
+          <p class="ph-over" style="--i:5">Color de marca</p>
+          <div class="ph-swatches" style="--i:6">
+            @for (c of swatches; track c) {
+              <span [style.background]="c" [class.ph-swatches__on]="c === '#8796A8'"></span>
+            }
+          </div>
+        </div>
+      }
+    }
+
+    @if (tabIndex !== null) {
+      <div class="ph-tabs" [style.--at]="tabIndex">
+        <span class="ph-tabs__blob"></span>
+        <span class="material-symbols-rounded" [class.ph-tabs__on]="tabIndex === 0">calendar_month</span>
+        <span class="material-symbols-rounded" [class.ph-tabs__on]="tabIndex === 1">format_list_bulleted</span>
+        <span class="material-symbols-rounded" [class.ph-tabs__on]="tabIndex === 2">forum</span>
+        <span class="material-symbols-rounded" [class.ph-tabs__on]="tabIndex === 3">contacts</span>
+        @if (tabIndex !== 2) { <span class="ph-badge">2</span> }
+      </div>
+    }
+  </div>
+</div>

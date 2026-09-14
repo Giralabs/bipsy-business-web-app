@@ -1,0 +1,229 @@
+<button type="button" class="skip-link" (click)="skipToContent()">Saltar al contenido</button>
+
+<!-- ----- TRIAL STRIP ----- -->
+@if (!promoDismissed) {
+  <aside class="promo" aria-label="Oferta">
+    <div class="promo__inner">
+      <a routerLink="/registro" class="promo__link">
+        <span class="promo__gift material-symbols-rounded fill">redeem</span>
+        <span class="promo__text">
+          <strong>{{ trialLabel }}</strong>
+          <span class="promo__sep" aria-hidden="true">·</span>
+          <span class="promo__extra">sin permanencia</span>
+          <span class="promo__sep" aria-hidden="true">·</span>
+          <span class="promo__extra">tu equipo, gratis</span>
+        </span>
+        <span class="promo__go">
+          Empezar
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </span>
+      </a>
+      <button type="button" class="promo__close" (click)="dismissPromo()" aria-label="Ocultar el aviso">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+  </aside>
+}
+
+<!-- ----- NAVIGATION BAR ----- -->
+<header class="nav" [class.nav--scrolled]="scrolled" [class.nav--open]="openMenu || mobileOpen">
+  <div class="nav__glass" aria-hidden="true"></div>
+
+  <div class="nav__bar">
+    <a routerLink="/" class="nav__brand" aria-label="Bipsy Business, inicio">
+      <img class="nav__logo theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="" />
+      <img class="nav__logo theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="" />
+    </a>
+
+    <nav class="nav__links" aria-label="Principal">
+      <!-- Funcionalidades -->
+      <div class="nav__item" (pointerenter)="hoverOpen('features')" (pointerleave)="hoverClose()">
+        <button type="button" class="nav__link" [class.nav__link--on]="openMenu === 'features'"
+                [attr.aria-expanded]="openMenu === 'features'" aria-controls="menu-features"
+                (click)="toggle('features')">
+          Funcionalidades
+          <span class="material-symbols-rounded nav__chev">expand_more</span>
+        </button>
+
+        @if (openMenu === 'features') {
+          <div class="mega" id="menu-features">
+            <div class="mega__panel mega__panel--features">
+              <div class="mega__groups">
+                @for (group of groups; track group.id; let gi = $index) {
+                  <div class="mega__group" [style.--i]="gi">
+                    <p class="mega__label">
+                      <span class="material-symbols-rounded fill">{{ group.icon }}</span>
+                      {{ group.label }}
+                    </p>
+                    @for (item of group.items; track item.slug) {
+                      <a class="mega__feature" [routerLink]="['/funcionalidades', item.slug]">
+                        <span class="mega__feature-name">
+                          {{ item.name }}
+                          @if (item.quality) {
+                            <span class="pill pill--accent mega__q">Quality</span>
+                          }
+                        </span>
+                        <span class="mega__feature-text">{{ item.summary }}</span>
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+
+              <aside class="mega__aside">
+                <a routerLink="/funcionalidades/gestion-de-equipo" class="mega__promo">
+                  <span class="mega__promo-icon material-symbols-rounded fill">group_add</span>
+                  <span class="mega__promo-kicker">Sin coste por persona</span>
+                  <span class="mega__promo-title">Añade a todo tu equipo gratis</span>
+                  <span class="mega__promo-text">Les pasas tu código de invitación y entran en tu negocio con su propia agenda.</span>
+                  <span class="mega__promo-go">Ver cómo funciona <span class="material-symbols-rounded">arrow_forward</span></span>
+                </a>
+                <a routerLink="/funcionalidades" class="mega__all">
+                  Todas las funcionalidades
+                  <span class="material-symbols-rounded">arrow_forward</span>
+                </a>
+              </aside>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Negocios -->
+      <div class="nav__item" (pointerenter)="hoverOpen('types')" (pointerleave)="hoverClose()">
+        <button type="button" class="nav__link" [class.nav__link--on]="openMenu === 'types'"
+                [attr.aria-expanded]="openMenu === 'types'" aria-controls="menu-types"
+                (click)="toggle('types')">
+          Negocios
+          <span class="material-symbols-rounded nav__chev">expand_more</span>
+        </button>
+
+        @if (openMenu === 'types') {
+          <div class="mega" id="menu-types">
+            <div class="mega__panel mega__panel--types">
+              <div class="mega__tiles">
+                @for (type of types; track type.slug; let ti = $index) {
+                  <a class="mega__tile" [routerLink]="['/negocios', type.slug]" [style.--i]="ti">
+                    <span class="mega__tile-icon material-symbols-rounded">{{ type.icon }}</span>
+                    <span class="mega__tile-name">{{ type.name }}</span>
+                  </a>
+                }
+              </div>
+              <aside class="mega__aside mega__aside--types">
+                <p class="mega__aside-title">¿Trabajas con cita?</p>
+                <p class="mega__aside-text">Si tus clientes reservan una hora contigo, Bipsy Business está hecho para ti, sea cual sea tu sector.</p>
+                <a routerLink="/negocios" class="mega__all">
+                  Ver todos los negocios
+                  <span class="material-symbols-rounded">arrow_forward</span>
+                </a>
+              </aside>
+            </div>
+          </div>
+        }
+      </div>
+
+      <a routerLink="/precios" routerLinkActive="nav__link--active" class="nav__link">Precios</a>
+      <a routerLink="/por-que-bipsy" routerLinkActive="nav__link--active" class="nav__link">Por qué Bipsy</a>
+
+      <!-- Recursos -->
+      <div class="nav__item nav__item--anchor" (pointerenter)="hoverOpen('resources')" (pointerleave)="hoverClose()">
+        <button type="button" class="nav__link" [class.nav__link--on]="openMenu === 'resources'"
+                [attr.aria-expanded]="openMenu === 'resources'" aria-controls="menu-resources"
+                (click)="toggle('resources')">
+          Recursos
+          <span class="material-symbols-rounded nav__chev">expand_more</span>
+        </button>
+
+        @if (openMenu === 'resources') {
+          <div class="drop" id="menu-resources">
+            <div class="drop__panel">
+              @for (r of resources; track r.link; let ri = $index) {
+                <a class="drop__item" [routerLink]="r.link" [style.--i]="ri">
+                  <span class="drop__icon material-symbols-rounded fill">{{ r.icon }}</span>
+                  <span>
+                    <span class="drop__title">{{ r.title }}</span>
+                    <span class="drop__text">{{ r.text }}</span>
+                  </span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </nav>
+
+    <div class="nav__actions">
+      <a routerLink="/ayuda" routerLinkActive="nav__help--active" class="nav__help" aria-label="Ayuda">
+        <span class="material-symbols-rounded">help</span>
+        <span class="nav__help-label">Ayuda</span>
+      </a>
+      <a routerLink="/acceder" class="btn btn--ghost btn--sm nav__login">Iniciar sesión</a>
+      <a routerLink="/registro" class="btn btn--primary nav__cta btn--shine">
+        Probar gratis
+        <span class="material-symbols-rounded nav__cta-arrow">arrow_forward</span>
+      </a>
+      <button type="button" class="nav__burger" [class.nav__burger--open]="mobileOpen"
+              (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-controls="menu-mobile"
+              [attr.aria-label]="mobileOpen ? 'Cerrar menú' : 'Abrir menú'">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav__progress" aria-hidden="true"><span #progress></span></div>
+
+  <!-- ----- MOBILE MENU ----- -->
+  @if (mobileOpen) {
+    <div class="mobile" id="menu-mobile" [style.top.px]="menuTop">
+      <nav class="mobile__nav" aria-label="Menú">
+        <details class="mobile__group">
+          <summary>Funcionalidades <span class="material-symbols-rounded">expand_more</span></summary>
+          <div class="mobile__sub">
+            @for (group of groups; track group.id) {
+              <p class="mobile__label">{{ group.label }}</p>
+              @for (item of group.items; track item.slug) {
+                <a [routerLink]="['/funcionalidades', item.slug]" class="mobile__link">
+                  <span class="material-symbols-rounded">{{ item.icon }}</span>{{ item.name }}
+                </a>
+              }
+            }
+            <a routerLink="/funcionalidades" class="mobile__more">Todas las funcionalidades</a>
+          </div>
+        </details>
+
+        <details class="mobile__group">
+          <summary>Negocios <span class="material-symbols-rounded">expand_more</span></summary>
+          <div class="mobile__sub mobile__sub--grid">
+            @for (type of types; track type.slug) {
+              <a [routerLink]="['/negocios', type.slug]" class="mobile__link">
+                <span class="material-symbols-rounded">{{ type.icon }}</span>{{ type.name }}
+              </a>
+            }
+          </div>
+        </details>
+
+        <a routerLink="/precios" class="mobile__top">Precios</a>
+        <a routerLink="/por-que-bipsy" class="mobile__top">Por qué Bipsy</a>
+
+        <details class="mobile__group">
+          <summary>Recursos <span class="material-symbols-rounded">expand_more</span></summary>
+          <div class="mobile__sub">
+            @for (r of resources; track r.link) {
+              <a [routerLink]="r.link" class="mobile__link">
+                <span class="material-symbols-rounded">{{ r.icon }}</span>{{ r.title }}
+              </a>
+            }
+          </div>
+        </details>
+
+        <a routerLink="/ayuda" class="mobile__top">Ayuda</a>
+      </nav>
+
+      <div class="mobile__actions">
+        <a routerLink="/registro" class="btn btn--primary btn--lg btn--block">
+          Probar {{ trialLabel }}
+        </a>
+        <a routerLink="/acceder" class="btn btn--secondary btn--lg btn--block">Iniciar sesión</a>
+      </div>
+    </div>
+  }
+</header>

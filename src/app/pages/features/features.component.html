@@ -1,0 +1,58 @@
+<app-page-hero
+  eyebrow="Funcionalidades"
+  icon="widgets"
+  title="Todo lo que hace Bipsy Business por tu negocio"
+  lead="Agenda, clientes, cobros, equipo y escaparate. Todo incluido en el plan, en la misma app y sin coste por trabajador."
+  [crumbs]="[{ label: 'Funcionalidades' }]">
+  <ng-container ngProjectAs="[actions]">
+    <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">Probar 30 días gratis</a>
+    <a routerLink="/precios" class="btn btn--secondary btn--lg">Ver precios</a>
+  </ng-container>
+</app-page-hero>
+
+<!-- Quick jump to each group. -->
+<nav class="jump container" aria-label="Grupos de funcionalidades">
+  @for (group of groups; track group.id) {
+    <a routerLink="/funcionalidades" [fragment]="group.id" class="jump__chip">
+      <span class="material-symbols-rounded">{{ group.icon }}</span>{{ group.label }}
+    </a>
+  }
+</nav>
+
+@for (group of groups; track group.id; let gi = $index) {
+  <section class="section group" [class.section--band]="gi % 2 === 1" [id]="group.id">
+    <div class="container group__grid" [class.group__grid--flip]="gi % 2 === 1">
+      <div class="group__intro" appReveal>
+        <span class="icon-tile"><span class="material-symbols-rounded">{{ group.icon }}</span></span>
+        <h2 class="display group__title">{{ group.label }}</h2>
+        <p class="lead">{{ group.blurb }}</p>
+        <div class="group__art">
+          <app-bip-slot [code]="group.bip.code" [pose]="group.bip.pose" variant="phone" [screen]="group.bip.screen" ratio="1 / 1" />
+        </div>
+      </div>
+
+      <div class="group__items">
+        @for (item of group.items; track item.slug; let i = $index) {
+          <a class="card card--glow feat" [routerLink]="['/funcionalidades', item.slug]" appTilt appReveal [revealDelay]="i * 90">
+            <div class="feat__top">
+              <span class="icon-tile"><span class="material-symbols-rounded">{{ item.icon }}</span></span>
+              @if (item.quality) {
+                <span class="pill pill--accent"><span class="material-symbols-rounded fill">auto_awesome</span>Quality</span>
+              }
+              <span class="feat__go material-symbols-rounded">arrow_outward</span>
+            </div>
+            <h3 class="headline feat__name">{{ item.name }}</h3>
+            <p class="body">{{ item.summary }}</p>
+            <ul class="feat__facts">
+              @for (fact of item.facts.slice(0, 3); track fact) {
+                <li class="pill">{{ fact }}</li>
+              }
+            </ul>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<app-cta-band />

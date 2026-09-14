@@ -1,0 +1,41 @@
+<section class="section section--tight">
+  <div class="container">
+    <div class="q" appReveal revealFrom="scale">
+      <div class="q__aura q__aura--1" aria-hidden="true"></div>
+      <div class="q__aura q__aura--2" aria-hidden="true"></div>
+
+      <div class="q__copy">
+        <span class="q__eyebrow"><span class="material-symbols-rounded fill">auto_awesome</span>Plan Quality</span>
+        <h2 class="display q__title">Que te vean antes de leer tu nombre</h2>
+        <p class="lead q__lead">
+          Portada y foto animadas, tu color de marca y efectos que solo tiene Quality. Además, en Destacados
+          apareces por delante de los negocios de tu zona.
+        </p>
+
+        <div class="q__effects">
+          @for (e of effects; track e.name; let i = $index) {
+            <div class="q__fx" [style.--i]="i">
+              <span class="q__demo" [attr.data-fx]="e.fx" aria-hidden="true"><i></i></span>
+              <span class="q__fx-text"><b>{{ e.name }}</b><small>{{ e.kind }}</small></span>
+            </div>
+          }
+        </div>
+
+        <div class="btn-row q__actions">
+          <a routerLink="/funcionalidades/plan-quality" class="btn btn--lg q__cta">
+            Descubrir Quality
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+          <span class="q__price">{{ price }} € al mes · 27 efectos</span>
+        </div>
+      </div>
+
+      <div class="q__visual">
+        <app-phone screen="quality" class="q__phone" />
+        <div class="q__bip">
+          <app-bip-slot code="MB-04" pose="Con gafas de sol, admirando su ficha llena de brillos" ratio="1 / 1" [compact]="true" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

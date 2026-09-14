@@ -1,0 +1,13 @@
+:host { display: block; width: 100%; }
+
+.sequence__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* While the manifest is fetched: reserve the space so the hero does not jump
+   when the frames (or the placeholder) arrive. */
+.sequence__loading {
+  width: 100%;
+}

@@ -1,0 +1,88 @@
+:host { display: block; }
+
+/* The one block that inverts the page: the slate of the brand (GipsiColors.base)
+   in both themes, with mint on top. It is the offer, and it has to look like
+   the end of the road. */
+.band {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  align-items: center;
+  gap: 32px;
+  padding: clamp(36px, 6vw, 72px);
+  border-radius: var(--r-xxl);
+  background: linear-gradient(135deg, #2E343B 0%, #1E242A 100%);   /* GipsiColors.darkGradient */
+  color: #F5F7F6;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.band__aura {
+  position: absolute;
+  z-index: -1;
+  width: 55%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(70px);
+  animation: aura-drift 16s ease-in-out infinite alternate;
+}
+.band__aura--mint { top: -30%; left: -10%; background: rgba(192, 238, 211, 0.22); }
+.band__aura--biz { bottom: -35%; right: -5%; background: rgba(135, 150, 168, 0.35); animation-direction: alternate-reverse; }
+
+.band__lotus {
+  position: absolute;
+  z-index: -1;
+  right: -6%;
+  top: -18%;
+  width: 46%;
+  opacity: 0.06;
+  animation: spin-slow 90s linear infinite;
+}
+
+/* In light mode the band keeps its dark ground, so the lotus must be the
+   light-coloured one there too. */
+@media (prefers-color-scheme: light) {
+  .band__lotus.theme-light-only { display: none !important; }
+  .band__lotus.theme-dark-only { display: block !important; }
+}
+
+.band__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(192, 238, 211, 0.14);
+  color: #C0EED3;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.band__pill .material-symbols-rounded { font-size: 18px; }
+
+.band__title { margin-top: 18px; color: #F5F7F6; max-width: 16ch; }
+.band__text { margin-top: 16px; color: #B5C3BE; max-width: 52ch; }
+.band__actions { margin-top: 32px; }
+
+.band__cta { background: #C0EED3; color: #2E343B; }
+.band__cta:hover { background: #D4F7E3; }
+.band__ghost { background: rgba(255, 255, 255, 0.1); color: #F5F7F6; }
+.band__ghost:hover { background: rgba(255, 255, 255, 0.16); }
+
+.band__stores { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+.band__store { display: block; height: 40px; transition: transform var(--dur-medium) var(--ease-back), opacity var(--dur-fast) ease; }
+.band__store:hover { transform: translateY(-2px); }
+.band__store img { height: 100%; width: auto; }
+
+.band__art { position: relative; max-width: 360px; justify-self: end; width: 100%; animation: float 7s ease-in-out infinite; }
+
+/* The slot is a surface of the current theme; on this dark band it needs the
+   dark one in both themes. */
+.band__art ::ng-deep .slot { background-color: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.1); }
+.band__art ::ng-deep .slot__pose,
+.band__art ::ng-deep .slot__code { color: #B5C3BE; }
+.band__art ::ng-deep .slot__code { background: rgba(255, 255, 255, 0.1); }
+
+@media (max-width: 860px) {
+  .band { grid-template-columns: 1fr; }
+  .band__art { justify-self: center; max-width: 280px; }
+}

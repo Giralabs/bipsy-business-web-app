@@ -1,0 +1,61 @@
+:host { display: block; }
+
+.types__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(32px, 4vw, 56px); }
+.types__head .section-head { margin-bottom: 0; }
+
+.types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+
+.type {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* A mint wash rises from the bottom on hover. */
+.type::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to top, var(--clr-accent-dim), transparent 70%);
+  transform: translateY(100%);
+  transition: transform 600ms var(--ease-out);
+}
+.type:hover::after { transform: none; }
+
+.type__icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-base);
+  color: var(--clr-accent-text);
+  transition: transform 500ms var(--ease-back), background-color var(--dur-medium) ease, color var(--dur-medium) ease;
+}
+.type__icon .material-symbols-rounded { font-size: 32px; }
+.type:hover .type__icon { transform: rotate(-10deg) scale(1.08); background: var(--clr-accent); color: var(--clr-on-accent); }
+
+@media (prefers-color-scheme: light) {
+  .type__icon { background: var(--clr-surface-2); }
+}
+
+.type__name { margin-top: auto; padding-top: 24px; font-family: var(--ff-display); font-size: 1.375rem; font-weight: 800; letter-spacing: -0.5px; }
+.type__text { margin-top: 4px; font-size: 0.875rem; font-weight: 500; color: var(--clr-text-2); }
+
+.type__go {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: 24px;
+  color: var(--clr-text-3);
+  transition: transform 500ms var(--ease-back), color var(--dur-fast) ease;
+}
+.type:hover .type__go { transform: translate(4px, -4px); color: var(--clr-text); }
+
+@media (max-width: 1024px) { .types { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .types { grid-template-columns: 1fr; } .type { min-height: 170px; } }

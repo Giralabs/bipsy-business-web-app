@@ -1,0 +1,63 @@
+<section class="section showcase" id="como-funciona">
+  <div class="container">
+    <div class="section-head section-head--center" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">apps</span>Todo en una app</span>
+      <h2 class="display">Tu negocio entero, <span class="mark">en el bolsillo</span></h2>
+      <p class="lead">Esto que ves es la app de verdad. Agenda, clientes, cuentas y equipo, siempre contigo y sin programas que instalar en ningún ordenador.</p>
+    </div>
+
+    <div class="showcase__tabs" role="tablist" aria-label="Áreas de la app" appReveal [revealDelay]="100"
+         [class.showcase__tabs--paused]="paused">
+      @for (tab of tabs; track tab.label; let i = $index) {
+        <button type="button" role="tab" class="showcase__tab" [class.showcase__tab--on]="i === active"
+                [attr.aria-selected]="i === active" aria-controls="showcase-panel" (click)="select(i)">
+          <span class="material-symbols-rounded" [class.fill]="i === active">{{ tab.icon }}</span>
+          <span>{{ tab.label }}</span>
+          @if (i === active && autoplay) {
+            <span class="showcase__bar" aria-hidden="true">
+              @for (key of [active]; track key) {
+                <span class="showcase__fill" (animationend)="next()"></span>
+              }
+            </span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="showcase__stage" id="showcase-panel" role="tabpanel"
+         (pointerenter)="paused = true" (pointerleave)="paused = false"
+         (focusin)="paused = true" (focusout)="paused = false">
+      <div class="showcase__phone">
+        <div class="showcase__glow" aria-hidden="true"></div>
+        @for (tab of [current]; track tab.label) {
+          <app-phone [screen]="tab.screen" class="showcase__device" />
+        }
+      </div>
+
+      @for (tab of [current]; track tab.label) {
+        <div class="showcase__copy">
+          <span class="icon-tile"><span class="material-symbols-rounded">{{ tab.feature.icon }}</span></span>
+          <h3 class="headline showcase__title">{{ tab.feature.headline }}</h3>
+          <p class="lead showcase__lead">{{ tab.feature.intro }}</p>
+
+          <ul class="showcase__points">
+            @for (point of tab.feature.points.slice(0, 3); track point.title; let pi = $index) {
+              <li [style.--i]="pi">
+                <span class="showcase__point-icon material-symbols-rounded">{{ point.icon }}</span>
+                <span>
+                  <b>{{ point.title }}</b>
+                  <span>{{ point.text }}</span>
+                </span>
+              </li>
+            }
+          </ul>
+
+          <a [routerLink]="['/funcionalidades', tab.feature.slug]" class="btn btn--secondary showcase__more">
+            Más sobre {{ tab.label.toLowerCase() }}
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</section>

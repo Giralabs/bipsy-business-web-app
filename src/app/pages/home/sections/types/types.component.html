@@ -1,0 +1,26 @@
+<section class="section section--band">
+  <div class="container">
+    <div class="types__head" appReveal>
+      <div class="section-head">
+        <span class="eyebrow"><span class="material-symbols-rounded fill">storefront</span>Para tu negocio</span>
+        <h2 class="display">Hecho para quien trabaja <span class="mark">con cita</span></h2>
+        <p class="lead">Barberías, estética, fisioterapia, clases… Si tus clientes reservan una hora contigo, Bipsy Business está pensado para ti.</p>
+      </div>
+      <a routerLink="/negocios" class="btn btn--secondary btn--lg types__all">
+        Ver los {{ total }} tipos
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+
+    <div class="types">
+      @for (type of types; track type.slug; let i = $index) {
+        <a class="type card" [routerLink]="['/negocios', type.slug]" appTilt appReveal [revealDelay]="i * 60">
+          <span class="type__icon"><span class="material-symbols-rounded">{{ type.icon }}</span></span>
+          <span class="type__name">{{ type.name }}</span>
+          <span class="type__text">{{ type.pains[0].title }}, {{ type.pains[1].title.toLowerCase() }}…</span>
+          <span class="type__go material-symbols-rounded">arrow_outward</span>
+        </a>
+      }
+    </div>
+  </div>
+</section>

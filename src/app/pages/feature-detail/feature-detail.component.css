@@ -1,0 +1,68 @@
+:host { display: block; }
+
+.included { display: inline-flex; align-items: center; gap: 6px; height: 58px; font-size: 0.9375rem; font-weight: 700; color: var(--clr-text-2); }
+.included .material-symbols-rounded { color: var(--clr-success); }
+
+.art { position: relative; display: flex; justify-content: center; }
+.art__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--clr-mint-glow), transparent);
+  transform: translate(-50%, -50%);
+  animation: aura-drift 14s ease-in-out infinite alternate;
+}
+.art app-phone { position: relative; animation: float 8s ease-in-out infinite; }
+
+.facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+.facts__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px 10px 12px;
+  border-radius: var(--r-pill);
+  background: var(--clr-surface);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 600ms var(--ease-out), transform 700ms var(--ease-back);
+  transition-delay: calc(var(--i) * 80ms);
+}
+.facts__item .material-symbols-rounded { font-size: 18px; color: var(--clr-accent-text); }
+.is-revealed .facts__item { opacity: 1; transform: none; }
+
+.points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.point__title { margin-top: 16px; }
+.point .body { margin-top: 6px; }
+
+.related {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+}
+.related__art { max-width: 380px; }
+
+.related__list { display: grid; gap: 10px; }
+
+.related__card { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
+.related__text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.related__text b { font-size: 1.0625rem; font-weight: 700; }
+.related__text span { font-size: 0.875rem; font-weight: 500; color: var(--clr-text-2); }
+.related__go { color: var(--clr-text-3); transition: transform var(--dur-medium) var(--ease-back), color var(--dur-fast) ease; }
+.related__card:hover .related__go { transform: translateX(4px); color: var(--clr-text); }
+
+@media (max-width: 960px) {
+  .points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .related { grid-template-columns: 1fr; }
+  .related__art { max-width: 260px; margin-inline: auto; }
+}
+
+@media (max-width: 600px) {
+  .points { grid-template-columns: 1fr; }
+}

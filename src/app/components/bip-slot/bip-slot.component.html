@@ -1,0 +1,36 @@
+@if (hasArtwork) {
+  <img class="artwork" [src]="artworkSrc" [alt]="mascotName + ' ' + pose"
+       [style.aspect-ratio]="ratio" loading="lazy" decoding="async"
+       (error)="onArtworkError()" />
+} @else {
+  <figure class="slot" [class.slot--client]="mascot === 'client'" [class.slot--compact]="compact"
+          [style.aspect-ratio]="ratio" role="img" [attr.aria-label]="mascotName + ': ' + pose">
+    <div class="slot__glow" aria-hidden="true"></div>
+
+    <div class="slot__art" aria-hidden="true">
+      @if (mascot === 'client') {
+        <img class="slot__symbol" src="assets_bipsy/Brand Marks/mint_symbol_nobackground.webp" alt="" />
+      } @else {
+        <img class="slot__symbol theme-dark-only" src="assets_bipsy_business/Brand Marks/apricot_dark_symbol_nobackground.webp" alt="" />
+        <img class="slot__symbol theme-light-only" src="assets_bipsy_business/Brand Marks/apricot_light_symbol_nobackground.webp" alt="" />
+      }
+      @if (variant === 'phone') {
+        <span class="slot__phone">
+          <span class="material-symbols-rounded">smartphone</span>
+        </span>
+      }
+    </div>
+
+    @if (!compact) {
+      <figcaption class="slot__caption">
+        <span class="slot__code">{{ code }} · {{ mascotName }}</span>
+        <span class="slot__pose">{{ pose }}</span>
+        @if (variant === 'phone' && screen) {
+          <span class="slot__screen">
+            <span class="material-symbols-rounded">smartphone</span>{{ screen }}
+          </span>
+        }
+      </figcaption>
+    }
+  </figure>
+}

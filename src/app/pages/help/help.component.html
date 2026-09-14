@@ -1,0 +1,68 @@
+<app-page-hero
+  eyebrow="Centro de ayuda"
+  icon="support_agent"
+  title="¿En qué te podemos ayudar?"
+  lead="Respuestas rápidas sobre la app, tu equipo, las reservas y los pagos."
+  [split]="true"
+  [crumbs]="[{ label: 'Ayuda' }]">
+  <div actions class="search">
+    <span class="material-symbols-rounded" aria-hidden="true">search</span>
+    <label class="sr-only" for="help-search">Buscar en la ayuda</label>
+    <input id="help-search" name="help-search" type="search" autocomplete="off"
+           placeholder="Busca: equipo, cancelar, plantones…" [value]="query" (input)="onSearch($event)" />
+  </div>
+  <div art class="art">
+    <app-bip-slot code="MB-08" pose="Con cascos de soporte y micrófono, sonriendo" ratio="4 / 5" />
+  </div>
+</app-page-hero>
+
+<section class="section section--tight">
+  <div class="container">
+    @if (!query) {
+      <div class="cats">
+        @for (g of groups; track g.id; let i = $index) {
+          <a class="card cat" routerLink="/ayuda" [fragment]="g.id" appReveal [revealDelay]="i * 60">
+            <span class="icon-tile"><span class="material-symbols-rounded">{{ g.icon }}</span></span>
+            <b>{{ g.label }}</b>
+            <span class="caption">{{ g.items.length }} preguntas</span>
+          </a>
+        }
+      </div>
+    }
+
+    <div class="groups">
+      @for (g of filtered; track g.id) {
+        <section class="group" [id]="g.id" appReveal>
+          <h2 class="headline group__title"><span class="material-symbols-rounded">{{ g.icon }}</span>{{ g.label }}</h2>
+          <app-faq-list [items]="g.items" [idPrefix]="'help-' + g.id" />
+        </section>
+      } @empty {
+        <div class="empty">
+          <span class="material-symbols-rounded">search_off</span>
+          <h2 class="headline">No encontramos nada con «{{ query }}»</h2>
+          <p class="body">Prueba con otra palabra o escríbenos y te respondemos.</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section section--band">
+  <div class="container contact">
+    <div class="contact__card card" appReveal>
+      <span class="icon-tile"><span class="material-symbols-rounded">confirmation_number</span></span>
+      <h2 class="title">Abre un ticket desde la app</h2>
+      <p class="body">Perfil › Soporte › Tickets. Cuéntanos qué pasa y adjunta hasta 4 capturas o documentos. Respondemos en {{ responseTime }}.</p>
+    </div>
+    <div class="contact__card card" appReveal [revealDelay]="100">
+      <span class="icon-tile"><span class="material-symbols-rounded">mail</span></span>
+      <h2 class="title">Escríbenos</h2>
+      <p class="body">Si no puedes entrar en la app, escribe a <a [href]="'mailto:' + email">{{ email }}</a> desde el correo de tu cuenta.</p>
+    </div>
+    <div class="contact__card card" appReveal [revealDelay]="200">
+      <span class="icon-tile"><span class="material-symbols-rounded">lightbulb</span></span>
+      <h2 class="title">Pide una mejora</h2>
+      <p class="body">Con el plan Quality tienes «Solicitudes a Bipsy»: nos cuentas qué echas en falta y te contestamos.</p>
+    </div>
+  </div>
+</section>

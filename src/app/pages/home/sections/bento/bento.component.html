@@ -1,0 +1,111 @@
+<section class="section section--band">
+  <div class="container">
+    <div class="section-head" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">widgets</span>Funcionalidades</span>
+      <h2 class="display">Todo lo que necesita tu negocio. <span class="mark">Nada que sobre.</span></h2>
+      <p class="lead">Cada función nace de lo que pasa en un negocio de verdad: el teléfono que no para, el cliente que no viene, la caja que no cuadra.</p>
+    </div>
+
+    <div class="bento">
+      <!-- Reservas 24/7 -->
+      <a routerLink="/funcionalidades/agenda-y-reservas-online" class="card card--glow tile tile--wide" appTilt appReveal>
+        <div class="tile__art tile__art--slots" aria-hidden="true">
+          @for (slot of slots; track slot; let i = $index) {
+            <span class="slot" [style.--i]="i">{{ slot }}</span>
+          }
+          <span class="toast"><span class="material-symbols-rounded fill">event_available</span>Reserva a las 03:12</span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">calendar_month</span></span>
+        <h3 class="title tile__title">Reservas online 24/7</h3>
+        <p class="body">Tus clientes reservan mientras duermes. Tú te levantas con la agenda hecha.</p>
+      </a>
+
+      <!-- Plantones -->
+      <a routerLink="/funcionalidades/proteccion-contra-plantones" class="card card--glow tile" appTilt appReveal [revealDelay]="80">
+        <div class="tile__art tile__art--shield" aria-hidden="true">
+          <span class="shield"><span class="material-symbols-rounded fill">shield_person</span></span>
+          <span class="fee">+ 5,50 €</span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">shield_person</span></span>
+        <h3 class="title tile__title">Adiós a los plantones</h3>
+        <p class="body">Tarjeta al reservar y una tarifa si no vienen.</p>
+      </a>
+
+      <!-- Lista de espera -->
+      <a routerLink="/funcionalidades/lista-de-espera" class="card card--glow tile" appTilt appReveal [revealDelay]="160">
+        <div class="tile__art tile__art--queue" aria-hidden="true">
+          <span class="q q--1">CR</span><span class="q q--2">DM</span><span class="q q--3">AM</span><span class="q q--4">SN</span>
+          <span class="q-slot"><span class="material-symbols-rounded">event</span></span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">hourglass_top</span></span>
+        <h3 class="title tile__title">Lista de espera</h3>
+        <p class="body">Si alguien cancela, el hueco se ofrece solo.</p>
+      </a>
+
+      <!-- Finanzas -->
+      <a routerLink="/funcionalidades/finanzas" class="card card--glow tile" appTilt appReveal>
+        <div class="tile__art tile__art--bars" aria-hidden="true">
+          @for (h of bars; track $index) {
+            <span [style.--h]="h" [style.--i]="$index"></span>
+          }
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">account_balance_wallet</span></span>
+        <h3 class="title tile__title">Finanzas y caja</h3>
+        <p class="body">Cobros, gastos, propinas y comisiones, sin hojas de cálculo.</p>
+      </a>
+
+      <!-- Mensajes -->
+      <a routerLink="/funcionalidades/chat-con-clientes" class="card card--glow tile tile--wide" appTilt appReveal [revealDelay]="80">
+        <div class="tile__art tile__art--chat" aria-hidden="true">
+          <span class="bubble bubble--in">¿Tenéis hueco el jueves por la tarde?</span>
+          <span class="bubble bubble--out">¡Sí! Te he guardado las 17:30</span>
+          <span class="typing"><i></i><i></i><i></i></span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">forum</span></span>
+        <h3 class="title tile__title">Mensajes con tus clientes</h3>
+        <p class="body">Fotos, dudas y avisos de cada cita en el mismo hilo, sin dar tu número personal.</p>
+      </a>
+
+      <!-- Reseñas -->
+      <a routerLink="/funcionalidades/resenas" class="card card--glow tile" appTilt appReveal>
+        <div class="tile__art tile__art--stars" aria-hidden="true">
+          @for (s of [0, 1, 2, 3, 4]; track s) {
+            <span class="material-symbols-rounded fill" [style.--i]="s">star</span>
+          }
+          <b>4,9</b>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">star</span></span>
+        <h3 class="title tile__title">Reseñas verificadas</h3>
+        <p class="body">Solo opina quien ha venido de verdad.</p>
+      </a>
+
+      <!-- Fichaje -->
+      <a routerLink="/funcionalidades/fichaje" class="card card--glow tile tile--wide" appTilt appReveal [revealDelay]="80">
+        <div class="tile__art tile__art--clock" aria-hidden="true">
+          <span class="clock"><i class="clock__h"></i><i class="clock__m"></i></span>
+          <span class="clock-pill"><i></i>Entrada 09:30</span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">timer</span></span>
+        <h3 class="title tile__title">Fichaje</h3>
+        <p class="body">El registro de jornada, desde el móvil de cada uno.</p>
+      </a>
+
+      <!-- Quality -->
+      <a routerLink="/funcionalidades/plan-quality" class="card card--glow tile tile--wide tile--quality" appTilt appReveal [revealDelay]="160">
+        <div class="tile__art tile__art--quality" aria-hidden="true">
+          <span class="qcard"><span class="qcard__cover"></span><span class="qcard__line"></span><span class="qcard__line qcard__line--short"></span></span>
+        </div>
+        <span class="icon-tile"><span class="material-symbols-rounded">auto_awesome</span></span>
+        <h3 class="title tile__title">Destaca con Quality <span class="pill pill--accent">Quality</span></h3>
+        <p class="body">Portada animada, tus colores y efectos exclusivos.</p>
+      </a>
+    </div>
+
+    <div class="bento__more" appReveal>
+      <a routerLink="/funcionalidades" class="btn btn--primary btn--lg">
+        Ver todas las funcionalidades
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+</section>

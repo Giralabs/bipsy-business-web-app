@@ -1,0 +1,52 @@
+<article class="plan" [class.plan--featured]="plan.recommended">
+  <div class="plan__inner">
+    <header class="plan__head">
+      <h3 class="plan__name">{{ plan.name }}</h3>
+      @if (plan.recommended) {
+        <span class="pill pill--solid">
+          <span class="material-symbols-rounded fill">star</span>
+          Recomendado
+        </span>
+      }
+    </header>
+
+    <p class="plan__tagline">{{ plan.tagline }}</p>
+
+    <p class="plan__price" [attr.aria-label]="plan.price + ' euros al mes'">
+      <span class="plan__euros">{{ euros }}</span>
+      <span class="plan__rest">
+        <span class="plan__cents">,{{ cents }} €</span>
+        <span class="plan__per">al mes</span>
+      </span>
+    </p>
+
+    <div class="plan__pills">
+      <span class="pill pill--success">
+        <span class="material-symbols-rounded fill">card_giftcard</span>
+        {{ trialDays }} días gratis
+      </span>
+      <span class="pill pill--biz">
+        <span class="material-symbols-rounded fill">group</span>
+        Equipo gratis
+      </span>
+    </div>
+
+    <a routerLink="/registro" class="btn btn--lg btn--block plan__cta"
+       [class.btn--primary]="plan.recommended" [class.btn--shine]="plan.recommended"
+       [class.btn--subtle]="!plan.recommended">
+      Empezar prueba gratis
+    </a>
+
+    <p class="plan__desc">{{ plan.description }}</p>
+
+    <p class="plan__includes">{{ plan.includesLabel }}</p>
+    <ul class="check-list">
+      @for (feature of plan.features.slice(0, maxFeatures); track feature) {
+        <li>
+          <span class="material-symbols-rounded">check_circle</span>
+          {{ feature }}
+        </li>
+      }
+    </ul>
+  </div>
+</article>

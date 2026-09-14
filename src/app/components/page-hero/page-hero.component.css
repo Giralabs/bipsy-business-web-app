@@ -1,0 +1,77 @@
+:host { display: block; }
+
+.phero {
+  position: relative;
+  margin-top: calc(var(--header-h) * -1);
+  padding-top: var(--header-h);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.phero__bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.phero__aura--1 { width: 620px; height: 620px; top: -300px; left: -160px; }
+.phero__aura--2 { width: 620px; height: 620px; top: -200px; right: -220px; }
+
+.phero__inner {
+  width: var(--container);
+  margin-inline: auto;
+  padding-block: clamp(48px, 7vw, 96px) clamp(40px, 5vw, 72px);
+  text-align: center;
+}
+
+.phero--split .phero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 80px);
+  text-align: left;
+}
+
+.phero__copy { display: flex; flex-direction: column; align-items: center; }
+.phero--split .phero__copy { align-items: flex-start; }
+
+.phero__in { animation: phero-in 800ms var(--ease-out) both; animation-delay: calc(var(--d) * 80ms + 60ms); }
+
+@keyframes phero-in {
+  from { opacity: 0; transform: translateY(22px); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.phero__crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clr-text-3);
+}
+.phero__crumbs a { color: var(--clr-text-2); text-decoration: none; }
+.phero__crumbs a:hover { color: var(--clr-text); text-decoration: underline; }
+.phero__crumbs .material-symbols-rounded { font-size: 16px; }
+
+.phero__title {
+  margin-top: 18px;
+  max-width: 18ch;
+  font-family: var(--ff-display);
+  font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.phero__lead { margin-top: 20px; max-width: 60ch; }
+
+.phero__actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.phero--split .phero__actions { justify-content: flex-start; }
+.phero__actions:empty { display: none; }
+
+.phero__art { display: flex; justify-content: center; }
+
+@media (max-width: 900px) {
+  .phero--split .phero__inner { grid-template-columns: 1fr; text-align: center; }
+  .phero--split .phero__copy { align-items: center; }
+  .phero--split .phero__actions { justify-content: center; }
+  .phero__art { max-width: 380px; margin-inline: auto; width: 100%; }
+}

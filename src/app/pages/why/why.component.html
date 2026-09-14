@@ -1,0 +1,83 @@
+<app-page-hero
+  eyebrow="Por qué Bipsy"
+  icon="favorite"
+  title="Menos llamadas, menos huecos, más negocio"
+  lead="Bipsy Business nace de lo que pasa cada día en un negocio con cita. Por eso lo que hace es sencillo de explicar y se nota desde la primera semana."
+  [split]="true"
+  [crumbs]="[{ label: 'Por qué Bipsy' }]">
+  <ng-container ngProjectAs="[actions]">
+    <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">Probar 30 días gratis</a>
+    <a routerLink="/funcionalidades" class="btn btn--secondary btn--lg">Ver funcionalidades</a>
+  </ng-container>
+  <div art class="hero-art">
+    <app-bip-slot code="MB-07" pose="Con los brazos cruzados y el pulgar arriba, seguro de sí mismo" ratio="4 / 5" />
+  </div>
+</app-page-hero>
+
+<!-- ----- REASONS ----- -->
+<section class="section section--tight">
+  <div class="container reasons">
+    @for (reason of reasons; track reason.title; let i = $index) {
+      <article class="card card--glow reason" appTilt appReveal [revealDelay]="i * 70">
+        <span class="reason__num" aria-hidden="true">0{{ i + 1 }}</span>
+        <span class="icon-tile"><span class="material-symbols-rounded">{{ reason.icon }}</span></span>
+        <h2 class="headline reason__title">{{ reason.title }}</h2>
+        <p class="body">{{ reason.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- ----- BEFORE / AFTER ----- -->
+<section class="section section--band">
+  <div class="container">
+    <div class="section-head section-head--center" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">swap_horiz</span>El cambio</span>
+      <h2 class="display">Un martes cualquiera, <span class="mark">antes y después</span></h2>
+    </div>
+
+    <div class="versus">
+      <div class="versus__col versus__col--before" appReveal revealFrom="left">
+        <p class="versus__label"><span class="material-symbols-rounded">sentiment_stressed</span>Sin Bipsy Business</p>
+        <ul>
+          @for (item of before; track item; let i = $index) {
+            <li [style.--i]="i"><span class="material-symbols-rounded">close</span>{{ item }}</li>
+          }
+        </ul>
+      </div>
+
+      <div class="versus__phone" appReveal revealFrom="scale">
+        <app-phone screen="agenda" />
+      </div>
+
+      <div class="versus__col versus__col--after" appReveal revealFrom="right">
+        <p class="versus__label"><span class="material-symbols-rounded">sentiment_very_satisfied</span>Con Bipsy Business</p>
+        <ul>
+          @for (item of after; track item; let i = $index) {
+            <li [style.--i]="i"><span class="material-symbols-rounded">check</span>{{ item }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ----- MADE HERE ----- -->
+<section class="section">
+  <div class="container made" appReveal>
+    <div class="made__icon"><span class="material-symbols-rounded fill">location_on</span></div>
+    <div>
+      <h2 class="headline">Hecha en Andalucía, con soporte en español</h2>
+      <p class="body">
+        Bipsy lo desarrolla Giralabs desde Marchena, Sevilla. Cuando escribes a soporte te responde alguien que
+        conoce la app por dentro, en 24-48 horas laborables.
+      </p>
+    </div>
+    <a routerLink="/legal/quienes-somos" class="btn btn--secondary btn--lg">
+      Quiénes somos
+      <span class="material-symbols-rounded">arrow_forward</span>
+    </a>
+  </div>
+</section>
+
+<app-cta-band />

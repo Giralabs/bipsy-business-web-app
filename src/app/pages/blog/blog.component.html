@@ -1,0 +1,49 @@
+<app-page-hero
+  eyebrow="Blog"
+  icon="article"
+  title="Ideas para llenar tu agenda y trabajar mejor"
+  lead="Guías prácticas para negocios con cita: plantones, equipo, reseñas, cuentas y cómo sacar partido a Bipsy Business."
+  [split]="true"
+  [crumbs]="[{ label: 'Blog' }]">
+  <div art class="art">
+    <app-bip-slot code="MB-15" pose="Leyendo un periódico con gafas de lectura" ratio="4 / 5" />
+  </div>
+</app-page-hero>
+
+<section class="section section--tight">
+  <div class="container">
+    @if (selected === 'Todos') {
+      <a class="featured card card--glow" [routerLink]="['/blog', featured.slug]" appReveal revealFrom="scale" appTilt [tiltMax]="3">
+        <span class="featured__cover cover" aria-hidden="true">
+          <span class="material-symbols-rounded">{{ featured.icon }}</span>
+        </span>
+        <span class="featured__body">
+          <span class="meta"><span class="pill pill--accent">Destacado</span><span class="pill">{{ featured.category }}</span>{{ featured.readMinutes }} min</span>
+          <span class="featured__title">{{ featured.title }}</span>
+          <span class="body">{{ featured.excerpt }}</span>
+          <span class="read">Leer artículo <span class="material-symbols-rounded">arrow_forward</span></span>
+        </span>
+      </a>
+    }
+
+    <div class="filters" role="toolbar" aria-label="Filtrar por categoría" appReveal>
+      @for (cat of categories; track cat) {
+        <button type="button" class="filters__chip" [class.filters__chip--on]="cat === selected"
+                [attr.aria-pressed]="cat === selected" (click)="selected = cat">{{ cat }}</button>
+      }
+    </div>
+
+    <div class="grid">
+      @for (post of posts; track post.slug; let i = $index) {
+        <a class="card card--glow post" [routerLink]="['/blog', post.slug]" appTilt appReveal [revealDelay]="(i % 3) * 80">
+          <span class="post__cover cover" aria-hidden="true"><span class="material-symbols-rounded">{{ post.icon }}</span></span>
+          <span class="meta"><span class="pill">{{ post.category }}</span>{{ post.readMinutes }} min · {{ post.dateLabel }}</span>
+          <span class="post__title">{{ post.title }}</span>
+          <span class="body">{{ post.excerpt }}</span>
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
+<app-cta-band />

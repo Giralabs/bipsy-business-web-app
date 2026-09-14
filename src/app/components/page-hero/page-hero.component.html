@@ -1,0 +1,46 @@
+<section class="phero" [class.phero--split]="split">
+  <div class="phero__bg" aria-hidden="true">
+    <div class="aura aura--mint phero__aura phero__aura--1"></div>
+    <div class="aura aura--biz phero__aura phero__aura--2"></div>
+  </div>
+
+  <div class="phero__inner">
+    <div class="phero__copy">
+      @if (crumbs.length) {
+        <nav class="phero__crumbs phero__in" style="--d:0" aria-label="Estás en">
+          <a routerLink="/">Inicio</a>
+          @for (crumb of crumbs; track crumb.label) {
+            <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+            @if (crumb.link) {
+              <a [routerLink]="crumb.link">{{ crumb.label }}</a>
+            } @else {
+              <span aria-current="page">{{ crumb.label }}</span>
+            }
+          }
+        </nav>
+      }
+
+      @if (eyebrow) {
+        <span class="eyebrow phero__in" style="--d:1">
+          <span class="material-symbols-rounded fill">{{ icon }}</span>{{ eyebrow }}
+        </span>
+      }
+
+      <h1 class="phero__title phero__in" style="--d:2">{{ title }}</h1>
+
+      @if (lead) {
+        <p class="lead phero__lead phero__in" style="--d:3">{{ lead }}</p>
+      }
+
+      <div class="phero__actions phero__in" style="--d:4">
+        <ng-content select="[actions]" />
+      </div>
+    </div>
+
+    @if (split) {
+      <div class="phero__art phero__in" style="--d:3">
+        <ng-content select="[art]" />
+      </div>
+    }
+  </div>
+</section>

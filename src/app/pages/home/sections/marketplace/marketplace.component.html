@@ -1,0 +1,59 @@
+<section class="section section--band">
+  <div class="container">
+    <div class="section-head section-head--center" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">hub</span>Dos apps, un mismo sitio</span>
+      <h2 class="display">Tus clientes reservan en Bipsy. <span class="mark">Tú lo recibes aquí.</span></h2>
+      <p class="lead">Bipsy es la app gratuita donde la gente busca y reserva cita. Al darte de alta en Bipsy Business, tu negocio aparece ahí, a la vista de quien busca lo que haces cerca de ti.</p>
+    </div>
+
+    <div class="duo">
+      <article class="duo__card duo__card--client" appReveal revealFrom="left">
+        <header class="duo__head">
+          <img class="duo__logo theme-dark-only" src="assets_bipsy/Combination Marks/combinationmark_mint_horizontal_nobackground.webp" alt="Bipsy" />
+          <img class="duo__logo theme-light-only" src="assets_bipsy/Combination Marks/combinationmark_carbon_horizontal_nobackground.webp" alt="Bipsy" />
+          <span class="pill pill--success">Gratis para tus clientes</span>
+        </header>
+        <div class="duo__art">
+          <app-bip-slot code="BIP-01" mascot="client" variant="phone" screen="App Bipsy › Elegir hora"
+                        pose="Bip (sudadera) reservando cita desde su móvil, contento" ratio="1 / 1" />
+        </div>
+        <ul class="check-list">
+          @for (p of clientPoints; track p) {
+            <li><span class="material-symbols-rounded">check_circle</span>{{ p }}</li>
+          }
+        </ul>
+      </article>
+
+      <div class="duo__bridge" aria-hidden="true">
+        <span class="duo__line"></span>
+        <span class="duo__packet duo__packet--1"><span class="material-symbols-rounded fill">event_available</span></span>
+        <span class="duo__packet duo__packet--2"><span class="material-symbols-rounded fill">notifications</span></span>
+        <span class="duo__packet duo__packet--3"><span class="material-symbols-rounded fill">star</span></span>
+      </div>
+
+      <article class="duo__card duo__card--business" appReveal revealFrom="right">
+        <header class="duo__head">
+          <img class="duo__logo theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
+          <img class="duo__logo theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+          <span class="pill pill--biz">Para tu negocio</span>
+        </header>
+        <div class="duo__art">
+          <app-bip-slot code="MB-02" variant="phone" screen="Agenda con la notificación «Nueva reserva»"
+                        pose="Mr. Bip recibe la reserva en su móvil y la señala con el dedo" ratio="1 / 1" />
+        </div>
+        <ul class="check-list">
+          @for (p of businessPoints; track p) {
+            <li><span class="material-symbols-rounded">check_circle</span>{{ p }}</li>
+          }
+        </ul>
+      </article>
+    </div>
+
+    <div class="duo__more" appReveal>
+      <a routerLink="/app-para-clientes" class="btn btn--secondary btn--lg">
+        Cómo es Bipsy para tus clientes
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+</section>

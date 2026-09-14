@@ -1,0 +1,34 @@
+<section class="section steps">
+  <div class="container steps__grid">
+    <div class="steps__intro" appReveal>
+      <span class="eyebrow"><span class="material-symbols-rounded fill">bolt</span>Empezar es fácil</span>
+      <h2 class="display steps__title">De cero a tu primera reserva <span class="mark">en una tarde</span></h2>
+      <p class="lead steps__lead">Sin instalaciones, sin formación y sin llamar a nadie. Todo desde tu móvil.</p>
+      <div class="steps__art">
+        <app-bip-slot code="MB-03" pose="Tachando una lista de tareas con un lápiz, satisfecho" ratio="1 / 1" />
+      </div>
+    </div>
+
+    <ol class="steps__list" appReveal>
+      <span class="steps__rail" aria-hidden="true"><span class="steps__rail-fill"></span></span>
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="steps__item" [style.--i]="i">
+          <span class="steps__num">
+            <span class="material-symbols-rounded">{{ step.icon }}</span>
+          </span>
+          <div class="steps__body card">
+            <p class="overline">Paso {{ i + 1 }}</p>
+            <h3 class="title">{{ step.title }}</h3>
+            <p class="body">{{ step.text }}</p>
+          </div>
+        </li>
+      }
+      <li class="steps__cta" [style.--i]="4">
+        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">
+          Empezar ahora
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+      </li>
+    </ol>
+  </div>
+</section>

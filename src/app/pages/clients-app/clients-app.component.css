@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.store { display: block; height: 50px; transition: transform var(--dur-medium) var(--ease-back); }
+.store:hover { transform: translateY(-3px); }
+.store img { height: 100%; width: auto; }
+
+/* The customer app is mint: its page keeps the mint glow in front. */
+.art { position: relative; display: flex; justify-content: center; width: 100%; }
+.art__phone { animation: float 8s ease-in-out infinite; }
+.art__bip { position: absolute; left: -4%; bottom: -4%; width: 42%; max-width: 170px; animation: float 6s ease-in-out -2s infinite; }
+
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 40px; text-align: center; }
+.brand__logo { height: 48px; width: auto; }
+
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.item__title { margin-top: 16px; }
+.item .body { margin-top: 6px; }
+
+.ways { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+.ways .section-head { margin-bottom: 0; }
+.ways__list { list-style: none; display: grid; gap: 12px; }
+.ways__item { display: flex; align-items: flex-start; gap: 16px; }
+.ways__item b { display: block; font-size: 1.0625rem; font-weight: 700; }
+.ways__item span span { display: block; margin-top: 4px; font-size: 0.9375rem; font-weight: 500; line-height: 1.55; color: var(--clr-text-2); }
+.ways__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--clr-mint);
+  color: #2E343B;
+}
+
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .ways { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .store { height: 44px; } }

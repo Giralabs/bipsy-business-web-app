@@ -1,0 +1,37 @@
+<app-page-hero
+  eyebrow="Negocios"
+  icon="storefront"
+  title="Un Bipsy Business para cada forma de trabajar"
+  lead="Las mismas herramientas se adaptan a cómo trabajas tú: citas cortas o sesiones largas, en tu local o a domicilio, solo o con equipo."
+  [split]="true"
+  [crumbs]="[{ label: 'Negocios' }]">
+  <div art class="art">
+    <app-bip-slot code="MB-16" pose="Haciendo malabares con unas tijeras, una brocha y una pesa" ratio="4 / 5" />
+  </div>
+</app-page-hero>
+
+<section class="section section--tight">
+  <div class="container grid">
+    @for (type of types; track type.slug; let i = $index) {
+      <a class="card card--glow type" [routerLink]="['/negocios', type.slug]" appTilt appReveal [revealDelay]="(i % 4) * 70">
+        <span class="type__icon"><span class="material-symbols-rounded">{{ type.icon }}</span></span>
+        <h2 class="type__name">{{ type.name }}</h2>
+        <p class="body">{{ type.headline }}</p>
+        <span class="type__go">Ver más <span class="material-symbols-rounded">arrow_forward</span></span>
+      </a>
+    }
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container other card" appReveal>
+    <span class="icon-tile icon-tile--biz"><span class="material-symbols-rounded">add_business</span></span>
+    <div>
+      <h2 class="headline">¿Tu negocio no está en la lista?</h2>
+      <p class="body">Si tus clientes reservan una hora contigo, Bipsy Business te sirve. Al darte de alta eliges hasta cinco categorías, y existe «Otros» para lo que no encaje.</p>
+    </div>
+    <a routerLink="/registro" class="btn btn--primary btn--lg">Probar gratis</a>
+  </div>
+</section>
+
+<app-cta-band />

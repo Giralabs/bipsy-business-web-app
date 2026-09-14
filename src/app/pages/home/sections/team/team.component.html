@@ -1,0 +1,63 @@
+<section class="section team">
+  <div class="container team__grid">
+    <div class="team__copy">
+      <div appReveal>
+        <span class="eyebrow"><span class="material-symbols-rounded fill">volunteer_activism</span>Equipo</span>
+        <h2 class="display team__title">Tu equipo entra <span class="team__free">gratis</span>.</h2>
+        <p class="lead team__lead">
+          Pagas un plan por negocio, no por persona. Tus trabajadores se descargan Bipsy Business,
+          escriben tu código de invitación y ya tienen su agenda. Con dos o con veinte, pagas lo mismo.
+        </p>
+      </div>
+
+      <ol class="team__steps">
+        @for (step of steps; track step.title; let i = $index) {
+          <li class="team__step" appReveal [revealDelay]="i * 120">
+            <span class="team__step-num">{{ i + 1 }}</span>
+            <span class="team__step-body">
+              <b>{{ step.title }}</b>
+              <span>{{ step.text }}</span>
+            </span>
+          </li>
+        }
+      </ol>
+
+      <div class="team__facts" appReveal [revealDelay]="200">
+        <span class="pill pill--success"><span class="material-symbols-rounded fill">euro</span>0 € por trabajador</span>
+        <span class="pill pill--biz"><span class="material-symbols-rounded fill">admin_panel_settings</span>Permisos a medida</span>
+        <span class="pill pill--accent"><span class="material-symbols-rounded fill">visibility_off</span>No ven tus números</span>
+      </div>
+
+      <a routerLink="/funcionalidades/gestion-de-equipo" class="btn btn--secondary btn--lg team__more" appReveal [revealDelay]="260">
+        Cómo funciona el equipo
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+
+    <div class="team__visual" appReveal revealFrom="right">
+      <div class="team__code">
+        <p class="team__code-label">Código de invitación</p>
+        <p class="team__digits" aria-label="Código 482913">
+          @for (d of digits; track $index) {
+            <span class="team__digit" [style.--i]="$index">{{ d }}</span>
+          }
+        </p>
+        <p class="team__code-foot"><span class="material-symbols-rounded">schedule</span>Caduca en 12 h · Gratis</p>
+      </div>
+
+      <div class="team__phone">
+        <app-phone screen="equipo" />
+      </div>
+
+      <div class="team__joined">
+        @for (p of joined; track p.name; let i = $index) {
+          <div class="team__join ph-float" [style.--i]="i">
+            <span class="ph-float__icon"><b>{{ p.initials }}</b></span>
+            <span class="ph-float__text"><small>{{ p.role }}</small><b>{{ p.name }} se ha unido</b></span>
+            <span class="material-symbols-rounded team__check">check_circle</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

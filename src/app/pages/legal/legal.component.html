@@ -1,0 +1,95 @@
+@if (doc) {
+  <div class="legal">
+    <aside class="side" aria-label="Documentos">
+      @for (group of groups; track group.label) {
+        <nav class="side__group" [attr.aria-label]="group.label">
+          <p class="side__title">{{ group.label }}</p>
+          @for (entry of group.entries; track entry.slug) {
+            <a [routerLink]="['/legal', entry.slug]" class="side__link"
+               [class.side__link--on]="entry.slug === doc.slug"
+               [attr.aria-current]="entry.slug === doc.slug ? 'page' : null">{{ entry.title }}</a>
+          }
+        </nav>
+      }
+      <!-- routerLink + fragment, never href="#id": with <base href="/"> a bare
+           anchor resolves against the base and lands on the home page. -->
+      <nav class="side__group side__toc" aria-label="Índice del documento">
+        <p class="side__title">En esta página</p>
+        @for (section of doc.sections; track section.id) {
+          <a [routerLink]="['/legal', doc.slug]" [fragment]="section.id" class="side__anchor">{{ section.title }}</a>
+        }
+      </nav>
+    </aside>
+
+    <article class="doc">
+      <p class="doc__kicker"><span class="material-symbols-rounded">gavel</span>Legal</p>
+      <h1 class="doc__title">{{ doc.title }}</h1>
+      <p class="lead doc__subtitle">{{ doc.subtitle }}</p>
+
+      <div class="doc__meta">
+        <span class="pill pill--accent">Versión {{ doc.version }}</span>
+        <span class="caption">Actualizado el {{ doc.updatedAt }}</span>
+      </div>
+
+      @if (isDraft) {
+        <div class="draft" role="note">
+          <span class="material-symbols-rounded">edit_note</span>
+          <p>
+            Borrador pendiente de revisión jurídica. Describe cómo funciona hoy la suscripción y el tratamiento
+            de datos de Bipsy Business, pero debe revisarlo un abogado antes de publicarse.
+            @if (companyIncomplete) {
+              Faltan además datos identificativos del prestador.
+            }
+          </p>
+        </div>
+      }
+
+      <nav class="toc" aria-label="Índice del documento">
+        <p class="toc__title">Contenido</p>
+        <ol>
+          @for (section of doc.sections; track section.id) {
+            <li><a [routerLink]="['/legal', doc.slug]" [fragment]="section.id">{{ section.title }}</a></li>
+          }
+        </ol>
+      </nav>
+
+      @for (section of doc.sections; track section.id) {
+        <section class="doc__section" [id]="section.id">
+          <h2>{{ section.title }}</h2>
+          @for (p of section.paragraphs; track $index) {
+            <p>{{ p }}</p>
+          }
+          @if (section.bullets?.length) {
+            <ul>
+              @for (b of section.bullets; track $index) {
+                <li>{{ b }}</li>
+              }
+            </ul>
+          }
+          @for (p of section.closingParagraphs; track $index) {
+            <p>{{ p }}</p>
+          }
+        </section>
+      }
+
+      <footer class="doc__foot">
+        <p class="side__title">Leer también</p>
+        <div class="doc__links">
+          @for (other of otherDocs; track other.slug) {
+            <a [routerLink]="['/legal', other.slug]" class="doc__link">
+              <span class="material-symbols-rounded">description</span>{{ other.title }}
+            </a>
+          }
+        </div>
+      </footer>
+    </article>
+  </div>
+} @else {
+  <div class="legal legal--missing">
+    <article class="doc">
+      <h1 class="doc__title">Documento no encontrado</h1>
+      <p class="lead doc__subtitle">El documento que buscas no existe o ha cambiado de dirección.</p>
+      <a routerLink="/legal/aviso-legal" class="btn btn--secondary">Ver el aviso legal</a>
+    </article>
+  </div>
+}

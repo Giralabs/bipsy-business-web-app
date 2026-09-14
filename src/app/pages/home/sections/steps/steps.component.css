@@ -1,0 +1,89 @@
+:host { display: block; }
+
+.steps__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+
+.steps__intro { position: sticky; top: calc(var(--header-h) + 40px); }
+.steps__title { margin-top: 16px; }
+.steps__lead { margin-top: 18px; }
+.steps__art { margin-top: 32px; max-width: 360px; }
+
+.steps__list { position: relative; list-style: none; display: grid; gap: 16px; padding-left: 0; }
+
+/* The rail fills as the list is revealed. */
+.steps__rail {
+  position: absolute;
+  left: 27px;
+  top: 28px;
+  bottom: 90px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--clr-hairline);
+  overflow: hidden;
+}
+.steps__rail-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(var(--clr-mint), var(--clr-biz));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1800ms var(--ease-out) 200ms;
+}
+.is-revealed .steps__rail-fill { transform: scaleY(1); }
+
+.steps__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms var(--ease-out), transform 800ms var(--ease-out);
+  transition-delay: calc(var(--i) * 260ms + 200ms);
+}
+.is-revealed .steps__item,
+.is-revealed .steps__cta { opacity: 1; transform: none; }
+
+.steps__num {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-accent);
+  color: var(--clr-on-accent);
+  box-shadow: 0 0 0 6px var(--clr-base);
+}
+.steps__num .material-symbols-rounded { font-size: 26px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+
+.steps__body .title { margin-top: 4px; }
+.steps__body .body { margin-top: 6px; }
+
+.steps__cta {
+  padding-left: 76px;
+  padding-top: 8px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms var(--ease-out) 1300ms, transform 800ms var(--ease-out) 1300ms;
+}
+
+@media (max-width: 960px) {
+  .steps__grid { grid-template-columns: 1fr; }
+  .steps__intro { position: static; }
+  .steps__art { max-width: 260px; }
+}
+
+@media (max-width: 560px) {
+  .steps__item { grid-template-columns: 44px minmax(0, 1fr); gap: 12px; }
+  .steps__num { width: 44px; height: 44px; border-radius: 14px; }
+  .steps__rail { left: 21px; }
+  .steps__cta { padding-left: 0; }
+  .steps__cta .btn { width: 100%; }
+}

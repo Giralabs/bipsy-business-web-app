@@ -1,0 +1,86 @@
+@if (feature && group) {
+  @for (f of [feature]; track f.slug) {
+    <app-page-hero
+      [eyebrow]="group.label"
+      [icon]="group.icon"
+      [title]="f.headline"
+      [lead]="f.intro"
+      [split]="true"
+      [crumbs]="[{ label: 'Funcionalidades', link: '/funcionalidades' }, { label: f.name }]">
+      <ng-container ngProjectAs="[actions]">
+        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">
+          Probar gratis
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+        @if (f.quality) {
+          <a routerLink="/precios" class="btn btn--secondary btn--lg">Ver el plan Quality</a>
+        } @else {
+          <span class="included"><span class="material-symbols-rounded fill">check_circle</span>Incluido en todos los planes</span>
+        }
+      </ng-container>
+      <div art class="art">
+        <div class="art__glow" aria-hidden="true"></div>
+        <app-phone [screen]="f.screen" />
+      </div>
+    </app-page-hero>
+
+    <!-- ----- FACTS ----- -->
+    <div class="container facts" appReveal>
+      @for (fact of f.facts; track fact; let i = $index) {
+        <span class="facts__item" [style.--i]="i">
+          <span class="material-symbols-rounded fill">bolt</span>{{ fact }}
+        </span>
+      }
+    </div>
+
+    <!-- ----- POINTS ----- -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head" appReveal>
+          <span class="eyebrow"><span class="material-symbols-rounded fill">{{ f.icon }}</span>{{ f.name }}</span>
+          <h2 class="display">Así funciona</h2>
+        </div>
+        <div class="points">
+          @for (point of f.points; track point.title; let i = $index) {
+            <article class="card card--glow point" appTilt appReveal [revealDelay]="i * 70">
+              <span class="icon-tile"><span class="material-symbols-rounded">{{ point.icon }}</span></span>
+              <h3 class="title point__title">{{ point.title }}</h3>
+              <p class="body">{{ point.text }}</p>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ----- MR. BIP + RELATED ----- -->
+    <section class="section section--band">
+      <div class="container related">
+        <div class="related__art" appReveal revealFrom="left">
+          <app-bip-slot [code]="group.bip.code" [pose]="group.bip.pose" variant="phone" [screen]="group.bip.screen" ratio="1 / 1" />
+        </div>
+        <div>
+          <div class="section-head" appReveal>
+            <span class="eyebrow"><span class="material-symbols-rounded fill">{{ group.icon }}</span>{{ group.label }}</span>
+            <h2 class="display">Funciona todavía mejor con…</h2>
+          </div>
+          <div class="related__list">
+            @for (item of related; track item.slug; let i = $index) {
+              <a class="card related__card" [routerLink]="['/funcionalidades', item.slug]" appReveal [revealDelay]="i * 90">
+                <span class="icon-tile"><span class="material-symbols-rounded">{{ item.icon }}</span></span>
+                <span class="related__text"><b>{{ item.name }}</b><span>{{ item.summary }}</span></span>
+                <span class="material-symbols-rounded related__go">arrow_forward</span>
+              </a>
+            }
+            <a class="card related__card related__card--all" routerLink="/funcionalidades" appReveal>
+              <span class="icon-tile icon-tile--biz"><span class="material-symbols-rounded">widgets</span></span>
+              <span class="related__text"><b>Todas las funcionalidades</b><span>Agenda, clientes, cobros, equipo y escaparate</span></span>
+              <span class="material-symbols-rounded related__go">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <app-cta-band />
+}

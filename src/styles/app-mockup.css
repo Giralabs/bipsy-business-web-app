@@ -1,0 +1,381 @@
+/* ============================================================
+   APP MOCKUP KIT — the business app, redrawn in HTML
+
+   Used by PhoneComponent and by the floating cards of the hero.
+   Global (not a component stylesheet) because both the phone and
+   loose cards on several pages share it; every class starts with
+   `ph-` so nothing here can collide with the site.
+
+   Sizes are the app's (GipsiTypography, GipsiRadii) scaled to a
+   phone drawn 300 px wide: roughly 0.78 of the real thing.
+   Colours come from the same tokens as the site, so the mockup
+   switches theme with the browser exactly like the app does.
+   ============================================================ */
+
+/* ----- FRAME -------------------------------------------------------- */
+.ph {
+  --ph-w: 300px;
+  position: relative;
+  width: var(--ph-w);
+  max-width: 100%;
+  aspect-ratio: 300 / 630;
+  padding: 9px;
+  border-radius: 48px;
+  background: var(--clr-phone-bezel);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    var(--shadow-float);
+  font-family: var(--ff);
+  color: var(--clr-text);
+  text-align: left;
+  user-select: none;
+}
+
+.ph__screen {
+  position: relative;
+  height: 100%;
+  border-radius: 40px;
+  background: var(--clr-base);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ph__island {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  z-index: 5;
+  width: 84px;
+  height: 24px;
+  border-radius: 20px;
+  background: #000;
+  transform: translateX(-50%);
+}
+
+.ph__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  padding: 4px 24px 0 30px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ph__status-icons { display: flex; gap: 3px; }
+.ph__status .material-symbols-rounded { font-size: 14px; font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 20; }
+
+.ph__body {
+  position: absolute;
+  inset: 42px 0 0 0;
+  padding: 6px 14px 90px;
+  overflow: hidden;
+}
+
+.ph__body--flush { padding: 0 0 20px; inset: 0; }
+
+/* Screen swap: the new screen rises in, like a pushed page settling. */
+.ph-enter > * { animation: ph-in 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 60ms); }
+
+@keyframes ph-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ----- TYPE ---------------------------------------------------------- */
+.ph-greet { font-size: 12.5px; font-weight: 600; color: var(--clr-text-2); }
+.ph-big { font-family: var(--ff-display); font-size: 25px; font-weight: 800; line-height: 1.02; letter-spacing: -0.9px; }
+.ph-over { margin: 14px 2px 7px; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--clr-text-2); }
+.ph-muted { color: var(--clr-text-2); }
+
+/* ----- HEADER / NAV BAR ------------------------------------------- */
+.ph-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding-top: 8px; }
+.ph-head--center { align-items: center; }
+
+.ph-nav {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  height: 36px;
+  margin-bottom: 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-align: center;
+}
+.ph-nav .material-symbols-rounded { font-size: 22px; color: var(--clr-accent-text); }
+.ph-nav .material-symbols-rounded:last-child { justify-self: end; font-size: 19px; }
+
+.ph-round {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-subtle);
+  color: var(--clr-text);
+}
+.ph-round .material-symbols-rounded { font-size: 17px; }
+
+/* ----- AVATAR -------------------------------------------------------- */
+.ph-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--clr-field);
+  color: var(--clr-text);
+  font-size: 11px;
+  font-weight: 800;
+}
+.ph-avatar--brand { background: var(--clr-accent); color: var(--clr-on-accent); }
+.ph-avatar--biz { background: var(--clr-biz); color: #1E242A; }
+.ph-avatar--xl { width: 64px; height: 64px; font-size: 20px; }
+
+/* ----- SEGMENTED (UISegmentedControl) ------------------------------ */
+.ph-seg {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  height: 30px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--clr-subtle);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+.ph-seg > span:not(.ph-seg__thumb) { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.ph-seg__thumb {
+  position: absolute;
+  z-index: 0 !important;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / var(--n, 3));
+  border-radius: 7px;
+  background: var(--clr-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transform: translateX(calc(var(--at, 0) * 100%));
+  transition: transform 400ms var(--ease-out);
+}
+
+/* ----- PILLS --------------------------------------------------------- */
+.ph-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--clr-subtle);
+  font-size: 9.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ph-pill .material-symbols-rounded { font-size: 12px; font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 20; }
+.ph-pill--warn { background: rgba(232, 182, 87, 0.18); color: var(--clr-warn); }
+.ph-pill--success { background: rgba(95, 185, 138, 0.16); color: var(--clr-success); }
+.ph-pill--accent { background: var(--clr-accent-dim); color: var(--clr-accent-text); }
+
+/* ----- GROUPED LIST (GipsiSheetGroup) ------------------------------- */
+.ph-group { border-radius: 14px; background: var(--clr-surface); overflow: hidden; }
+
+.ph-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 7px 11px;
+  font-size: 11.5px;
+}
+.ph-row + .ph-row { box-shadow: inset 44px 0.5px 0 var(--clr-surface), inset 0 0.5px 0 var(--clr-border); }
+.ph-row__main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ph-row__main b { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-row__main small { font-size: 9.5px; font-weight: 500; color: var(--clr-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-row__end { font-size: 11px; font-weight: 700; color: var(--clr-text-2); white-space: nowrap; }
+.ph-row__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-accent-dim);
+  color: var(--clr-accent-text);
+}
+.ph-row__icon .material-symbols-rounded { font-size: 16px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+.ph-chev { font-size: 16px !important; color: var(--clr-text-3); }
+
+.ph-card { border-radius: 16px; background: var(--clr-surface); padding: 12px; }
+
+/* ----- BUTTONS ------------------------------------------------------ */
+.ph-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  background: var(--clr-field);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ph-btn--primary { background: var(--clr-accent); color: var(--clr-on-accent); }
+.ph-btn--big { height: 42px; border-radius: 22px; font-size: 12.5px; }
+
+/* ----- BOOKING CARD (booking_card.dart) ---------------------------- */
+.ph-bk {
+  display: flex;
+  align-items: stretch;
+  border-radius: 18px;
+  background: var(--clr-surface);
+  overflow: hidden;
+}
+
+.ph-bk + .ph-bk { margin-top: 8px; }
+
+.ph-bk__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 9px 11px; }
+.ph-bk__time { width: 38px; flex-shrink: 0; display: flex; flex-direction: column; }
+.ph-bk__time b { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ph-bk__time small { font-size: 9px; font-weight: 700; color: var(--clr-text-2); }
+.ph-bk__body { min-width: 0; display: flex; flex-direction: column; }
+.ph-bk__body b { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-bk__body span { font-size: 11px; font-weight: 500; color: var(--clr-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-bk__meta { display: flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 700; color: var(--clr-text-2); }
+.ph-bk__meta .material-symbols-rounded { font-size: 10px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+.ph-bk__meta .material-symbols-rounded + .material-symbols-rounded { margin-left: 5px; }
+
+/* The coloured strip on the right: the state AND the action, in one control. */
+.ph-bk__state {
+  position: relative;
+  width: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #11150F;
+  background: var(--state, var(--clr-success));
+}
+.ph-bk__state .material-symbols-rounded { font-size: 18px; font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 20; }
+
+.ph-bk__state[data-state='pendiente'] { --state: var(--clr-warn); }
+.ph-bk__state[data-state='confirmada'] { --state: var(--clr-success); }
+.ph-bk__state[data-state='cobrada'] { --state: var(--clr-success); }
+.ph-bk__state[data-state='porCobrar'] { --state: var(--clr-accent); color: var(--clr-on-accent); }
+.ph-bk__state[data-state='pasada'] { --state: var(--clr-grey-state); }
+.ph-bk__state[data-state='cancelada'],
+.ph-bk__state[data-state='noVino'] { --state: var(--clr-danger); }
+
+/* A pending booking that gets confirmed while you watch. */
+.ph-bk--cycle .ph-bk__state { animation: ph-strip 6s ease-in-out infinite; }
+.ph-bk--cycle .ph-bk__icon { animation: ph-icon-out 6s ease-in-out infinite; }
+.ph-bk--cycle .ph-bk__icon--next { position: absolute; animation: ph-icon-in 6s ease-in-out infinite; }
+
+@keyframes ph-strip {
+  0%, 45% { background: var(--clr-warn); }
+  52%, 94% { background: var(--clr-success); }
+  100% { background: var(--clr-warn); }
+}
+@keyframes ph-icon-out {
+  0%, 45% { opacity: 1; transform: scale(1); }
+  50%, 95% { opacity: 0; transform: scale(0.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ph-icon-in {
+  0%, 46% { opacity: 0; transform: scale(0.3); }
+  54% { opacity: 1; transform: scale(1.25); }
+  60%, 94% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+
+/* ----- TAB BAR (the Android blob bar of GipsiAdaptiveTabBar) -------- */
+.ph-tabs {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 14px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 54px;
+  padding: 0 4px;
+  border-radius: 28px;
+  background: var(--clr-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), inset 0 0 0 0.5px var(--clr-hairline);
+}
+.ph-tabs__blob {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 4px;
+  width: calc((100% - 8px) / 4);
+  padding: 0 6px;
+  transform: translateX(calc(var(--at, 0) * 100%));
+  transition: transform 420ms var(--ease-out);
+}
+.ph-tabs__blob::before { content: ''; display: block; height: 100%; border-radius: 22px; background: var(--clr-accent); }
+.ph-tabs span.material-symbols-rounded { position: relative; z-index: 1; align-self: center; justify-self: center; font-size: 21px; color: var(--clr-text-2); }
+.ph-tabs span.ph-tabs__on { color: var(--clr-on-accent); font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+.ph-badge {
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  left: calc(62.5% + 4px);
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--clr-danger);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 15px;
+  text-align: center;
+}
+
+/* ----- FLOATING GLASS CARDS (hero) --------------------------------- */
+.ph-float {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 20px;
+  background: var(--clr-nav-bg-solid);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: var(--shadow-pop), inset 0 0 0 0.5px var(--clr-hairline);
+  font-family: var(--ff);
+  color: var(--clr-text);
+  white-space: nowrap;
+}
+.ph-float__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--clr-accent);
+  color: var(--clr-on-accent);
+}
+.ph-float__icon .material-symbols-rounded { font-size: 20px; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+.ph-float__icon--success { background: var(--clr-success); color: #11150F; }
+.ph-float__icon--warn { background: var(--clr-warn); color: #11150F; }
+.ph-float__icon--biz { background: var(--clr-biz); color: #1E242A; }
+.ph-float__text { display: flex; flex-direction: column; line-height: 1.25; }
+.ph-float__text small { font-size: 11px; font-weight: 600; color: var(--clr-text-2); }
+.ph-float__text b { font-size: 13.5px; font-weight: 700; }
+.ph-float__stars { color: var(--clr-star); letter-spacing: 1px; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-bk--cycle .ph-bk__state,
+  .ph-bk--cycle .ph-bk__icon,
+  .ph-bk--cycle .ph-bk__icon--next { animation: none; }
+  .ph-bk--cycle .ph-bk__icon--next { display: none; }
+}

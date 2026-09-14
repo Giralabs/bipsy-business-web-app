@@ -1,0 +1,73 @@
+:host { display: block; }
+
+.jump {
+  position: sticky;
+  top: 72px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-block: 12px;
+  scrollbar-width: none;
+}
+.jump::-webkit-scrollbar { display: none; }
+
+.jump__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 16px 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--clr-nav-bg-solid);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 0 0 0.5px var(--clr-hairline);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.jump__chip .material-symbols-rounded { font-size: 18px; color: var(--clr-accent-text); }
+.jump__chip:hover { background: var(--clr-accent); color: var(--clr-on-accent); }
+.jump__chip:hover .material-symbols-rounded { color: inherit; }
+
+.group__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: start;
+}
+
+.group__grid--flip .group__intro { order: 2; }
+
+.group__intro { position: sticky; top: 140px; }
+.group__title { margin-top: 16px; }
+.group__intro .lead { margin-top: 14px; }
+.group__art { margin-top: 28px; max-width: 320px; }
+
+.group__items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.group__items > .feat:only-child,
+.group__items > .feat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.feat { display: flex; flex-direction: column; gap: 10px; min-height: 260px; }
+.feat__top { display: flex; align-items: center; gap: 10px; }
+.feat__go { margin-left: auto; color: var(--clr-text-3); transition: transform 500ms var(--ease-back), color var(--dur-fast) ease; }
+.feat:hover .feat__go { transform: translate(4px, -4px); color: var(--clr-text); }
+.feat__name { margin-top: 8px; }
+.feat__facts { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 12px; }
+.feat__facts .pill { background: var(--clr-field); color: var(--clr-text-2); font-weight: 700; }
+
+@media (max-width: 960px) {
+  .group__grid { grid-template-columns: 1fr; }
+  .group__grid--flip .group__intro { order: 0; }
+  .group__intro { position: static; }
+  .group__art { max-width: 240px; }
+}
+
+@media (max-width: 620px) {
+  .group__items { grid-template-columns: 1fr; }
+  .jump { top: 64px; }
+}
