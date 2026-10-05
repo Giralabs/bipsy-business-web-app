@@ -32,7 +32,12 @@ interface Known {
   message: string | null;
 }
 
-const OPEN: Known = { maintenance: false, bypass: false, message: null };
+/**
+ * Closed to the public. It is where the site starts and where it goes back to
+ * whenever the server cannot be asked: while the backend only runs on the
+ * team's machines, «nobody answers» means «this visitor is not the team».
+ */
+const CLOSED: Known = { maintenance: true, bypass: false, message: null };
 
 /** The last answer of the server, so a reload starts from it. */
 const STATE_KEY = 'bipsy.maintenance.state';
@@ -55,12 +60,13 @@ const MAX_MISSES = 3;
  * Whether the web is closed for maintenance, and whether this browser is let
  * in anyway.
  *
- * The rule is FAIL OPEN: the server is the only one that can close the site,
- * and when it cannot be asked (the API on Render wakes up slowly, or it is an
- * older backend without the endpoint) the site works as always. Nothing here
- * waits for the answer before painting: the page starts from the last answer
- * remembered in `localStorage` —so a reload during maintenance does not flash
- * the real site— and the server's answer replaces it as soon as it arrives.
+ * The rule is FAIL CLOSED: the site is in maintenance until the server says
+ * otherwise, and whenever it cannot be asked. The backend is not hosted yet —
+ * it runs on the team's machines — so for the public there is nobody to ask
+ * and the maintenance page is all they see; the team, with the backend
+ * running, gets the real answer and enters through /admin with the password.
+ * The page starts from the last answer remembered in `localStorage` and the
+ * server's answer replaces it as soon as it arrives.
  *
  * Only the web is gated. The app keeps working during maintenance.
  */
@@ -209,12 +215,9 @@ export class MaintenanceService {
   }
 
   /**
-   * No usable answer. The site opens — unless the server itself confirmed the
-   * maintenance a moment ago and this is only a call that got lost: flapping
-   * between the maintenance page and the site on every hiccup (the backend
-   * restarts during a deploy, which is exactly when maintenance is on) would
-   * be worse than holding the page for a couple of minutes. An answer that is
-   * a plain «no» (404 on a backend without the endpoint) opens at once.
+   * No usable answer: the site closes. The one exception is a call that got
+   * lost right after the server did answer — then what it said is kept for a
+   * couple of tries, so the team is not thrown out on every hiccup.
    */
   private missed(cause: unknown): void {
     this.lastCheckFailed.set(true);
@@ -227,7 +230,7 @@ export class MaintenanceService {
 
     this.confirmed = false;
     this.misses = 0;
-    this.set(OPEN);
+    this.set({ ...CLOSED, message: this.known().message });
   }
 
   private set(next: Known): void {
@@ -270,15 +273,15 @@ export class MaintenanceService {
 function readKnown(): Known {
   try {
     const raw = localStorage.getItem(STATE_KEY);
-    if (!raw) return OPEN;
+    if (!raw) return CLOSED;
     const value = JSON.parse(raw) as Partial<Known> | null;
-    if (value?.maintenance !== true) return OPEN;
+    if (value?.maintenance !== true) return CLOSED;
     return {
       maintenance: true,
       bypass: value.bypass === true,
       message: typeof value.message === 'string' ? value.message : null,
     };
   } catch {
-    return OPEN;
+    return CLOSED;
   }
 }
