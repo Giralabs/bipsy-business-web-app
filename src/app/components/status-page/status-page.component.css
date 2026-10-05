@@ -44,6 +44,12 @@
 /* The artwork is a full-body render, much taller than wide. */
 .status__art { max-width: 280px; width: 100%; justify-self: center; animation: float 7s ease-in-out infinite; }
 
+/* A rig moves its own limbs, so the whole figure stays put. It keeps the 3:5
+   box the flat render had: the layers are 720:1231, a shade narrower, and sit
+   centred in it exactly where `object-fit: contain` put the still. */
+.status__art--rig { aspect-ratio: 3 / 5; animation: none; }
+.status__art--rig app-bip-rig { width: calc(100% * (720 / 1231) / (3 / 5)); margin-inline: auto; }
+
 .status__copy { animation: status-in 800ms var(--ease-out) both; }
 @keyframes status-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 

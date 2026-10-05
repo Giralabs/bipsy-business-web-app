@@ -216,6 +216,53 @@ const FIGURES = {
       },
     ],
   },
+
+  // The worker: hi-vis vest, a wrench in one hand, thumb up with the other.
+  // The vest is worn over the jacket and hides both shoulders, so each sleeve
+  // meets the body along the vest's edge instead of at an armpit. The capsules
+  // stop about 16 px short of that edge: the strip of sleeve left on the body
+  // is what the reconstruction grows from, so it comes out black, and neither
+  // the yellow nor the grey bands are ever inside a moving layer.
+  'mb-17': {
+    source: 'MB-17',
+    // Only as wide as the chin's contact with the collar. Past x=632 there is
+    // open background between the head and the vest's shoulder, and a tab
+    // reaching in there rides up with the head as a grey fringe on the yellow.
+    tab: { x0: 384, x1: 634, bottom: 880 },
+    // Both forearms are held out in front of the background; only the pixels
+    // beside the vest have any body behind them.
+    fillReach: 26,
+    arms: [
+      {
+        // Pivots halfway down the seam with the vest rather than on the
+        // shoulder, which is under the vest anyway: the seam is 180 px long,
+        // and turned from its top end the bottom end would travel twice as far.
+        key: 'arm-wrench', pivot: [356, 890],
+        chain: [[332, 862, 28], [318, 930, 46], [308, 988, 52], [250, 1014, 58],
+                [188, 992, 60], [200, 900, 60]],
+        fabric: 'any',
+        // The wrench is steel on a transparent background, the same greys as
+        // the reflective bands, so it is taken by its outline like MB-15's
+        // newspaper. Loose everywhere except beside the face, which the screw
+        // knob comes within 11 px of: there the outline runs down the middle
+        // of the gap.
+        take: [{
+          poly: [[118, 574], [152, 576], [188, 598], [211, 636], [211, 668], [199, 692],
+                 [199, 742], [214, 782], [236, 814], [290, 925], [322, 1005], [340, 1040],
+                 [341, 1066], [330, 1088], [308, 1097], [282, 1094], [262, 1076],
+                 [130, 1000], [130, 830], [155, 815], [142, 775], [120, 752], [90, 738],
+                 [60, 722], [44, 700], [43, 650], [50, 625], [62, 602], [100, 590]],
+          test: 'any',
+        }],
+      },
+      {
+        key: 'arm-thumb', pivot: [716, 890],
+        chain: [[738, 852, 26], [750, 930, 24], [764, 990, 32], [808, 992, 60],
+                [850, 975, 64], [838, 900, 46]],
+        fabric: 'any',
+      },
+    ],
+  },
 };
 
 // ---------------------------------------------------------------------------

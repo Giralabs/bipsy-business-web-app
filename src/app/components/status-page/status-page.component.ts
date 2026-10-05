@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, booleanAttribute } from '@angular/core';
+import { BipRigComponent } from '../bip-rig/bip-rig.component';
+import { BIP_RIGS } from '../bip-rig/bip-rigs.data';
 import { BipSlotComponent } from '../bip-slot/bip-slot.component';
 
 /**
@@ -14,7 +16,7 @@ import { BipSlotComponent } from '../bip-slot/bip-slot.component';
 @Component({
   selector: 'app-status-page',
   standalone: true,
-  imports: [BipSlotComponent],
+  imports: [BipRigComponent, BipSlotComponent],
   templateUrl: './status-page.component.html',
   styleUrl: './status-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +25,16 @@ export class StatusPageComponent {
   /** Mr. Bip illustration (`public/mr_bip/<code>.webp`) and what he is doing in it. */
   @Input({ required: true }) bip!: string;
   @Input({ required: true }) pose!: string;
+
+  /**
+   * The animated cut-up of `bip`, when there is one; otherwise the flat render
+   * is shown. Same rule as the access pages: a code gets its animation here
+   * the moment `scripts/build-bip-rigs.mjs` learns to cut it.
+   */
+  get rig(): string | null {
+    const name = this.bip.toLowerCase();
+    return BIP_RIGS[name] ? name : null;
+  }
 
   /** Material symbol of the eyebrow. */
   @Input() icon = 'info';

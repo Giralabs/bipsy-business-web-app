@@ -13,8 +13,12 @@
   }
 
   <div class="status__inner">
-    <div class="status__art">
-      <app-bip-slot [code]="bip" [pose]="pose" ratio="3 / 5" />
+    <div class="status__art" [class.status__art--rig]="rig">
+      @if (rig; as name) {
+        <app-bip-rig [rig]="name" [label]="'Mr. Bip ' + pose" />
+      } @else {
+        <app-bip-slot [code]="bip" [pose]="pose" ratio="3 / 5" />
+      }
     </div>
 
     <div class="status__copy">

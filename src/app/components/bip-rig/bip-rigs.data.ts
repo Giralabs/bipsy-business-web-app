@@ -144,6 +144,28 @@ const MB_15: BipRig = {
   ],
 };
 
+/**
+ * MB-17: the worker — works a wrench with one hand, thumb up with the other.
+ *
+ * The hi-vis vest covers both shoulders, so each arm turns on the middle of
+ * the seam where its sleeve meets the vest. The head turns on a point inside
+ * the collar, for the same reason as MB-05: no neck, so a pivot on the chin
+ * would lift the jaw off the shoulders.
+ */
+const MB_17: BipRig = {
+  name: 'mb-17',
+  width: 720,
+  height: 1231,
+  aspect: '720 / 1231',
+  label: 'Mr. Bip con chaleco reflectante, apretando con una llave inglesa y con el pulgar arriba',
+  layers: [
+    { file: 'head', origin: '50.83% 51.9%' },
+    { file: 'body', origin: '50% 100%' },
+    { file: 'arm-wrench', origin: '37.12% 54.30%' },
+    { file: 'arm-thumb', origin: '74.66% 54.30%' },
+  ],
+};
+
 export const BIP_RIGS: Readonly<Record<string, BipRig>> = {
   'mb-00': MB_00,
   'mb-03': MB_03,
@@ -151,6 +173,7 @@ export const BIP_RIGS: Readonly<Record<string, BipRig>> = {
   'mb-06': MB_06,
   'mb-08': MB_08,
   'mb-15': MB_15,
+  'mb-17': MB_17,
 };
 
 /**
@@ -161,6 +184,6 @@ export const BIP_RIGS: Readonly<Record<string, BipRig>> = {
  * however many times they are regenerated. This is what makes a rebuilt rig
  * actually reach the page.
  */
-export const BIP_RIG_VERSION = 6;
+export const BIP_RIG_VERSION = 7;
 
 export type BipRigName = keyof typeof BIP_RIGS;

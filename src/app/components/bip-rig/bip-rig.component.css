@@ -30,7 +30,9 @@
 .rig--mb-05 .rig__head,
 .rig--mb-05 .rig__arm-left, .rig--mb-05 .rig__arm-right,
 .rig--mb-06 .rig__head, .rig--mb-06 .rig__arms-piggy,
-.rig--mb-08 .rig__arm-gesture { will-change: transform; }
+.rig--mb-08 .rig__arm-gesture,
+.rig--mb-17 .rig__head,
+.rig--mb-17 .rig__arm-wrench, .rig--mb-17 .rig__arm-thumb { will-change: transform; }
 
 /* Whole-body movement rides on the wrapper, so the head and the arms keep
    their joints exactly where the body left them. */
@@ -253,6 +255,50 @@
   64%  { transform: translateY(0.02%) rotate(0.1deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
   80%  { transform: translateY(-0.06%) rotate(-0.26deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
   100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* ===== MB-17 · works the wrench, thumb up ============================== */
+/* No breath and no sway on this one: it stands where a still picture used to
+   float up and down, and the brief was limbs, not the whole figure. Three
+   loops of different lengths, so the pose never repeats exactly.
+
+   The wrench, 5.6 s: winds back a touch, pulls round, springs back a little
+   the way a ratchet gives, and pulls again. Negative is the pull — it swings
+   the jaws away from his face. Positive is kept under 1.5°: the adjusting
+   screw sits 11 px from his cheek and anything more puts it on top of it.
+   The thumb, 7.2 s: still for half the loop, then one bump up and a smaller
+   echo. The head, 6.4 s, leans a degree either way. */
+.rig--mb-17 .rig__arm-wrench { animation: bip-wrench 5.6s infinite; }
+.rig--mb-17 .rig__arm-thumb  { animation: bip-thumb 7.2s infinite; }
+.rig--mb-17 .rig__head       { animation: bip-worker-head 6.4s ease-in-out infinite; }
+
+@keyframes bip-wrench {
+  0%   { transform: rotate(0deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  10%  { transform: rotate(1.2deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1); }
+  25%  { transform: rotate(-3deg);    animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  31%  { transform: rotate(-2.3deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  40%  { transform: rotate(-2.5deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  53%  { transform: rotate(1deg);     animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1); }
+  67%  { transform: rotate(-2.6deg);  animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  73%  { transform: rotate(-2deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  88%  { transform: rotate(0.4deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes bip-thumb {
+  0%, 52% { transform: rotate(0deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  60%  { transform: rotate(0.8deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1); }
+  69%  { transform: rotate(-3.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  77%  { transform: rotate(-1.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  85%  { transform: rotate(-2.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+/* Turn only, no lift, as on MB-05: see the note in bip-rigs.data.ts. */
+@keyframes bip-worker-head {
+  0%   { transform: rotate(0deg); }
+  24%  { transform: rotate(1.1deg); }
+  48%  { transform: rotate(0.2deg); }
+  74%  { transform: rotate(-1.1deg); }
+  100% { transform: rotate(0deg); }
 }
 
 /* Off screen it is not worth a compositor frame. */
