@@ -1,0 +1,104 @@
+:host { display: contents; }
+
+.nb-intro { margin-bottom: 20px; font-size: 0.9375rem; color: var(--clr-text-2); line-height: 1.55; }
+
+.nb-title {
+  margin: 26px 0 14px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+
+/* ----- CLIENTE --------------------------------------------------------- */
+
+.nb-section__head { display: flex; align-items: center; justify-content: space-between; min-height: 38px; }
+.nb-section__head .pn-field__label { margin-bottom: 0; }
+
+/* La agenda es una lista telefónica: corre por dentro para que el resto del
+   formulario no se vaya abajo con treinta fichas. */
+.nb-people {
+  max-height: 232px;
+  margin-top: 10px;
+  padding: 6px;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-card);
+  overflow-y: auto;
+}
+.nb-people__wait { height: 120px; border-radius: 12px; }
+.nb-people__msg { padding: 22px 14px; text-align: center; font-size: 0.875rem; color: var(--clr-text-2); }
+
+.nb-person { display: flex; align-items: center; gap: 6px; border-radius: 12px; }
+.nb-person:hover:not(.nb-person--off) { background: var(--pn-field); }
+.nb-person__pick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nb-person__pick:disabled { cursor: default; }
+.nb-person--off .nb-person__pick { opacity: 0.55; }
+.nb-person__main { flex: 1; min-width: 0; }
+.nb-person__name { display: block; font-size: 0.9375rem; font-weight: 600; }
+.nb-person__sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Ámbar solo cuando falta algo de verdad: que le llegue por correo no es un
+   problema, es cómo funciona. */
+.nb-person__sub--warn { color: var(--clr-warn-text); }
+
+.nb-chosen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 10px 10px 16px;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-card);
+}
+
+.nb-new { margin-top: 10px; padding: 16px; border-radius: var(--pn-radius-row); background: var(--pn-card); }
+.nb-new .pn-field { margin-bottom: 14px; }
+.nb-new__pair, .nb-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 14px; }
+.nb-new__error { margin: 0 0 14px; }
+.nb-new__actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.nb-invite { margin-top: 10px; }
+
+/* ----- HORA ------------------------------------------------------------ */
+
+.nb-slots__group {
+  margin: 12px 0 8px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+.nb-slots__group:first-of-type { margin-top: 0; }
+/* Celdas iguales y no pastillas a su ancho: se lee como una tabla de horas. */
+.nb-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+.nb-slot { justify-content: center; padding-inline: 0; }
+.nb-slots__wait { height: 88px; border-radius: var(--pn-radius-row); }
+.nb-slots__msg { font-size: 0.875rem; color: var(--clr-text-2); line-height: 1.5; }
+
+.nb-notes { min-height: 76px; }
+
+.nb-error { margin: 0 0 14px; }
+.nb-foot { font-size: 0.8125rem; color: var(--clr-text-3); line-height: 1.55; text-align: center; }

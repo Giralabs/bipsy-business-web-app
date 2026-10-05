@@ -1,0 +1,119 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Lo que dicen de ti tus clientes</p>
+      <h1>Reseñas</h1>
+    </div>
+  </div>
+
+  @if (store.count() === 0) {
+    <section class="pn-card">
+      <pn-empty icon="reviews" title="Sin reseñas todavía"
+                text="Aquí aparecerán las valoraciones que dejen tus clientes cuando terminen una cita." />
+    </section>
+  } @else {
+    <div class="pn-grid">
+      <section class="pn-card pn-col-4">
+        <div class="rs-avg">
+          <span class="rs-avg__value pn-tabular">{{ rating(store.average()) }}</span>
+          <span class="rs-avg__stars" aria-hidden="true">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <span class="material-symbols-rounded fill"
+                    [style.opacity]="(store.average() ?? 0) >= star - 0.5 ? 1 : 0.22">star</span>
+            }
+          </span>
+          <span class="pn-muted">{{ count(store.count(), 'reseña', 'reseñas') }}</span>
+        </div>
+
+        <div class="rs-bars">
+          @for (row of store.breakdown(); track row.stars) {
+            <div class="rs-bar">
+              <span class="rs-bar__label pn-tabular">{{ row.stars }}</span>
+              <span class="material-symbols-rounded fill rs-bar__star">star</span>
+              <span class="pn-bar"><span class="pn-bar__fill" [style.width.%]="barWidth(row.count)"></span></span>
+              <span class="rs-bar__count pn-tabular">{{ row.count }}</span>
+            </div>
+          }
+        </div>
+
+        @if (canReply() && store.unanswered().length > 0) {
+          <p class="rs-todo">
+            Te quedan {{ count(store.unanswered().length, 'reseña por responder', 'reseñas por responder') }}.
+          </p>
+        }
+      </section>
+
+      <section class="pn-card pn-col-8">
+        @for (review of visible(); track review.id) {
+          <article class="rs">
+            <pn-avatar [name]="review.customerName" [url]="review.customerProfileImageUrl" />
+            <div class="rs__body">
+              <div class="rs__head">
+                <span class="rs__name">{{ review.customerName }}</span>
+                <span class="rs__stars" aria-hidden="true">
+                  @for (star of [1, 2, 3, 4, 5]; track star) {
+                    <span class="material-symbols-rounded fill" [style.opacity]="review.rating >= star ? 1 : 0.2">star</span>
+                  }
+                </span>
+              </div>
+              <p class="rs__meta">{{ review.serviceName }} · {{ longDate(toDate(review.createdAt)) }}</p>
+              @if (review.comment) {
+                <p class="rs__text">{{ review.comment }}</p>
+              }
+
+              @if (review.reply) {
+                <div class="rs__reply">
+                  <span class="material-symbols-rounded">reply</span>
+                  <div>
+                    <strong>{{ canReply() ? 'Tu respuesta' : 'Respuesta del negocio' }}</strong>
+                    <p>{{ review.reply }}</p>
+                  </div>
+                </div>
+                @if (canReply()) {
+                  <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="startReply(review)">
+                    Editar respuesta
+                  </button>
+                }
+              } @else if (canReply()) {
+                <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm rs__answer"
+                        (click)="startReply(review)">
+                  <span class="material-symbols-rounded">reply</span>Responder
+                </button>
+              }
+            </div>
+          </article>
+        }
+
+        @if (hidden() > 0) {
+          <button type="button" class="pn-btn pn-btn--secondary pn-btn--block rs-more" (click)="showMore()">
+            Ver más ({{ hidden() }})
+          </button>
+        }
+      </section>
+    </div>
+  }
+</main>
+
+@if (replying(); as review) {
+  <pn-dialog title="Responder a la reseña" (closed)="replying.set(null)">
+    <p class="pn-dim rs-quote">«{{ review.comment }}»</p>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Tu respuesta</span>
+      <textarea class="pn-textarea" rows="4" name="reply" [(ngModel)]="draft"
+                placeholder="Gracias por venir…"></textarea>
+      <span class="pn-field__hint">La ve todo el que mire tu ficha, no solo quien escribió la reseña.</span>
+    </label>
+
+    @if (review.reply) {
+      <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="removeReply(review)">
+        Eliminar mi respuesta
+      </button>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="replying.set(null)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="save()">Publicar</button>
+    </ng-container>
+  </pn-dialog>
+}

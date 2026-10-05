@@ -1,0 +1,563 @@
+/* ════════════════════════════════════════════════════════════════════
+   LA FICHA, TAL CUAL LA PINTA LA APP DE CLIENTE
+
+   Port de `bipsy-mobile-apps/packages/gipsi_shared_ui/lib/src/business/`:
+     · gipsi_business_detail_body.dart      → cabecera, secciones, divisores
+     · gipsi_service_row.dart               → la fila de servicio
+     · gipsi_review_card.dart               → la tarjeta de reseña
+     · gipsi_portfolio_strip.dart           → la tira de fotos
+     · gipsi_policies_section.dart          → las normas
+     · gipsi_rating.dart                    → estrella, media y recuento
+     · gipsi_business_schedule_sheet.dart   → la hoja de horario
+   con los tokens de `lib/src/tokens/{spacing,radii,radii,colors}.dart` y
+   `lib/src/theme/gipsi_typography.dart`.
+
+   Un píxel lógico de Flutter es un píxel de CSS, así que los números son
+   LITERALMENTE los del widget: no hay escala ni aproximación. `letterSpacing`
+   de Flutter va en píxeles absolutos, no en «em».
+
+   El marco reutiliza `.ph`, `.ph__screen`, `.ph__island` y `.ph__status` de
+   `src/styles/app-mockup.css`, redimensionados al teléfono de verdad.
+   ════════════════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+/* ----- TOKENS DEL TEMA «LIFT» DE LA APP -----------------------------
+   La app de cliente usa GipsiSurfaceMode.lift: la tarjeta se separa por ser
+   más clara que el suelo, sin borde ni sombra. Los del panel coinciden con
+   los de la app salvo los dos que se declaran aquí. */
+.vpa-dev {
+  --vpa-bg: var(--clr-base);              /* liftBackground */
+  --vpa-card: rgba(255, 255, 255, 0.05);  /* GipsiColors.cardFill(dark) */
+  --vpa-primary: var(--clr-accent);       /* colorScheme.primary */
+  --vpa-ink: var(--clr-text);             /* onSurface */
+  --vpa-ink-2: var(--clr-text-2);         /* onSurfaceVariant */
+  --vpa-highest: #333A41;                 /* surfaceContainerHighest */
+  --vpa-line: rgba(255, 255, 255, 0.06);  /* DividerTheme */
+  --vpa-avatar: rgba(192, 238, 211, 0.15);
+  --vpa-avatar-ink: var(--clr-accent);
+  --vpa-reply: rgba(255, 255, 255, 0.05);
+  --vpa-chev: rgba(235, 235, 245, 0.3);   /* CupertinoColors.tertiaryLabel */
+  --vpa-sheet-bg: #1C1C1E;                /* systemGroupedBackground, elevado */
+  --vpa-sheet-card: #2C2C2E;              /* secondarySystemGroupedBackground */
+  --vpa-sheet-sep: rgba(84, 84, 88, 0.65);
+  --vpa-sheet-label: #FFFFFF;
+  --vpa-sheet-label-2: rgba(235, 235, 245, 0.6);
+  --vpa-star-off: #83A38E;                /* GipsiColors.secondary */
+  --vpa-star-on: #E8B657;                 /* GipsiColors.warning */
+}
+
+@media (prefers-color-scheme: light) {
+  .vpa-dev {
+    --vpa-card: #FFFFFF;
+    --vpa-highest: #F0F3F1;
+    --vpa-line: #E4E8E6;
+    --vpa-avatar: rgba(68, 84, 75, 0.15);
+    --vpa-avatar-ink: #44544B;
+    --vpa-reply: #F4F6F5;
+    --vpa-chev: rgba(60, 60, 67, 0.3);
+    --vpa-sheet-bg: #F2F2F7;
+    --vpa-sheet-card: #FFFFFF;
+    --vpa-sheet-sep: rgba(60, 60, 67, 0.29);
+    --vpa-sheet-label: #000000;
+    --vpa-sheet-label-2: rgba(60, 60, 67, 0.6);
+  }
+}
+
+/* ----- EL TELÉFONO --------------------------------------------------- */
+.vpa-dev.ph {
+  width: calc(var(--vpa-w) + var(--vpa-bezel) * 2);
+  aspect-ratio: auto;
+  height: calc(var(--vpa-h) + var(--vpa-bezel) * 2);
+  padding: var(--vpa-bezel);
+  border-radius: calc(var(--vpa-radius) + var(--vpa-bezel));
+  max-width: none;
+}
+
+.vpa-screen.ph__screen {
+  border-radius: var(--vpa-radius);
+  background: var(--vpa-bg);
+  color: var(--vpa-ink);
+  font-family: var(--ff);
+}
+
+/* La isla del iPhone, a tamaño real (la del kit está a escala 0,78). */
+.vpa-dev .ph__island { top: 11px; width: 126px; height: 37px; border-radius: 19px; }
+
+/* El agujero de la cámara del Android: un punto, arriba y centrado. */
+.vpa-punch {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  z-index: 5;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #000;
+  transform: translateX(-50%);
+}
+
+/* ----- BARRA DE ESTADO ----------------------------------------------- */
+.vpa-status.ph__status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  height: var(--vpa-safe-top);
+  padding: 0 22px 0 30px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  pointer-events: none;
+  transition: color 160ms ease;
+}
+.vpa-status.ph__status .material-symbols-rounded { font-size: 16px; }
+
+.vpa-dev--android .vpa-status.ph__status {
+  padding: 0 16px;
+  font-size: 13px;
+}
+.vpa-dev--android .vpa-status.ph__status .material-symbols-rounded { font-size: 14px; }
+
+/* En cuanto la portada sale por arriba, el reloj vuelve al color del tema. */
+.vpa-status--dark { color: var(--vpa-ink); }
+
+/* ----- BOTONES FLOTANTES (GipsiCoverIconButton) ---------------------- */
+.vpa-top {
+  position: absolute;
+  top: var(--vpa-safe-top);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.vpa-top__spacer { flex: 1; }
+
+.vpa-top__btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 8px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  cursor: pointer;
+}
+.vpa-top__btn .material-symbols-rounded { font-size: 20px; }
+
+/* ----- EL SCROLL ------------------------------------------------------ */
+.vpa-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.vpa-scroll::-webkit-scrollbar { display: none; }
+
+/* Portada a sangre, 16:9 y sin degradado: se ve tal cual la subió el
+   negocio. El color de relleno es GipsiColors.contrast. */
+.vpa-cover {
+  height: var(--vpa-cover-h);
+  background: #44544B;
+}
+.vpa-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ----- CABECERA ------------------------------------------------------ */
+/* Padding.fromLTRB(20, 20, 20, 12) */
+.vpa-head { padding: 20px 20px 12px; }
+
+.vpa-name { display: flex; align-items: center; }
+.vpa-logo { width: 52px; height: 52px; flex: none; margin-right: 12px; border-radius: 50%; object-fit: cover; }
+
+/* headlineMedium: Bricolage 24 / w700 / -0.6px / 1.15 */
+.vpa-title {
+  font-family: var(--ff-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  color: var(--vpa-ink);
+}
+
+.vpa-meta { display: flex; align-items: center; margin-top: 8px; min-width: 0; }
+
+/* GipsiRating */
+.vpa-rating { display: inline-flex; align-items: center; flex: none; }
+.vpa-rating__star { color: #FFB020; font-size: 16px; }
+.vpa-rating b { margin-left: 2px; font-size: 13px; font-weight: 800; line-height: 1.4; color: var(--vpa-ink); }
+.vpa-rating small { margin-left: 4px; font-size: 12px; font-weight: 500; color: var(--vpa-ink-2); }
+
+.vpa-rating--lg .vpa-rating__star { font-size: 20px; }
+.vpa-rating--lg b { font-size: 15px; }
+.vpa-rating--lg small { font-size: 14px; }
+
+/* `emptyLabel` por defecto de GipsiRating. */
+.vpa-rating__empty { flex: none; font-size: 15px; font-weight: 500; color: var(--vpa-ink-2); }
+
+.vpa-dot {
+  width: 3px;
+  height: 3px;
+  flex: none;
+  margin: 0 12px;
+  border-radius: 50%;
+  background: var(--vpa-ink-2);
+}
+
+/* _AddressLink: una línea, sin subrayado. Aquí no lleva a Maps, así que va
+   del color del texto y no del acento — es lo que hace la app cuando no hay
+   `onOpenMap`. */
+.vpa-place { display: flex; align-items: center; min-width: 0; color: var(--vpa-ink-2); }
+.vpa-place .material-symbols-rounded { font-size: 14px; margin-right: 2px; flex: none; }
+.vpa-place__text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* bodyLarge con height 1.5 */
+.vpa-desc { margin-top: 16px; font-size: 16px; font-weight: 500; line-height: 1.5; color: var(--vpa-ink); }
+
+/* _InfoActions: fila centrada, botones iguales, 44 de alto mínimo. */
+.vpa-actions { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+
+.vpa-action {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vpa-card);
+  color: var(--vpa-primary);
+  cursor: pointer;
+}
+.vpa-action .material-symbols-rounded { font-size: 22px; }
+
+/* ----- DIVISORES ----------------------------------------------------- */
+.vpa-divider { height: 0.5px; margin: 16px 20px; background: var(--vpa-line); }
+.vpa-divider--xl { margin: 20px; }
+
+/* ----- CABECERA DE SECCIÓN (_SectionHeader) -------------------------- */
+.vpa-section-head {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 20px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.vpa-section-head--plain { padding: 0 20px; cursor: default; }
+
+/* headlineSmall: Bricolage 20 / w700 / -0.4px / 1.2 */
+.vpa-section-head__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--ff-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  color: var(--vpa-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vpa-section-head__more { margin-left: 8px; font-size: 15px; color: var(--vpa-ink-2); }
+
+.vpa-pad { padding: 0 20px; }
+.vpa-list { display: flex; flex-direction: column; gap: 12px; padding: 12px 20px 0; }
+
+/* ----- GALERÍA (GipsiPortfolioStrip) --------------------------------- */
+.vpa-strip {
+  display: flex;
+  gap: 8px;
+  height: 140px;
+  margin-top: 12px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vpa-strip::-webkit-scrollbar { display: none; }
+
+.vpa-shot {
+  flex: none;
+  width: 140px;
+  height: 140px;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--vpa-highest);
+  cursor: pointer;
+}
+.vpa-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ----- SERVICIOS (GipsiServiceRow) -----------------------------------
+   104 de alto, foto cuadrada pegada al borde y un chevrón: el botón
+   «Reservar» ya no existe, toda la tarjeta es el objetivo. */
+.vpa-service {
+  display: flex;
+  align-items: stretch;
+  height: 104px;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--vpa-card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vpa-service__img { width: 104px; height: 104px; flex: none; object-fit: cover; display: block; }
+.vpa-service__img--none {
+  display: grid;
+  place-items: center;
+  background: var(--vpa-highest);
+  color: var(--vpa-primary);
+}
+.vpa-service__img--none .material-symbols-rounded { font-size: 32px; }
+
+.vpa-service__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px;
+}
+
+/* titleSmall: Jakarta 14 / w600 / 1.4, dos líneas como mucho. */
+.vpa-service__name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--vpa-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vpa-service__meta { display: flex; align-items: center; margin-top: 8px; min-width: 0; }
+.vpa-service__meta .material-symbols-rounded { font-size: 12px; color: var(--vpa-ink-2); }
+.vpa-service__dur { margin-left: 4px; font-size: 12px; font-weight: 500; line-height: 1.45; color: var(--vpa-ink-2); }
+.vpa-service__price {
+  margin-left: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--vpa-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vpa-service__chev { align-self: center; margin-right: 12px; font-size: 14px; color: var(--vpa-chev); }
+
+/* ----- RESEÑAS (GipsiReviewCard) ------------------------------------- */
+.vpa-review { border-radius: 28px; overflow: hidden; background: var(--vpa-card); }
+.vpa-review__pad { padding: 16px; }
+.vpa-review__head { display: flex; align-items: flex-start; }
+
+.vpa-review__avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--vpa-avatar);
+  color: var(--vpa-avatar-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+.vpa-review__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.vpa-review__who { flex: 1; min-width: 0; }
+.vpa-review__name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--vpa-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cinco estrellas rellenas: lo que cambia es el color, no el icono. */
+.vpa-review__stars { display: flex; margin-top: 2px; }
+.vpa-review__stars .material-symbols-rounded { font-size: 14px; color: var(--vpa-star-on); }
+.vpa-review__stars .vpa-star--off { color: var(--vpa-star-off); }
+
+.vpa-review__date { margin-left: 8px; font-size: 12px; font-weight: 500; color: var(--vpa-ink-2); white-space: nowrap; }
+
+/* bodyMedium: Jakarta 14 / w500 / 1.55 */
+.vpa-review__text { margin-top: 12px; font-size: 14px; font-weight: 500; line-height: 1.55; color: var(--vpa-ink-2); }
+.vpa-review__pad .vpa-review__text:first-child { margin-top: 0; }
+
+.vpa-reply { padding: 16px; background: var(--vpa-reply); box-shadow: inset 0 0.5px 0 var(--vpa-sheet-sep); }
+/* labelSmall, con el color del acento. */
+.vpa-reply__label { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; line-height: 1.2; color: var(--vpa-primary); }
+.vpa-reply .vpa-review__text { margin-top: 8px; }
+
+/* ----- NORMAS (GipsiPoliciesSection) --------------------------------- */
+.vpa-policies { margin-top: 12px; padding: 16px; border-radius: 28px; background: var(--vpa-card); }
+.vpa-policies__group + .vpa-policies__group { margin-top: 16px; }
+
+.vpa-policies__name {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--vpa-ink);
+}
+.vpa-policies__name .material-symbols-rounded { font-size: 18px; margin-right: 8px; color: var(--vpa-primary); }
+
+.vpa-policy {
+  position: relative;
+  padding-left: 19px;
+  padding-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--vpa-ink-2);
+}
+
+/* Container(5 × 5) con `top: (lineHeight - 5) / 2` = 7.65. */
+.vpa-policy__dot {
+  position: absolute;
+  left: 2px;
+  top: 7.65px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--vpa-ink-2) 60%, transparent);
+}
+
+/* labelLarge con el acento. */
+.vpa-policies__all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 16px;
+  background: none;
+  color: var(--vpa-primary);
+  font-family: var(--ff);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  cursor: pointer;
+}
+.vpa-policies__all .material-symbols-rounded { margin-left: 4px; font-size: 16px; }
+
+/* ----- VACÍOS Y ESQUELETOS ------------------------------------------- */
+/* GipsiEmptyState, aproximado: el widget vive en gipsi_shared_ui. */
+.vpa-empty { padding: 20px; text-align: center; }
+.vpa-empty .material-symbols-rounded { font-size: 40px; color: var(--vpa-ink-2); }
+.vpa-empty__title { margin-top: 8px; font-size: 16px; font-weight: 600; color: var(--vpa-ink); }
+.vpa-empty__text { margin-top: 4px; font-size: 14px; font-weight: 500; line-height: 1.55; color: var(--vpa-ink-2); }
+
+.vpa-skel { border-radius: 24px; }
+.vpa-skel--service { height: 96px; margin-top: 12px; }
+.vpa-skel--review { height: 120px; margin-top: 12px; }
+
+/* `SizedBox(height: GipsiSpacing.huge)` al final del scroll. */
+.vpa-tail { height: 48px; }
+
+/* ----- HOJAS (GipsiSheet) -------------------------------------------- */
+.vpa-sheet-veil { position: absolute; inset: 0; z-index: 8; background: rgba(0, 0, 0, 0.4); }
+
+.vpa-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  max-height: 92%;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--vpa-sheet-radius) var(--vpa-sheet-radius) 0 0;
+  background: var(--vpa-sheet-bg);
+  padding-bottom: var(--vpa-safe-bottom);
+  animation: vpa-sheet-up 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes vpa-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+
+.vpa-sheet__handle {
+  width: 40px;
+  height: 4px;
+  margin: 12px auto 0;
+  border-radius: 999px;
+  background: var(--vpa-sheet-sep);
+}
+
+.vpa-sheet__title {
+  padding: 16px 20px 8px;
+  font-family: var(--ff-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--vpa-sheet-label);
+}
+
+.vpa-sheet__body { padding: 8px 20px 24px; overflow-y: auto; }
+.vpa-sheet__body--list { display: flex; flex-direction: column; gap: 20px; padding-top: 12px; padding-bottom: 32px; }
+.vpa-sheet__body--list .vpa-policies__name { color: var(--vpa-sheet-label); }
+.vpa-sheet__body--list .vpa-policy { color: var(--vpa-sheet-label-2); }
+
+/* Una sola tarjeta con los siete días. */
+.vpa-hours { border-radius: 16px; background: var(--vpa-sheet-card); overflow: hidden; }
+.vpa-hours__row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; font-size: 14px; }
+.vpa-hours__day { flex: 1; color: var(--vpa-sheet-label); font-weight: 400; }
+.vpa-hours__at { text-align: right; white-space: pre-line; color: var(--vpa-sheet-label); font-weight: 400; }
+.vpa-hours__at--closed { color: var(--vpa-sheet-label-2); }
+.vpa-hours__row--today .vpa-hours__day { font-weight: 700; color: var(--vpa-primary); }
+.vpa-hours__row--today .vpa-hours__at { font-weight: 600; }
+.vpa-hours__sep { display: block; height: 0.5px; margin-left: 16px; background: var(--vpa-sheet-sep); }
+
+/* ----- NAVEGACIÓN DEL SISTEMA ---------------------------------------- */
+.vpa-home,
+.vpa-gesture {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* El indicador de inicio del iPhone. */
+.vpa-home { bottom: 8px; width: 139px; height: 5px; background: rgba(255, 255, 255, 0.85); mix-blend-mode: difference; }
+
+/* La barra de gestos de Android. */
+.vpa-gesture { bottom: 9px; width: 108px; height: 4px; background: rgba(255, 255, 255, 0.7); mix-blend-mode: difference; }

@@ -1,0 +1,113 @@
+:host { display: block; }
+
+.sv-warn { margin-bottom: 18px; }
+.sv { padding: 10px; }
+.sv__hint { padding: 6px 10px 12px; font-size: 0.8125rem; }
+
+.sv-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--pn-radius-card);
+  transition: background-color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.sv-row:hover { background: var(--pn-field); }
+.sv-row + .sv-row { box-shadow: inset 0 1px 0 var(--clr-hairline); }
+/* A service that is off keeps its place but stops shouting. */
+.sv-row--off { opacity: 0.5; }
+
+.sv-row__order { display: flex; flex-direction: column; flex: none; }
+.sv-row__order .pn-icon-btn { width: 26px; height: 22px; border-radius: 8px; }
+.sv-row__order .material-symbols-rounded { font-size: 16px; }
+.sv-row__order .pn-icon-btn:disabled { opacity: 0.25; cursor: default; }
+
+.sv-row__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sv-row__photo {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-accent-soft);
+  overflow: hidden;
+}
+.sv-row__photo img { width: 100%; height: 100%; object-fit: cover; }
+.sv-row__photo .material-symbols-rounded { font-size: 28px; color: var(--clr-text-3); }
+
+.sv-row__text { min-width: 0; }
+.sv-row__name { display: block; font-size: 1rem; font-weight: 600; }
+.sv-row__meta { display: block; margin-top: 3px; font-size: 0.8125rem; color: var(--clr-text-3); }
+.sv-row__nostaff { color: var(--clr-warn-text); font-weight: 600; }
+
+.sv-photo { display: block; margin-bottom: 16px; }
+.sv-photo-remove { margin: -8px 0 12px -12px; }
+
+.sv-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+@media (max-width: 560px) { .sv-form-grid { grid-template-columns: 1fr; } }
+
+.sv-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--pn-radius-field);
+  background: var(--pn-field);
+}
+.sv-stepper__value { font-size: 1rem; font-weight: 700; }
+
+/* ----- DÓNDE SE PRESTA ------------------------------------------------ */
+
+.sv-places { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 560px) { .sv-places { grid-template-columns: 1fr; } }
+.sv-place {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-field);
+  color: var(--clr-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease;
+}
+.sv-place:hover { background: var(--pn-field-strong); }
+.sv-place[aria-checked='true'] { background: var(--pn-accent); color: var(--pn-on-accent); }
+.sv-place .material-symbols-rounded { font-size: 22px; }
+.sv-place__title { font-size: 0.9375rem; font-weight: 700; }
+.sv-place__sub { font-size: 0.75rem; line-height: 1.4; opacity: 0.75; }
+.sv-places__hint { margin-bottom: 18px; }
+
+/* The business only attends one way: nothing to choose, so it reads as a
+   field that is off and says where the value comes from. */
+.sv-place-fixed {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 15px 18px;
+  border-radius: var(--pn-radius-field);
+  background: var(--pn-field);
+  color: var(--clr-text-3);
+  font-weight: 500;
+}
+.sv-place-fixed .material-symbols-rounded { font-size: 20px; }

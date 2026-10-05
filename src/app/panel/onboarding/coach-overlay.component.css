@@ -1,0 +1,84 @@
+:host { display: contents; }
+
+.coach {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+
+/* The veil is the shadow of the hole, so there is nothing to keep in sync. */
+.coach__hole {
+  position: absolute;
+  border-radius: 20px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 18px var(--pn-accent-line);
+  border: 2.5px solid var(--pn-accent);
+  transition: top var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1),
+    left var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1),
+    width var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1),
+    height var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1);
+  pointer-events: none;
+}
+
+.coach__veil { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
+
+.coach__card {
+  position: absolute;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  padding: 22px;
+  border-radius: var(--pn-radius-card);
+  background: var(--clr-surface);
+  color: var(--clr-text);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  animation: coach-in var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+
+@keyframes coach-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.coach__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--pn-accent);
+  color: var(--pn-on-accent);
+  font-size: 24px;
+}
+
+.coach__card h2 {
+  font-family: var(--ff-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.coach__card p {
+  margin-top: 8px;
+  font-size: 0.9375rem;
+  color: var(--clr-text-2);
+  line-height: 1.55;
+}
+
+.coach__dots { display: flex; gap: 5px; margin-top: 18px; }
+.coach__dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--pn-subtle);
+  transition: width var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.coach__dots span.on { width: 18px; background: var(--pn-accent); }
+
+.coach__actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.coach__actions--stack { flex-direction: column; align-items: stretch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .coach__hole { transition-duration: 0s; }
+  .coach__card { animation-duration: 0s; }
+}

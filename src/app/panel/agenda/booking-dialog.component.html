@@ -1,0 +1,183 @@
+<pn-dialog [title]="booking.serviceName" (closed)="closed.emit()">
+  <div class="bk-head">
+    <span class="pn-status" [style.background]="'color-mix(in srgb, ' + look.color + ' 18%, transparent)'"
+          [style.color]="look.color">
+      <span class="material-symbols-rounded">{{ look.icon }}</span>
+      {{ look.label }}
+    </span>
+    <p class="bk-when">{{ when }}</p>
+    <p class="bk-range pn-tabular">{{ range }} · {{ length }}</p>
+  </div>
+
+  <div class="pn-group__body bk-rows">
+    <!-- Both, and in this order: who shows up, then the account that booked,
+         which is who everything else is done with. -->
+    <div class="pn-row">
+      <span class="material-symbols-rounded pn-row__icon">person</span>
+      <span class="pn-row__main"><span class="pn-row__title">{{ forSomeoneElse ? 'Para' : 'Cliente' }}</span></span>
+      <span class="pn-row__value">{{ attendee }}</span>
+    </div>
+
+    @if (forSomeoneElse) {
+      <div class="pn-row">
+        <span class="material-symbols-rounded pn-row__icon">account_circle</span>
+        <span class="pn-row__main"><span class="pn-row__title">Reservó</span></span>
+        <span class="pn-row__value">{{ booking.customerName }}</span>
+      </div>
+    }
+
+    @if (booking.customerPhone) {
+      <a class="pn-row" [href]="phoneHref">
+        <span class="material-symbols-rounded pn-row__icon">call</span>
+        <span class="pn-row__main"><span class="pn-row__title">Teléfono</span></span>
+        <span class="pn-row__value">{{ booking.customerPhone }}</span>
+        <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+      </a>
+    }
+
+    <div class="pn-row">
+      <span class="material-symbols-rounded pn-row__icon">badge</span>
+      <span class="pn-row__main"><span class="pn-row__title">Profesional</span></span>
+      <span class="pn-row__value">{{ booking.workerName ?? 'Sin asignar' }}</span>
+    </div>
+
+    <div class="pn-row">
+      <span class="material-symbols-rounded pn-row__icon">payments</span>
+      <span class="pn-row__main"><span class="pn-row__title">Precio</span></span>
+      <span class="pn-row__value">
+        {{ amount }}@if (prepaid) { <span class="pn-status pn-status--success bk-paid">Pagada</span> }
+      </span>
+    </div>
+  </div>
+
+  @if (guest) {
+    <div class="bk-note">
+      <span class="material-symbols-rounded">mail</span>
+      <div>
+        <strong>Cliente sin la app</strong>
+        @if (booking.guestConfirmedAt) {
+          <p>Le enviamos la cita por correo y ha confirmado que vendrá. No se le puede cobrar por la app ni escribirle por chat: no tiene cuenta.</p>
+        } @else {
+          <p>Le enviamos la cita por correo y todavía no ha contestado. La cita está en pie igualmente. No se le puede cobrar por la app ni escribirle por chat: no tiene cuenta.</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (forSomeoneElse) {
+    <div class="bk-note">
+      <span class="material-symbols-rounded">group</span>
+      <div>
+        <strong>La cita es para otra persona</strong>
+        <p>{{ booking.customerName }} la pidió para {{ attendee }}, que es quien vendrá. Todo lo demás es de {{ booking.customerName }}: el cobro, el chat y los avisos.</p>
+      </div>
+    </div>
+  }
+
+  @if (awaitingCustomer) {
+    <div class="bk-note">
+      <span class="material-symbols-rounded">hourglass_top</span>
+      <div>
+        <strong>Esperando al cliente</strong>
+        <p>{{ deadline }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Above the notes on purpose: it is the first thing whoever walks out the
+       door needs, and customers write errands in the notes, not the address. -->
+  @if (atHome) {
+    <div class="bk-note">
+      <span class="material-symbols-rounded">directions_car</span>
+      <div>
+        <strong>Dónde</strong>
+        @if (where) {
+          <p>{{ where }}</p>
+          <a class="bk-map" [href]="mapsHref" target="_blank" rel="noopener">
+            <span class="material-symbols-rounded">place</span>
+            Abrir en Maps
+          </a>
+        } @else {
+          <p>A domicilio · dirección no registrada. Llama al cliente para confirmarla.</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (booking.notes) {
+    <div class="bk-note">
+      <span class="material-symbols-rounded">sticky_note_2</span>
+      <div>
+        <strong>Notas del cliente</strong>
+        <p>{{ booking.notes }}</p>
+      </div>
+    </div>
+  }
+
+  @if (booking.cancelReason) {
+    <div class="bk-note bk-note--danger">
+      <span class="material-symbols-rounded">cancel</span>
+      <div>
+        <strong>Motivo de cancelación</strong>
+        <p>{{ booking.cancelReason }}</p>
+      </div>
+    </div>
+  }
+
+  @if (booking.customerPhone) {
+    <div class="bk-contact">
+      <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="whatsappHref" target="_blank" rel="noopener">
+        <span class="material-symbols-rounded">chat</span>
+        WhatsApp
+      </a>
+      <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="phoneHref">
+        <span class="material-symbols-rounded">call</span>
+        Llamar
+      </a>
+      @if (auth.isBusiness() && !auth.isAutonomous() && canCancel) {
+        <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="startReassign()">
+          <span class="material-symbols-rounded">swap_horiz</span>
+          Cambiar de profesional
+        </button>
+      }
+    </div>
+  }
+
+  @if (reassigning()) {
+    <div class="bk-reassign">
+      <p class="pn-field__label">¿Quién la atiende?</p>
+      @if (candidates().length === 0) {
+        <p class="pn-muted">No hay nadie libre a esa hora.</p>
+      } @else {
+        @for (worker of candidates(); track worker.id) {
+          <button type="button" class="pn-row" (click)="reassign(worker.id)">
+            <span class="material-symbols-rounded pn-row__icon">person</span>
+            <span class="pn-row__main"><span class="pn-row__title">{{ worker.name }}</span></span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </button>
+        }
+      }
+    </div>
+  }
+
+  <ng-container dialogActions>
+    @if (canCancel) {
+      <button type="button" class="pn-btn pn-btn--danger" [disabled]="busy()" (click)="cancel()">
+        Cancelar cita
+      </button>
+    }
+    @if (canNoShow) {
+      <button type="button" class="pn-btn pn-btn--danger" [disabled]="busy()" (click)="noShow()">
+        No se presentó
+      </button>
+    }
+    @if (canConfirm) {
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="confirm()">
+        Confirmar cita
+      </button>
+    }
+    @if (!canConfirm && !canNoShow && !canCancel) {
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="closed.emit()">Cerrar</button>
+    }
+  </ng-container>
+</pn-dialog>

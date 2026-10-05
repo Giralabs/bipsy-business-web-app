@@ -1,0 +1,101 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm back" routerLink="/panel/ajustes">
+    <span class="material-symbols-rounded">arrow_back</span>Ajustes
+  </a>
+
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Un plan por negocio. Tu equipo, gratis.</p>
+      <h1>Mi plan</h1>
+    </div>
+  </div>
+
+  @if (status(); as subscription) {
+    <section class="pn-card sub">
+      <div class="sub__main">
+        <span class="pn-status" [class]="'pn-status--' + tone()">{{ stateLabel() }}</span>
+        <p class="sub__name">{{ subscription.planName ?? 'Sin plan' }}</p>
+        <p class="sub__price pn-tabular">{{ money(subscription.priceCents) }} <span>al mes</span></p>
+      </div>
+
+      <div class="sub__when">
+        @if (subscription.trialEndsAt && subscription.state === 'TRIAL') {
+          <p class="sub__when-label">Tu prueba acaba el</p>
+          <p class="sub__when-date">{{ longDate(fromInstant(subscription.trialEndsAt)) }}</p>
+        } @else if (subscription.currentPeriodEnd) {
+          <p class="sub__when-label">{{ subscription.cancelAtPeriodEnd ? 'Acaba el' : 'Se renueva el' }}</p>
+          <p class="sub__when-date">{{ longDate(fromInstant(subscription.currentPeriodEnd)) }}</p>
+        }
+
+        <div class="sub__actions">
+          @if (subscription.cancelAtPeriodEnd && subscription.canChangePlan) {
+            <button type="button" class="pn-btn pn-btn--primary pn-btn--sm"
+                    [disabled]="busy() !== null" (click)="resume()">
+              Reactivar
+            </button>
+          } @else if (subscription.canChangePlan) {
+            <button type="button" class="pn-btn pn-btn--text pn-btn--sm"
+                    [disabled]="busy() !== null" (click)="cancel()">
+              Cancelar plan
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <p class="sec-label">Planes</p>
+
+  <div class="plans">
+    @for (plan of plans(); track plan.code) {
+      <section class="pn-card plan" [class.plan--on]="plan.code === current()">
+        <div class="plan__head">
+          <h2>{{ plan.name }}</h2>
+          @if (plan.code === current()) {
+            <span class="pn-status pn-status--success">Tu plan</span>
+          }
+        </div>
+
+        <p class="plan__price pn-tabular">{{ money(plan.priceCents) }}<span>/mes</span></p>
+        @if (plan.description) {
+          <p class="plan__desc">{{ plan.description }}</p>
+        }
+
+        <ul class="plan__features">
+          @for (feature of plan.features; track feature.code) {
+            <li>
+              <span class="material-symbols-rounded fill">check_circle</span>
+              {{ feature.name }}
+            </li>
+          }
+        </ul>
+
+        @if (plan.code !== current() || !status()?.canChangePlan) {
+          <button type="button" class="pn-btn pn-btn--primary pn-btn--block plan__cta"
+                  [disabled]="busy() !== null" (click)="choose(plan)">
+            @if (busy() === plan.code) {
+              <span class="pn-spinner"></span>
+            } @else {
+              {{ status()?.canChangePlan ? 'Cambiar a ' + plan.name : (status()?.trialAvailable && plan.trialDays ? 'Probar ' + plan.trialDays + ' días gratis' : 'Contratar ' + plan.name) }}
+            }
+          </button>
+        }
+      </section>
+    }
+  </div>
+
+  <div class="pn-notice pn-notice--info pay">
+    <span class="material-symbols-rounded">lock</span>
+    <div>
+      <strong>Pago seguro</strong>
+      <span class="pn-notice__body">
+        Se paga con tarjeta a través de Stripe; Bipsy no ve ni guarda tus datos. Si lo contrataste desde el
+        móvil, el cobro sigue en la tienda de tu teléfono y se gestiona desde allí.
+      </span>
+    </div>
+  </div>
+</main>
+
+@if (paying(); as plan) {
+  <app-stripe-checkout [plan]="plan" (closed)="onPaid($event)" />
+}

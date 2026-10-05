@@ -1,0 +1,98 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Así ven tu negocio los clientes en Bipsy</p>
+      <h1>Vista previa</h1>
+    </div>
+    <div class="pn-head__actions">
+      <a class="pn-btn pn-btn--secondary" routerLink="/panel/negocio">
+        <span class="material-symbols-rounded">arrow_back</span>Volver a tu ficha
+      </a>
+    </div>
+  </div>
+
+  @if (businessId() == null) {
+    <section class="pn-card">
+      <pn-empty icon="storefront" title="Todavía no hay nada que previsualizar"
+                text="Cuando tu negocio esté creado podrás ver aquí cómo lo ven tus clientes." />
+    </section>
+  } @else if (loading()) {
+    <div class="pn-card pn-skeleton vp-skel"></div>
+  } @else if (error()) {
+    <section class="pn-card">
+      <pn-error title="No se pudo cargar tu ficha." [text]="error() ?? ''" (retry)="load()" />
+    </section>
+  } @else {
+    @if (vm(); as data) {
+
+    <!-- ----- CONMUTADOR ----- -->
+    <div class="vp-bar">
+      <div class="pn-seg" role="tablist" aria-label="Dónde se mira la ficha">
+        <button type="button" role="tab" [attr.aria-selected]="mode() === 'web'" (click)="mode.set('web')">
+          <span class="material-symbols-rounded">language</span>Web
+        </button>
+        <button type="button" role="tab" [attr.aria-selected]="mode() === 'app'" (click)="mode.set('app')">
+          <span class="material-symbols-rounded">smartphone</span>App
+        </button>
+      </div>
+
+      @if (mode() === 'web') {
+        <div class="pn-seg" role="tablist" aria-label="Ancho de la ventana">
+          @for (size of sizes; track size) {
+            <button type="button" role="tab" [attr.aria-selected]="webSize() === size" (click)="webSize.set(size)">
+              {{ sizeLabel[size] }}
+            </button>
+          }
+        </div>
+      }
+
+      <p class="vp-bar__note">
+        <span class="material-symbols-rounded">visibility</span>
+        Vista previa · así ven tu negocio los clientes en Bipsy
+      </p>
+    </div>
+
+    <!-- ----- EL ESCENARIO -----
+         El marco se pinta a tamaño real y se encoge con `transform` para
+         caber en el panel: así los saltos de diseño ocurren en el ancho del
+         MARCO —1280, 834, 390— y no en el de esta ventana. -->
+    <div class="vp-stage" #stage
+         [style.--vp-scale]="scale()"
+         [style.--vp-fw.px]="frameWidth()"
+         [style.--vp-fh.px]="frameHeight()">
+      <div class="vp-stage__fit">
+
+        @if (mode() === 'web') {
+          <div class="vp-browser" [style.--vp-view-h.px]="webHeight()">
+            <div class="vp-browser__bar">
+              <span class="vp-browser__dots"><i></i><i></i><i></i></span>
+              <span class="vp-browser__url">
+                <span class="material-symbols-rounded">lock</span>{{ publicUrl() }}
+              </span>
+              <span class="vp-browser__size">{{ webWidth() }} × {{ webHeight() }}</span>
+            </div>
+            <div class="vp-browser__view">
+              <app-preview-web [vm]="data" (act)="notify()" />
+            </div>
+          </div>
+        } @else {
+          <div class="vp-phones">
+            <figure class="vp-phone">
+              <app-preview-app [vm]="data" platform="android" (act)="notify()" />
+              <figcaption>Android · Pixel 8 · 412 × 915</figcaption>
+            </figure>
+            <figure class="vp-phone">
+              <app-preview-app [vm]="data" platform="ios" (act)="notify()" />
+              <figcaption>iPhone 15 · 393 × 852</figcaption>
+            </figure>
+          </div>
+        }
+      </div>
+    </div>
+
+    <p class="pn-field__hint vp-foot">
+      La vista previa muestra lo que está publicado ahora mismo. Si quieres verla con tus cambios, guárdalos antes.
+    </p>
+    }
+  }
+</main>

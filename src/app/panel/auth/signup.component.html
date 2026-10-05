@@ -1,0 +1,422 @@
+<app-auth-layout bip="MB-03" [claim]="'Dado de alta en cinco pasos. ' + trialDays + ' días gratis.'">
+  <div class="auth-steps">
+    <div class="auth-steps__count">
+      <span>Paso {{ step() }} de 5</span>
+      <span>{{ trialDays }} días gratis</span>
+    </div>
+    <div class="auth-steps__bar">
+      <div class="auth-steps__fill" [style.width.%]="progress() * 100"></div>
+    </div>
+  </div>
+
+  <h1 class="auth-title">{{ stepTitle() }}</h1>
+
+  <!-- ----- 1 · CUENTA ----- -->
+  @if (step() === 1) {
+    @if (withProvider()) {
+      <div class="pn-notice pn-notice--info auth-notice">
+        <span class="material-symbols-rounded">{{ needsTypedEmail() ? 'alternate_email' : 'verified' }}</span>
+        <div>
+          @if (needsTypedEmail()) {
+            <!-- Llega de Apple con el correo oculto: el relay sirve para
+                 reconocer su cuenta, pero no para escribirle mientras el
+                 dominio no esté registrado en Apple, y el alta se apoya en
+                 poder hacerlo. -->
+            <strong>{{ providerName() }} no nos ha dado un correo al que escribirte</strong>
+            <span class="pn-notice__body">
+              Escribe el tuyo y seguimos: entrarás con {{ providerName() }}, sin contraseña.
+            </span>
+          } @else {
+            <strong>Sigues con {{ providerName() }}</strong>
+            <span class="pn-notice__body">
+              {{ email }} ya está verificado, así que no tendrás que elegir contraseña ni comprobar el correo.
+            </span>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="auth-lead">Empieza con tu correo. Después te pedimos los datos de tu negocio.</p>
+    }
+
+    <!-- Con proveedor el correo lo pone él: sólo se escribe cuando Apple no ha
+         dado ninguno al que se pueda escribir. -->
+    @if (!withProvider() || needsTypedEmail()) {
+      <label class="pn-field">
+        <span class="pn-field__label">Correo del negocio</span>
+        <input class="pn-input" type="email" name="email" autocomplete="email" [readonly]="resumable()"
+               placeholder="hola@tunegocio.es" [(ngModel)]="email" (keydown.enter)="checkEmail()" />
+      </label>
+    }
+
+    @if (resumable()) {
+      <p class="auth-lead">
+        Empezaste a registrar tu negocio con <b>{{ email }}</b> pero no llegaste a terminar. Escribe tu
+        contraseña y seguimos donde lo dejaste.
+      </p>
+      <label class="pn-field">
+        <span class="pn-field__label">Contraseña</span>
+        <input class="pn-input" type="password" name="resumePassword" autocomplete="current-password"
+               [(ngModel)]="resumePassword" (keydown.enter)="resumeSignup()" />
+      </label>
+    }
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    @if (resumable()) {
+      <div class="auth-actions">
+        <button type="button" class="pn-btn pn-btn--secondary pn-btn--lg"
+                (click)="resumable.set(false); resumePassword = ''; error.set(null)">Otro correo</button>
+        <button type="button" class="pn-btn pn-btn--primary pn-btn--lg" [disabled]="busy()" (click)="resumeSignup()">
+          @if (busy()) { <span class="pn-spinner"></span> } @else { Seguir con mi alta }
+        </button>
+      </div>
+    } @else {
+      <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+              [disabled]="busy()" (click)="checkEmail()">
+        @if (busy() && socialBusy() === null) {
+          <span class="pn-spinner"></span>
+        } @else if (withProvider()) {
+          Continuar
+        } @else {
+          Continuar con correo electrónico
+        }
+      </button>
+    }
+
+    @if (withProvider()) {
+      <button type="button" class="pn-btn pn-btn--text auth-link" (click)="dropProvider()">
+        Prefiero darme de alta con otro correo
+      </button>
+    } @else if (socialEnabled) {
+      <div class="auth-divider"><span>o</span></div>
+
+      <!-- Con Google o con Apple el correo llega ya verificado: el alta se
+           salta el paso de comprobarlo y no hay contraseña que elegir. Si ese
+           correo ya tuviera cuenta, se entra en ella en vez de chocar. -->
+      <div class="auth-social">
+        @if (googleEnabled) {
+          <button type="button" class="social-btn social-btn--google" [disabled]="busy()"
+                  (click)="signUpWith('google')">
+            @if (socialBusy() === 'google') {
+              <span class="pn-spinner"></span>
+            } @else {
+              <svg class="social-btn__logo" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+              Continuar con Google
+            }
+          </button>
+        }
+
+        @if (appleEnabled) {
+          <button type="button" class="social-btn social-btn--apple" [disabled]="busy()"
+                  (click)="signUpWith('apple')">
+            @if (socialBusy() === 'apple') {
+              <span class="pn-spinner"></span>
+            } @else {
+              <svg class="social-btn__logo social-btn__logo--apple" viewBox="0 0 24 24"
+                   fill="currentColor" aria-hidden="true">
+                <path d="M17.05 12.54c-.03-2.6 2.12-3.85 2.22-3.91-1.21-1.77-3.09-2.01-3.76-2.04-1.6-.16-3.12.94-3.93.94-.81 0-2.06-.92-3.39-.9-1.74.03-3.35 1.01-4.25 2.57-1.81 3.14-.46 7.79 1.3 10.34.86 1.25 1.88 2.65 3.23 2.6 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.01.84 3.38.81 1.4-.02 2.28-1.27 3.13-2.53.99-1.45 1.4-2.86 1.42-2.93-.03-.01-2.72-1.04-2.75-4.13M14.5 4.76c.71-.87 1.19-2.07 1.06-3.27-1.02.04-2.27.69-3.01 1.55-.66.76-1.24 1.99-1.08 3.16 1.14.09 2.31-.58 3.03-1.44"/>
+              </svg>
+              Continuar con Apple
+            }
+          </button>
+        }
+      </div>
+    }
+
+    <p class="auth-foot">¿Ya tienes cuenta? <a routerLink="/acceder">Inicia sesión</a></p>
+  }
+
+  <!-- ----- 3 · VERIFICACIÓN (por enlace, como step3_verify_screen.dart) ----- -->
+  @if (step() === 3) {
+    <p class="auth-lead">
+      Te hemos enviado un enlace a <b>{{ auth.user()?.email ?? email }}</b>. Ábrelo para activar tu cuenta y
+      continúa aquí.
+    </p>
+
+    @if (notice(); as text) { <p class="pn-muted auth-error" role="status">{{ text }}</p> }
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+            [disabled]="busy()" (click)="checkVerified()">
+      @if (busy()) { <span class="pn-spinner"></span> } @else { Ya lo verifiqué }
+    </button>
+
+    <button type="button" class="pn-btn pn-btn--text auth-link" [disabled]="resendIn() > 0 || busy()" (click)="resend()">
+      @if (resendIn() > 0) { Reenviar en {{ resendIn() }}s } @else { Reenviar correo }
+    </button>
+
+    <p class="auth-foot pn-muted">¿No te llega? Mira en spam o promociones. El enlace puede tardar un par de minutos.</p>
+  }
+
+  <!-- ----- 2 · NEGOCIO (aquí se crea la cuenta) ----- -->
+  @if (step() === 2) {
+    <p class="auth-lead">Esto es lo que verán tus clientes cuando te encuentren.</p>
+
+    @if (withProvider()) {
+      <div class="pn-notice pn-notice--info auth-notice">
+        <span class="material-symbols-rounded">verified</span>
+        <div>
+          <strong>Entrarás con {{ providerName() }}</strong>
+          <span class="pn-notice__body">
+            @if (needsTypedEmail()) {
+              <!-- El correo lo ha escrito él, así que hay que comprobarlo como
+                   cualquier otro: el alta pasa por el paso de verificación. -->
+              No hay contraseña que elegir. Te enviaremos un enlace para comprobar {{ email }}.
+            } @else {
+              {{ email }} ya está verificado, así que no hace falta contraseña ni comprobar el correo.
+            }
+          </span>
+        </div>
+      </div>
+    }
+
+    <label class="pn-field">
+      <span class="pn-field__label">¿A qué te dedicas?</span>
+      <select class="pn-select" name="category" [(ngModel)]="categoryId" (ngModelChange)="error.set(null)"
+              [class.pn-input--invalid]="error() === 'Elige a qué se dedica tu negocio.'">
+        <option [ngValue]="null" disabled>Elige tu categoría</option>
+        @for (category of categories(); track category.id) {
+          <option [ngValue]="category.id">{{ category.name }}</option>
+        }
+      </select>
+      @if (categoriesFailed()) {
+        <span class="pn-field__error">
+          No hemos podido cargar las categorías.
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="loadCategories()">Reintentar</button>
+        </span>
+      } @else {
+        <span class="pn-field__hint">Obligatorio: así te encuentran los clientes que buscan lo tuyo.</span>
+      }
+    </label>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Nombre del negocio</span>
+      <input class="pn-input" type="text" name="businessName" placeholder="Barbería Nómada" [(ngModel)]="businessName" />
+    </label>
+
+    <!-- No username any more (backend V105): the email is what signs in. -->
+    <label class="pn-field">
+      <span class="pn-field__label">Teléfono</span>
+      <input class="pn-input" type="tel" name="phone" autocomplete="tel"
+             placeholder="600 00 00 00" [(ngModel)]="phone" />
+      <span class="pn-field__hint">El correo lo usarás para iniciar sesión.</span>
+    </label>
+
+    <!-- Con Google o Apple no hay contraseña: la cuenta entra por el
+         proveedor, y `RegisterBusinessRequest` acepta password, googleIdToken
+         o appleIdToken, uno y sólo uno. -->
+    @if (!withProvider()) {
+      <label class="pn-field">
+        <span class="pn-field__label">Contraseña</span>
+        <input class="pn-input" type="password" name="password" autocomplete="new-password"
+               placeholder="Mínimo 8 caracteres" [(ngModel)]="password" />
+        <span class="auth-strength" [class.good]="strength() >= 4">
+          @for (mark of [1, 2, 3, 4, 5]; track mark) {
+            <span [class.on]="strength() >= mark"></span>
+          }
+        </span>
+      </label>
+    }
+
+    <label class="pn-field">
+      <span class="pn-field__label">CIF o NIF <span class="pn-muted">· opcional</span></span>
+      <input class="pn-input" type="text" name="cif" placeholder="B12345678" [(ngModel)]="cif" />
+    </label>
+
+    <label class="auth-check">
+      <input type="checkbox" name="terms" [(ngModel)]="acceptedTerms" />
+      <span>He leído y acepto los <a routerLink="/legal/terminos" target="_blank">términos</a> y la
+        <a routerLink="/legal/privacidad" target="_blank">política de privacidad</a>.</span>
+    </label>
+    <label class="auth-check">
+      <input type="checkbox" name="marketing" [(ngModel)]="marketingOptIn" />
+      <span>Quiero recibir novedades y consejos de Bipsy. Puedes darte de baja cuando quieras.</span>
+    </label>
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <div class="auth-actions">
+      <button type="button" class="pn-btn pn-btn--secondary pn-btn--lg" (click)="back()">Atrás</button>
+      <button type="button" class="pn-btn pn-btn--primary pn-btn--lg" [disabled]="busy()" (click)="createAccount()">
+        @if (busy()) { <span class="pn-spinner"></span> } @else { Crear mi negocio }
+      </button>
+    </div>
+  }
+
+  <!-- ----- 4 · UBICACIÓN ----- -->
+  @if (step() === 4) {
+    <p class="auth-lead">Esto define cómo te encuentran tus clientes.</p>
+
+    <button type="button" class="auth-choice" [attr.aria-pressed]="serviceMode === 'AT_BUSINESS'"
+            (click)="setServiceMode('AT_BUSINESS')">
+      <span class="material-symbols-rounded auth-choice__icon">storefront</span>
+      <span>
+        <span class="auth-choice__title">Tengo un local</span>
+        <span class="auth-choice__sub">Los clientes vienen a mi establecimiento.</span>
+      </span>
+    </button>
+    <button type="button" class="auth-choice" [attr.aria-pressed]="serviceMode === 'AT_CUSTOMER'"
+            (click)="setServiceMode('AT_CUSTOMER')">
+      <span class="material-symbols-rounded auth-choice__icon">directions_car</span>
+      <span>
+        <span class="auth-choice__title">Voy a domicilio</span>
+        <span class="auth-choice__sub">Solo trabajo desplazándome: no tengo local al que puedan venir.</span>
+      </span>
+    </button>
+    <button type="button" class="auth-choice" [attr.aria-pressed]="serviceMode === 'BOTH'"
+            (click)="setServiceMode('BOTH')">
+      <span class="material-symbols-rounded auth-choice__icon">swap_horiz</span>
+      <span>
+        <span class="auth-choice__title">Las dos cosas</span>
+        <span class="auth-choice__sub">Tengo local y además me desplazo a casa del cliente.</span>
+      </span>
+    </button>
+
+    <div style="margin-top:20px">
+      @if (serviceMode !== 'AT_CUSTOMER') {
+        <pn-address-search
+          label="Dirección"
+          placeholder="Empieza a escribir tu dirección…"
+          hint="Escribe la calle y el número, y elígela de la lista."
+          [disabled]="busy()"
+          [(text)]="address"
+          (typed)="resolvedAddress.set(null)"
+          (resolved)="onAddressResolved($event)"
+          (available)="placesUp.set($event)"
+        />
+        @if (resolvedAddress(); as found) {
+          <div class="pn-notice pn-notice--info" style="margin-bottom:18px">
+            <span class="material-symbols-rounded">where_to_vote</span>
+            <div>
+              <strong>{{ found.address || found.formatted }}</strong>
+              <span class="pn-notice__body">
+                {{ addressZone(found) }}
+                @if (!found.streetNumber) {
+                  <br />Falta el número de portal: sin él, el cliente llega a la calle pero no a la puerta.
+                }
+              </span>
+            </div>
+          </div>
+        }
+        @if (!placesUp()) {
+          <div class="auth-grid">
+            <label class="pn-field">
+              <span class="pn-field__label">Ciudad</span>
+              <input class="pn-input" type="text" name="city" placeholder="Valencia" [(ngModel)]="city" />
+            </label>
+            <label class="pn-field">
+              <span class="pn-field__label">Código postal</span>
+              <input class="pn-input" type="text" name="postalCode" placeholder="46003" [(ngModel)]="postalCode" />
+            </label>
+          </div>
+        }
+      } @else {
+        <pn-address-search
+          label="Zona donde trabajas"
+          placeholder="Tu ciudad o pueblo…"
+          hint="Sirve para que te encuentren los clientes de tu área."
+          [citiesOnly]="true"
+          [disabled]="busy()"
+          [(text)]="address"
+          (typed)="resolvedAddress.set(null)"
+          (resolved)="onAddressResolved($event)"
+          (available)="placesUp.set($event)"
+        />
+        @if (!placesUp()) {
+          <div class="auth-grid">
+            <label class="pn-field">
+              <span class="pn-field__label">Ciudad</span>
+              <input class="pn-input" type="text" name="city" placeholder="Valencia" [(ngModel)]="city" />
+            </label>
+            <label class="pn-field">
+              <span class="pn-field__label">Provincia</span>
+              <input class="pn-input" type="text" name="province" placeholder="Valencia" [(ngModel)]="province" />
+            </label>
+          </div>
+        }
+        <p class="pn-field__hint">
+          No hace falta dirección exacta: al no tener local, tu ficha no muestra ninguna ni el botón de cómo llegar.
+        </p>
+      }
+    </div>
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <div class="auth-actions">
+      <button type="button" class="pn-btn pn-btn--secondary pn-btn--lg" (click)="step.set(5)">Ahora no</button>
+      <button type="button" class="pn-btn pn-btn--primary pn-btn--lg" [disabled]="busy()" (click)="saveLocation()">
+        @if (busy()) { <span class="pn-spinner"></span> } @else { Continuar }
+      </button>
+    </div>
+  }
+
+  <!-- ----- 5 · CONFIGURACIÓN ----- -->
+  @if (step() === 5) {
+    <p class="auth-lead">Cuatro respuestas y tu agenda queda lista para recibir reservas.</p>
+
+    <p class="pn-field__label">¿Cuántos sois?</p>
+    <div class="auth-grid" style="margin-bottom:20px">
+      <button type="button" class="auth-choice" [attr.aria-pressed]="teamSize === 'SOLO'" (click)="teamSize = 'SOLO'">
+        <span class="auth-choice__title">Yo solo</span>
+      </button>
+      <button type="button" class="auth-choice" [attr.aria-pressed]="teamSize === 'SMALL'" (click)="teamSize = 'SMALL'">
+        <span class="auth-choice__title">2 a 5</span>
+      </button>
+      <button type="button" class="auth-choice" [attr.aria-pressed]="teamSize === 'MEDIUM'" (click)="teamSize = 'MEDIUM'">
+        <span class="auth-choice__title">6 a 15</span>
+      </button>
+      <button type="button" class="auth-choice" [attr.aria-pressed]="teamSize === 'LARGE'" (click)="teamSize = 'LARGE'">
+        <span class="auth-choice__title">Más de 15</span>
+      </button>
+    </div>
+
+    <p class="pn-field__label">Tu primer servicio</p>
+    <label class="pn-field">
+      <input class="pn-input" type="text" name="serviceName" placeholder="Corte de caballero" [(ngModel)]="serviceName" />
+    </label>
+    <div class="auth-grid">
+      <label class="pn-field">
+        <span class="pn-field__label">Precio (€)</span>
+        <input class="pn-input" type="number" min="0" step="0.5" name="servicePrice" placeholder="18" [(ngModel)]="servicePrice" />
+      </label>
+      <label class="pn-field">
+        <span class="pn-field__label">Duración (min)</span>
+        <input class="pn-input" type="number" min="5" step="5" name="serviceDuration" [(ngModel)]="serviceDuration" />
+      </label>
+    </div>
+
+    <div class="pn-group" style="margin-top:8px">
+      <div class="pn-group__body">
+        <label class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">calendar_month</span>
+          <span class="pn-row__main">
+            <span class="pn-row__title">Abro también los sábados</span>
+            <span class="pn-row__sub">De momento te ponemos de lunes a viernes, 9-14 y 16-20.</span>
+          </span>
+          <input type="checkbox" name="weekends" [(ngModel)]="opensWeekends" />
+        </label>
+        <label class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">credit_card</span>
+          <span class="pn-row__main">
+            <span class="pn-row__title">Pedir tarjeta al reservar</span>
+            <span class="pn-row__sub">Te protege de los plantones. Necesita la cuenta de cobros activa.</span>
+          </span>
+          <input type="checkbox" name="requiresCard" [(ngModel)]="requiresCard" />
+        </label>
+      </div>
+      <p class="pn-group__foot">Todo esto se cambia después desde Ajustes, sin prisa.</p>
+    </div>
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+            [disabled]="busy()" (click)="finish()">
+      @if (busy()) { <span class="pn-spinner"></span> } @else { Ya terminé, entrar al panel }
+    </button>
+  }
+</app-auth-layout>

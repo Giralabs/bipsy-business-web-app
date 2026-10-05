@@ -1,0 +1,266 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Tus trabajadores y las invitaciones que has enviado</p>
+      <h1>Equipo</h1>
+    </div>
+    @if (hasTeam()) {
+      <div class="pn-head__actions">
+        <a class="pn-btn pn-btn--secondary" routerLink="/panel/equipo/fichajes">
+          <span class="material-symbols-rounded">timer</span>Fichajes
+        </a>
+        <a class="pn-btn pn-btn--secondary" routerLink="/panel/equipo/ausencias">
+          <span class="material-symbols-rounded">event_busy</span>
+          Ausencias
+          @if (team.pendingAbsences().length > 0) {
+            <span class="pn-tab__badge">{{ team.pendingAbsences().length }}</span>
+          }
+        </a>
+        <button type="button" class="pn-btn pn-btn--primary" (click)="inviting.set(true); newCode.set(null)">
+          <span class="material-symbols-rounded">person_add</span>Invitar
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Trabajando solo no hay equipo, ni invitaciones, ni ausencias, ni
+       fichaje: el servidor responde 409 a todos esos endpoints. -->
+  @if (!hasTeam()) {
+    <section class="pn-card">
+      <pn-empty icon="groups" title="Trabajas solo"
+                text="Trabajando solo no hay trabajadores, invitaciones, ausencias ni fichaje. Se activa en Funcionalidades.">
+        <a class="pn-btn pn-btn--primary" routerLink="/panel/ajustes/funcionalidades">Ir a ajustes</a>
+      </pn-empty>
+    </section>
+  } @else {
+
+  @if (team.pendingAbsences().length > 0) {
+    <a class="pn-notice pn-notice--warn eq-alert" routerLink="/panel/equipo/ausencias">
+      <span class="material-symbols-rounded">event_busy</span>
+      <div>
+        <strong>Hay ausencias esperando tu respuesta</strong>
+        <span class="pn-notice__body">
+          Mientras no las apruebes o las rechaces, esas horas siguen abiertas para reservar.
+        </span>
+      </div>
+    </a>
+  }
+
+  <div class="pn-grid">
+    <section class="pn-card pn-col-8">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">group</span>
+        <h2>Trabajadores</h2>
+      </div>
+
+      <!-- The staff, not everyone who attends: the owner travels in the same
+           list when they take appointments, and is not somebody to delete. -->
+      @if (team.staff().length === 0) {
+        <pn-empty icon="group_add" title="Aún no tienes trabajadores"
+                  text="Invita a alguien con el botón de arriba. Tu equipo no cuesta más: pagas un plan por negocio.">
+          <button type="button" class="pn-btn pn-btn--primary" (click)="inviting.set(true)">Invitar al primero</button>
+        </pn-empty>
+      } @else {
+        @for (worker of team.staff(); track worker.id) {
+          <button type="button" class="eq-row" (click)="picked.set(worker)">
+            <pn-avatar [name]="worker.name" [url]="worker.profileImageUrl" size="lg" />
+            <span class="eq-row__main">
+              <span class="eq-row__name">{{ worker.name }}</span>
+              <span class="eq-row__user">{{ worker.email }}</span>
+              <span class="eq-row__tags">
+                @if (worker.available) {
+                  <span class="pn-status pn-status--success">Disponible</span>
+                } @else {
+                  <span class="pn-status pn-status--grey">No disponible</span>
+                }
+                @if (worker.autoAccept) { <span class="pn-status pn-status--accent">Acepta solo</span> }
+                @if (worker.chatEnabled) { <span class="pn-status pn-status--accent">Chat</span> }
+              </span>
+            </span>
+            <span class="eq-row__services pn-muted">{{ servicesOf(worker) }}</span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </button>
+        }
+      }
+    </section>
+
+    <section class="pn-card pn-col-4">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">mail</span>
+        <h2>Invitaciones</h2>
+      </div>
+
+      @if (team.invitations.value().length === 0) {
+        <p class="pn-dim eq-empty">
+          Aquí verás los códigos que hayas enviado y que todavía no ha usado nadie.
+        </p>
+      } @else {
+        @for (invitation of team.invitations.value(); track invitation.id) {
+          <div class="eq-inv">
+            <span class="eq-inv__code pn-tabular">{{ invitation.token }}</span>
+            <span class="eq-inv__main">
+              <span class="eq-inv__mail">{{ invitation.email ?? 'Sin correo' }}</span>
+              <span class="eq-inv__exp pn-muted">Caduca en 12 h</span>
+            </span>
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Copiar"
+                    (click)="copy(invitation.token)">
+              <span class="material-symbols-rounded">content_copy</span>
+            </button>
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Anular"
+                    (click)="revoke(invitation)">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        }
+      }
+    </section>
+  </div>
+  }
+</main>
+
+<!-- ----- AJUSTES DE UN TRABAJADOR ----- -->
+@if (picked(); as worker) {
+  <pn-dialog [title]="worker.name" (closed)="picked.set(null)">
+    <div class="pn-group">
+      <p class="pn-group__head">Contacto</p>
+      <div class="pn-group__body">
+        <div class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">mail</span>
+          <span class="pn-row__main"><span class="pn-row__title">Correo</span></span>
+          <span class="pn-row__value">{{ worker.email }}</span>
+        </div>
+        @if (worker.phone) {
+          <a class="pn-row" [href]="'tel:' + worker.phone">
+            <span class="material-symbols-rounded pn-row__icon">call</span>
+            <span class="pn-row__main"><span class="pn-row__title">Teléfono</span></span>
+            <span class="pn-row__value">{{ worker.phone }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <div class="pn-group">
+      <p class="pn-group__head">Permisos</p>
+      <div class="pn-group__body">
+        <div class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">more_time</span>
+          <span class="pn-row__main"><span class="pn-row__title">Aceptar horas extra</span></span>
+          <pn-switch [checked]="worker.allowOvertime" label="Aceptar horas extra"
+                     (toggle)="toggle(worker, 'allowOvertime', $event)" />
+        </div>
+        <!-- Con el chat o la espera apagados en Funcionalidades, el permiso
+             no existe: el servidor lo revoca al apagarlos. -->
+        @if (auth.profile()?.chatEnabled) {
+          <div class="pn-row">
+            <span class="material-symbols-rounded pn-row__icon">forum</span>
+            <span class="pn-row__main"><span class="pn-row__title">Puede usar el chat</span></span>
+            <pn-switch [checked]="worker.chatEnabled" label="Puede usar el chat"
+                       (toggle)="toggle(worker, 'chatEnabled', $event)" />
+          </div>
+        }
+        @if (auth.profile()?.waitlistEnabled) {
+          <div class="pn-row">
+            <span class="material-symbols-rounded pn-row__icon">hourglass_top</span>
+            <span class="pn-row__main"><span class="pn-row__title">Puede gestionar la lista de espera</span></span>
+            <pn-switch [checked]="worker.waitlistManageEnabled" label="Puede gestionar la lista de espera"
+                       (toggle)="toggle(worker, 'waitlistManageEnabled', $event)" />
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="pn-group">
+      <p class="pn-group__head">Estado</p>
+      <div class="pn-group__body">
+        <div class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">event_available</span>
+          <span class="pn-row__main">
+            <span class="pn-row__title">Disponible para citas</span>
+            <span class="pn-row__sub">Lo decide cada trabajador desde su app.</span>
+          </span>
+          <span class="pn-status" [class.pn-status--success]="worker.available"
+                [class.pn-status--grey]="!worker.available">
+            {{ worker.available ? 'Sí' : 'No' }}
+          </span>
+        </div>
+        <!-- Si el negocio acepta todo automáticamente, el interruptor de cada
+             trabajador no decide nada: se esconde en vez de mentir. -->
+        @if (!auth.profile()?.autoAccept) {
+          <div class="pn-row">
+            <span class="material-symbols-rounded pn-row__icon">bolt</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Acepta las citas automáticamente</span>
+              <span class="pn-row__sub">Sus citas se confirman solas.</span>
+            </span>
+            <pn-switch [checked]="worker.autoAccept" label="Acepta automáticamente"
+                       (toggle)="toggle(worker, 'autoAccept', $event)" />
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (services.count() > 0) {
+      <div class="pn-group">
+        <p class="pn-group__head">Servicios que presta</p>
+        <div class="pn-group__body">
+          @for (service of services.all(); track service.id) {
+            <div class="pn-row">
+              <span class="pn-row__main"><span class="pn-row__title">{{ service.name }}</span></span>
+              <pn-switch [checked]="doesService(worker, service.id)" [label]="service.name"
+                         (toggle)="toggleService(worker, service.id, $event)" />
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <a class="pn-btn pn-btn--secondary pn-btn--block eq-schedule"
+       [routerLink]="['/panel/equipo', worker.id, 'horario']">
+      <span class="material-symbols-rounded">schedule</span>
+      Editar su horario
+    </a>
+
+    <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="unlink(worker)">
+      Eliminar trabajador
+    </button>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--primary" (click)="picked.set(null)">Listo</button>
+    </ng-container>
+  </pn-dialog>
+}
+
+<!-- ----- INVITAR ----- -->
+@if (inviting()) {
+  <pn-dialog title="Invitar a un trabajador" (closed)="inviting.set(false)">
+    @if (newCode(); as invitation) {
+      <div class="eq-code">
+        <p class="pn-dim">Comparte este código con tu trabajador. Caduca en 12 horas.</p>
+        <p class="eq-code__value pn-tabular">{{ invitation.token }}</p>
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="copy(invitation.token)">
+          <span class="material-symbols-rounded">content_copy</span>Copiar código
+        </button>
+      </div>
+    } @else {
+      <p class="pn-dim eq-empty">
+        Le generamos un código de seis dígitos. Lo mete en la app de Bipsy Business y entra en tu equipo
+        con su propia agenda.
+      </p>
+      <label class="pn-field">
+        <span class="pn-field__label">Su correo <span class="pn-muted">· opcional</span></span>
+        <input class="pn-input" type="email" name="inviteEmail" placeholder="trabajador@correo.com"
+               [(ngModel)]="inviteEmail" />
+        <span class="pn-field__hint">Si lo pones, le mandamos el código por correo además de enseñártelo.</span>
+      </label>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="inviting.set(false)">Cerrar</button>
+      @if (!newCode()) {
+        <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="invite()">
+          @if (busy()) { <span class="pn-spinner"></span> } @else { Generar código }
+        </button>
+      }
+    </ng-container>
+  </pn-dialog>
+}

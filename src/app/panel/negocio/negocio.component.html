@@ -1,0 +1,335 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Así te ven tus clientes antes de reservar</p>
+      <h1>Tu ficha</h1>
+    </div>
+    <div class="pn-head__actions">
+      <a class="pn-btn pn-btn--secondary" routerLink="/panel/negocio/vista-previa">
+        <span class="material-symbols-rounded">visibility</span>Ver como cliente
+      </a>
+      <button type="button" class="pn-btn pn-btn--primary" (click)="startEdit()">
+        <span class="material-symbols-rounded">edit</span>Editar datos
+      </button>
+    </div>
+  </div>
+
+  <div class="pn-grid">
+    <!-- ----- LA FICHA, TAL Y COMO LA VE EL CLIENTE ----- -->
+    <section class="pn-card pn-card--flush pn-col-8 ficha">
+      <!-- El recorte vive solo en la portada; si envolviera también al avatar
+           lo cortaría por la mitad. -->
+      <div class="ficha__cover">
+        @if (profile()?.coverImageUrl) {
+          <img [src]="profile()?.coverImageUrl" alt="Portada de tu ficha" />
+        } @else {
+          <div class="ficha__cover-empty">
+            <span class="material-symbols-rounded">add_photo_alternate</span>
+            <span class="ficha__cover-text">Sin portada</span>
+            <span class="ficha__cover-hint">Una foto de tu local o de tu trabajo, en grande</span>
+          </div>
+        }
+      </div>
+
+      <div class="ficha__id">
+        <span class="ficha__avatar">
+          @if (profile()?.profileImageUrl) {
+            <img [src]="profile()?.profileImageUrl" alt="" />
+          } @else {
+            {{ auth.businessName().charAt(0) }}
+          }
+        </span>
+
+        <div class="ficha__id-text">
+          <h2>{{ auth.businessName() }}</h2>
+          <p class="ficha__meta">
+            @if (reviews.count() > 0) {
+              <span class="ficha__stars">
+                <span class="material-symbols-rounded fill">star</span>{{ rating(reviews.average()) }}
+              </span>
+              <span class="ficha__dot">·</span>
+              {{ reviews.count() }} reseñas
+              <span class="ficha__dot">·</span>
+            }
+            {{ services.count() }} servicios
+          </p>
+        </div>
+      </div>
+
+      <div class="ficha__body">
+        @if (profile()?.description) {
+          <p class="ficha__desc">{{ profile()?.description }}</p>
+        } @else {
+          <p class="ficha__desc ficha__desc--empty">
+            Todavía no has contado quién eres. Una descripción corta de lo que haces y cómo trabajas es
+            lo que convence al cliente que aún no te conoce.
+          </p>
+        }
+
+        <p class="pn-group__head ficha__photos-head">Tus fotos</p>
+        <div class="ficha__photos">
+          <div>
+            <pn-photo-picker
+              label="Foto de perfil"
+              hint="Cuadrada, mínimo 400×400"
+              [current]="profile()?.profileImageUrl ?? null"
+              [busy]="uploading() === 'profile'"
+              (picked)="upload('profile', $event)"
+            />
+            @if (profile()?.profileImageUrl) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm ficha__remove"
+                      (click)="removePhoto('profile')">Quitar foto de perfil</button>
+            }
+          </div>
+
+          <div>
+            <pn-photo-picker
+              label="Portada"
+              hint="Apaisada, 1920×1080 va perfecta"
+              [current]="profile()?.coverImageUrl ?? null"
+              [busy]="uploading() === 'cover'"
+              (picked)="upload('cover', $event)"
+            />
+            @if (profile()?.coverImageUrl) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm ficha__remove"
+                      (click)="removePhoto('cover')">Quitar portada</button>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----- LO QUE COMPONE LA FICHA ----- -->
+    <section class="pn-col-4">
+      <div class="pn-group">
+        <p class="pn-group__head">Tu ficha</p>
+        <div class="pn-group__body">
+          <a class="pn-row" routerLink="/panel/negocio/horario">
+            <span class="material-symbols-rounded pn-row__icon">schedule</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Horario del negocio</span>
+              <span class="pn-row__sub">Cuándo se te puede reservar.</span>
+            </span>
+            <span class="pn-row__value">{{ hasSchedule() ? 'Configurado' : 'Sin configurar' }}</span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+          <a class="pn-row" routerLink="/panel/negocio/portfolio">
+            <span class="material-symbols-rounded pn-row__icon">photo_library</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Portfolio</span>
+              <span class="pn-row__sub">Fotos de tus trabajos.</span>
+            </span>
+            <span class="pn-row__value">{{ setup.portfolio.value().length }}</span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+          <a class="pn-row" routerLink="/panel/negocio/normas">
+            <span class="material-symbols-rounded pn-row__icon">rule</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Políticas y normas</span>
+              <span class="pn-row__sub">Lo que el cliente acepta al reservar.</span>
+            </span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+          <a class="pn-row" routerLink="/panel/negocio/codigo">
+            <span class="material-symbols-rounded pn-row__icon">card_giftcard</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Código de invitación</span>
+              <span class="pn-row__sub">Tus clientes cuentan como invitados por ti.</span>
+            </span>
+            <span class="pn-row__value">{{ setup.referral.value().code ?? 'Sin elegir' }}</span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+          <a class="pn-row" routerLink="/panel/resenas">
+            <span class="material-symbols-rounded pn-row__icon">star</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Reseñas recibidas</span>
+            </span>
+            <span class="pn-row__value">{{ reviews.count() }}</span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="pn-group">
+        <p class="pn-group__head">Cómo se ve</p>
+        <div class="pn-group__body">
+          <a class="pn-row" routerLink="/panel/negocio/vista-previa">
+            <span class="material-symbols-rounded pn-row__icon">visibility</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Ver como cliente</span>
+              <span class="pn-row__sub">Tu ficha tal y como la ve un cliente en Bipsy.</span>
+            </span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+        </div>
+      </div>
+
+      @if (!isQuality()) {
+        <div class="pn-card ng-quality">
+          <span class="material-symbols-rounded">auto_awesome</span>
+          <h3>Con Quality, tu ficha es tuya</h3>
+          <p>Tu color, tu foto y tu portada animadas, los efectos de la ficha y el portfolio sin tope.</p>
+          <a class="pn-btn pn-btn--primary pn-btn--sm" routerLink="/panel/ajustes/suscripcion">Ver Quality</a>
+        </div>
+      }
+    </section>
+  </div>
+</main>
+
+@if (editing()) {
+  <pn-dialog title="Editar tu ficha" [wide]="true" (closed)="editing.set(false)">
+    <label class="pn-field">
+      <span class="pn-field__label">Nombre del negocio</span>
+      <input class="pn-input" type="text" name="name" [(ngModel)]="form.name" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Teléfono</span>
+      <input class="pn-input" type="tel" name="phone" [(ngModel)]="form.phone" />
+    </label>
+
+    <p class="pn-field__label">Dónde atiendes</p>
+    <div class="ng-modes" role="radiogroup" aria-label="Modalidad">
+      @for (mode of modes; track mode.id) {
+        <button type="button" class="ng-mode" role="radio" [attr.aria-checked]="form.mode === mode.id"
+                (click)="setMode(mode.id)">
+          <span class="material-symbols-rounded">{{ mode.icon }}</span>
+          <span class="ng-mode__title">{{ mode.title }}</span>
+          <span class="ng-mode__sub">{{ mode.sub }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Con local, la calle; sin él, la zona. Ciudad, provincia y código
+         postal salen del buscador en los dos casos. -->
+    @if (atCustomer) {
+      <pn-address-search
+        label="Zona donde trabajas"
+        placeholder="Tu ciudad o pueblo…"
+        [citiesOnly]="true"
+        [hint]="zoneHint"
+        [(text)]="form.address"
+        (resolved)="onResolved($event)"
+        (available)="placesUp.set($event)"
+      />
+    } @else {
+      <pn-address-search
+        label="Dirección"
+        placeholder="Empieza a escribir tu dirección…"
+        [hint]="zoneHint"
+        [error]="addressError()"
+        [(text)]="form.address"
+        (typed)="addressError.set(null)"
+        (resolved)="onResolved($event)"
+        (available)="placesUp.set($event)"
+      />
+    }
+    @if (!placesUp()) {
+      <div class="ng-two">
+        <label class="pn-field">
+          <span class="pn-field__label">Ciudad</span>
+          <input class="pn-input" type="text" name="city" [(ngModel)]="form.city" />
+        </label>
+        <label class="pn-field">
+          <span class="pn-field__label">Provincia</span>
+          <input class="pn-input" type="text" name="province" [(ngModel)]="form.province" />
+        </label>
+      </div>
+    }
+
+    <!-- Hasta dónde se desplaza (`service_area_sheet.dart`). Solo si se
+         desplaza: en un negocio de local, una zona no significa nada. En la
+         app es una hoja con un mapa; aquí no hay mapa, así que el centro es
+         el local o la dirección que se busque. -->
+    @if (visitsCustomer) {
+      <div class="pn-group ng-area">
+        <p class="pn-group__head">Zona de desplazamiento</p>
+        <div class="pn-group__body">
+          <div class="pn-row">
+            <span class="material-symbols-rounded pn-row__icon">my_location</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Limitar por distancia</span>
+            </span>
+            <pn-switch [checked]="form.area.limit" label="Limitar por distancia"
+                       (toggle)="setAreaLimit($event)" />
+          </div>
+          @if (form.area.limit) {
+            <div class="ng-area__radius">
+              <span class="ng-area__head">
+                <span class="pn-row__title">Distancia máxima</span>
+                <span class="ng-area__value pn-tabular">{{ form.area.radiusKm }} km a la redonda</span>
+              </span>
+              <input
+                class="ng-area__slider"
+                type="range"
+                name="areaRadius"
+                min="1"
+                [max]="areaLimits.maxRadiusKm"
+                step="1"
+                aria-label="Distancia máxima"
+                [disabled]="busy()"
+                [(ngModel)]="form.area.radiusKm"
+              />
+            </div>
+          }
+        </div>
+        <!-- El pie dice lo que pasa AHORA, y por eso cambia con el interruptor. -->
+        <p class="pn-group__foot">
+          {{ form.area.limit ? 'Fuera de esta zona no se te podrá reservar.' : 'Ahora aceptas citas de cualquier sitio.' }}
+        </p>
+      </div>
+
+      @if (form.area.limit) {
+        <pn-address-search
+          label="Desde dónde sales"
+          [hint]="centerHint"
+          [error]="centerError()"
+          [(text)]="form.centerText"
+          (typed)="centerError.set(null)"
+          (resolved)="onCenterResolved($event)"
+        />
+      }
+    }
+
+    <label class="pn-field">
+      <span class="pn-field__label">Descripción</span>
+      <textarea class="pn-textarea" rows="5" name="description"
+                placeholder="Cortes clásicos y afeitado a navaja. Tres sillones, sin prisa."
+                [(ngModel)]="form.description"></textarea>
+      <span class="pn-field__hint">Cuéntalo corto: es lo primero que se lee debajo de tu nombre.</span>
+    </label>
+
+    <!-- Las seis redes de `social_links_group.dart`. En la app se añaden de
+         una en una con dos hojas; en un escritorio caben las seis a la vez y
+         se deja en blanco la que no se tenga. -->
+    <p class="pn-field__label">Redes sociales</p>
+    <div class="ng-social">
+      @for (network of networks; track network.id) {
+        <label class="pn-field">
+          <span class="pn-field__label">{{ network.label }}</span>
+          <input
+            class="pn-input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="none"
+            [name]="'social-' + network.id"
+            [maxlength]="network.max"
+            [placeholder]="network.placeholder"
+            [(ngModel)]="form.social[network.id]"
+          />
+        </label>
+      }
+    </div>
+    <p class="pn-field__hint">
+      Puedes pegar la dirección entera: nos quedamos con tu usuario. Lo que dejes en blanco no sale en tu ficha.
+    </p>
+
+    @if (formError(); as text) {
+      <p class="pn-field__error" role="alert">{{ text }}</p>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="editing.set(false)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="save()">Guardar</button>
+    </ng-container>
+  </pn-dialog>
+}

@@ -1,0 +1,38 @@
+﻿:host { display: block; }
+
+.fi-back { margin: 0 0 14px -12px; text-decoration: none; }
+
+.fi-live { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
+.fi-live + .fi-live { border-top: 1px solid var(--clr-hairline); }
+.fi-live__main { flex: 1; min-width: 0; }
+.fi-live__name { display: block; font-size: 0.9375rem; font-weight: 600; }
+.fi-live__since { display: block; font-size: 0.8125rem; }
+
+.fi-month { display: flex; align-items: center; gap: 4px; }
+.fi-month__label { min-width: 130px; text-align: center; font-size: 0.9375rem; font-weight: 700; }
+.fi-month .pn-icon-btn:disabled { opacity: 0.3; cursor: default; }
+
+.fi-day + .fi-day { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--clr-hairline); }
+
+.fi-day__head { display: flex; align-items: baseline; gap: 10px; padding: 4px 0 8px; }
+.fi-day__label { font-size: 0.9375rem; font-weight: 700; }
+.fi-day__date { font-size: 0.8125rem; }
+.fi-day__total { margin-left: auto; font-size: 0.875rem; font-weight: 700; }
+
+.fi-entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  border-radius: var(--pn-radius-row);
+}
+.fi-entry:nth-child(odd) { background: var(--pn-field); }
+.fi-entry__name { flex: 1; min-width: 0; font-size: 0.875rem; font-weight: 600; }
+.fi-entry__times { font-size: 0.875rem; color: var(--clr-text-2); }
+.fi-entry__times em { font-style: normal; color: var(--clr-success); font-weight: 600; }
+.fi-entry__dur { width: 90px; text-align: right; font-size: 0.875rem; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .fi-entry { flex-wrap: wrap; gap: 4px 12px; }
+  .fi-entry__dur { width: auto; }
+}

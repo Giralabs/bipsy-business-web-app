@@ -1,0 +1,329 @@
+<!-- Marco del móvil: `.ph*` viene de `src/styles/app-mockup.css`; las medidas
+     reales de cada teléfono se pasan por variables desde el componente. -->
+<div class="ph vpa-dev" [class.vpa-dev--android]="platform === 'android'"
+     [style.--ph-w.px]="spec.width + spec.bezel * 2"
+     [style.--vpa-w.px]="spec.width"
+     [style.--vpa-h.px]="spec.height"
+     [style.--vpa-bezel.px]="spec.bezel"
+     [style.--vpa-radius.px]="spec.screenRadius"
+     [style.--vpa-safe-top.px]="spec.safeTop"
+     [style.--vpa-safe-bottom.px]="spec.safeBottom"
+     [style.--vpa-sheet-radius.px]="spec.sheetRadius"
+     [style.--vpa-cover-h.px]="coverHeight">
+  <div class="ph__screen vpa-screen">
+
+    <!-- ----- BARRA DE ESTADO -----
+         Blanca mientras se ve la portada y del color del tema en cuanto se
+         va: es lo que hace `AnnotatedRegion<SystemUiOverlayStyle>`. -->
+    @if (platform === 'ios') {
+      <span class="ph__island"></span>
+    } @else {
+      <span class="vpa-punch"></span>
+    }
+    <div class="ph__status vpa-status" [class.vpa-status--dark]="coverGone()">
+      <span>{{ clock }}</span>
+      <span class="ph__status-icons">
+        <span class="material-symbols-rounded">signal_cellular_alt</span>
+        <span class="material-symbols-rounded">wifi</span>
+        <span class="material-symbols-rounded">battery_full</span>
+      </span>
+    </div>
+
+    <!-- ----- BOTONES FLOTANTES (GipsiCoverIconButton) ----- -->
+    <div class="vpa-top">
+      <button type="button" class="vpa-top__btn" aria-label="Volver" (click)="act.emit()">
+        <span class="material-symbols-rounded">arrow_back_ios_new</span>
+      </button>
+      <span class="vpa-top__spacer"></span>
+      <button type="button" class="vpa-top__btn" aria-label="Añadir a favoritos" (click)="act.emit()">
+        <span class="material-symbols-rounded">favorite</span>
+      </button>
+      <button type="button" class="vpa-top__btn" aria-label="Reportar" (click)="act.emit()">
+        <span class="material-symbols-rounded">flag</span>
+      </button>
+      <button type="button" class="vpa-top__btn" aria-label="Compartir" (click)="act.emit()">
+        <span class="material-symbols-rounded">share</span>
+      </button>
+    </div>
+
+    <div class="vpa-scroll" (scroll)="onScroll($event)">
+
+      <!-- ----- PORTADA (_CoverAppBar) -----
+           A sangre, 16:9 y SIN degradado: la portada se ve tal cual la subió
+           el negocio. -->
+      <div class="vpa-cover">
+        @if (vm.coverUrl; as url) {
+          <img [src]="url" alt="" (error)="hideBroken($event)" />
+        }
+      </div>
+
+      <!-- ----- CABECERA ----- -->
+      <div class="vpa-head">
+        <div class="vpa-name">
+          @if (vm.avatarUrl; as url) {
+            <img class="vpa-logo" [src]="url" alt="" />
+          }
+          <h2 class="vpa-title">{{ vm.business.name }}</h2>
+        </div>
+
+        <div class="vpa-meta">
+          @if (vm.score.value != null && vm.score.count > 0) {
+            <span class="vpa-rating vpa-rating--lg">
+              <span class="material-symbols-rounded fill vpa-rating__star">star</span>
+              <b>{{ rating(vm.score.value!) }}</b>
+              <small>({{ vm.score.count }})</small>
+            </span>
+          } @else {
+            <span class="vpa-rating__empty">Sin valoraciones</span>
+          }
+          @if (vm.locationDisplay) {
+            <span class="vpa-dot"></span>
+            <span class="vpa-place">
+              <span class="material-symbols-rounded">place</span>
+              <span class="vpa-place__text">{{ vm.locationDisplay }}</span>
+            </span>
+          }
+        </div>
+
+        @if (vm.business.description) {
+          <p class="vpa-desc">{{ vm.business.description }}</p>
+        }
+
+        <!-- `_InfoActions`: solo iconos, y en este orden — llamar, cómo
+             llegar, horario y escribir. La etiqueta no se pinta nunca. -->
+        @if (actionCount > 0) {
+          <div class="vpa-actions">
+            @if (vm.business.phone) {
+              <button type="button" class="vpa-action" [style.width.px]="actionWidth(actionCount)"
+                      aria-label="Llamar" (click)="act.emit()">
+                <span class="material-symbols-rounded">call</span>
+              </button>
+            }
+            @if (vm.hasVenue && vm.locationDisplay) {
+              <button type="button" class="vpa-action" [style.width.px]="actionWidth(actionCount)"
+                      aria-label="Como llegar" (click)="act.emit()">
+                <span class="material-symbols-rounded">place</span>
+              </button>
+            }
+            @if (vm.hasSchedule) {
+              <button type="button" class="vpa-action" [style.width.px]="actionWidth(actionCount)"
+                      aria-label="Horario" (click)="sheet.set('schedule')">
+                <span class="material-symbols-rounded">schedule</span>
+              </button>
+            }
+            @if (vm.business.chatEnabled) {
+              <button type="button" class="vpa-action" [style.width.px]="actionWidth(actionCount)"
+                      aria-label="Escribir" (click)="act.emit()">
+                <span class="material-symbols-rounded">chat_bubble</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="vpa-divider"></div>
+
+      <!-- ----- SECCIONES, EN EL ORDEN ELEGIDO ----- -->
+      @for (section of sections; track section; let first = $first) {
+        @switch (section) {
+
+          @case ('GALLERY') {
+            @if (vm.strip.length > 0) {
+              @if (!first) { <div class="vpa-divider vpa-divider--xl"></div> }
+              <button type="button" class="vpa-section-head" (click)="act.emit()">
+                <span class="vpa-section-head__title">Galería</span>
+                <span class="material-symbols-rounded vpa-section-head__more">arrow_forward_ios</span>
+              </button>
+              <div class="vpa-strip">
+                @for (photo of vm.strip; track photo.id) {
+                  <button type="button" class="vpa-shot" [attr.aria-label]="photo.caption ?? 'Foto del negocio'"
+                          (click)="act.emit()">
+                    <img [src]="photo.url" [alt]="photo.caption ?? ''" loading="lazy" (error)="hideBroken($event)" />
+                  </button>
+                }
+              </div>
+            }
+          }
+
+          @case ('SERVICES') {
+            @if (!first) { <div class="vpa-divider vpa-divider--xl"></div> }
+            <div class="vpa-section-head vpa-section-head--plain">
+              <span class="vpa-section-head__title">Servicios</span>
+            </div>
+            @if (vm.services === null) {
+              <div class="vpa-pad">
+                <div class="pn-skeleton vpa-skel vpa-skel--service"></div>
+                <div class="pn-skeleton vpa-skel vpa-skel--service"></div>
+              </div>
+            } @else if (vm.services.length === 0) {
+              <div class="vpa-empty">
+                <span class="material-symbols-rounded">content_cut</span>
+                <p class="vpa-empty__title">Sin servicios aun</p>
+                <p class="vpa-empty__text">Este negocio todavia no ha publicado su catalogo.</p>
+              </div>
+            } @else {
+              <div class="vpa-list">
+                @for (service of vm.services; track service.id) {
+                  <button type="button" class="vpa-service" (click)="act.emit()"
+                          [attr.aria-label]="'Reservar ' + service.name">
+                    @if (service.imageUrl) {
+                      <img class="vpa-service__img" [src]="service.imageUrl" alt="" loading="lazy" />
+                    } @else {
+                      <span class="vpa-service__img vpa-service__img--none">
+                        <span class="material-symbols-rounded">{{ serviceIcon(service) }}</span>
+                      </span>
+                    }
+                    <span class="vpa-service__body">
+                      <span class="vpa-service__name">{{ service.name }}</span>
+                      <span class="vpa-service__meta">
+                        <span class="material-symbols-rounded">schedule</span>
+                        <span class="vpa-service__dur">{{ duration(service.duration) }}</span>
+                        <span class="vpa-service__price">{{ price(service.price) }}</span>
+                      </span>
+                    </span>
+                    <span class="material-symbols-rounded vpa-service__chev">arrow_forward_ios</span>
+                  </button>
+                }
+              </div>
+            }
+          }
+
+          @case ('REVIEWS') {
+            @if (!first) { <div class="vpa-divider vpa-divider--xl"></div> }
+            <div class="vpa-section-head vpa-section-head--plain">
+              <span class="vpa-section-head__title">Valoraciones</span>
+              @if (vm.score.value != null && vm.score.count > 0) {
+                <span class="vpa-rating">
+                  <span class="material-symbols-rounded fill vpa-rating__star">star</span>
+                  <b>{{ rating(vm.score.value!) }}</b>
+                  <small>({{ vm.score.count }})</small>
+                </span>
+              }
+            </div>
+            @if (vm.reviews === null) {
+              <div class="vpa-pad"><div class="pn-skeleton vpa-skel vpa-skel--review"></div></div>
+            } @else if (vm.reviews.length === 0) {
+              <div class="vpa-empty">
+                <span class="material-symbols-rounded">rate_review</span>
+                <p class="vpa-empty__title">Sin valoraciones</p>
+                <p class="vpa-empty__text">Se tu el primero en opinar tras tu cita.</p>
+              </div>
+            } @else {
+              <div class="vpa-list">
+                @for (review of vm.reviews; track review.id) {
+                  <article class="vpa-review">
+                    <div class="vpa-review__pad">
+                      <div class="vpa-review__head">
+                        <span class="vpa-review__avatar">
+                          @if (review.customerProfileImageUrl) {
+                            <img [src]="review.customerProfileImageUrl" alt="" />
+                          } @else {
+                            {{ initials(review.customerName) }}
+                          }
+                        </span>
+                        <span class="vpa-review__who">
+                          <span class="vpa-review__name">{{ review.customerName }}</span>
+                          <span class="vpa-review__stars">
+                            @for (on of stars(review.rating); track $index) {
+                              <span class="material-symbols-rounded fill" [class.vpa-star--off]="!on">star</span>
+                            }
+                          </span>
+                        </span>
+                        <span class="vpa-review__date">{{ reviewDate(review.createdAt) }}</span>
+                      </div>
+                      @if (review.comment) {
+                        <p class="vpa-review__text">{{ review.comment }}</p>
+                      }
+                    </div>
+                    @if (review.reply) {
+                      <div class="vpa-reply">
+                        <p class="vpa-reply__label">Respuesta del negocio</p>
+                        <p class="vpa-review__text">{{ review.reply }}</p>
+                      </div>
+                    }
+                  </article>
+                }
+              </div>
+            }
+          }
+        }
+      }
+
+      <!-- ----- POLÍTICAS Y NORMAS (siempre al final y fuera del orden) ----- -->
+      @if (vm.totalPolicies > 0) {
+        <div class="vpa-divider vpa-divider--xl"></div>
+        <div class="vpa-section-head vpa-section-head--plain">
+          <span class="vpa-section-head__title">Políticas y normas</span>
+        </div>
+        <div class="vpa-pad">
+          <div class="vpa-policies">
+            @for (group of groupsWith(vm.previewPolicies); track group.categoryId) {
+              <div class="vpa-policies__group">
+                @if (showGroupHeaders) {
+                  <p class="vpa-policies__name">
+                    <span class="material-symbols-rounded">rule</span>{{ group.name }}
+                  </p>
+                }
+                @for (policy of group.policies; track policy.id) {
+                  <p class="vpa-policy"><span class="vpa-policy__dot"></span>{{ policy.text }}</p>
+                }
+              </div>
+            }
+            @if (policiesTruncated) {
+              <button type="button" class="vpa-policies__all" (click)="sheet.set('policies')">
+                Ver las {{ vm.totalPolicies }} normas
+                <span class="material-symbols-rounded">arrow_forward</span>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="vpa-divider vpa-divider--xl"></div>
+      }
+
+      <div class="vpa-tail"></div>
+    </div>
+
+    <!-- ----- HOJAS (GipsiSheet) ----- -->
+    @if (sheet(); as open) {
+      <div class="vpa-sheet-veil" (click)="sheet.set(null)"></div>
+      <div class="vpa-sheet" [class.vpa-sheet--ios]="platform === 'ios'">
+        <span class="vpa-sheet__handle"></span>
+
+        @if (open === 'schedule') {
+          <div class="vpa-sheet__body">
+            <div class="vpa-hours">
+              @for (day of vm.week; track day.label; let last = $last) {
+                <div class="vpa-hours__row" [class.vpa-hours__row--today]="day.today">
+                  <span class="vpa-hours__day">{{ day.label }}</span>
+                  <span class="vpa-hours__at" [class.vpa-hours__at--closed]="day.closed">{{ day.hours }}</span>
+                </div>
+                @if (!last) { <span class="vpa-hours__sep"></span> }
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="vpa-sheet__title">Políticas y normas de {{ vm.business.name }}</p>
+          <div class="vpa-sheet__body vpa-sheet__body--list">
+            @for (group of groupsWith(vm.policies); track group.categoryId) {
+              <div class="vpa-policies__group">
+                <p class="vpa-policies__name">
+                  <span class="material-symbols-rounded">rule</span>{{ group.name }}
+                </p>
+                @for (policy of group.policies; track policy.id) {
+                  <p class="vpa-policy"><span class="vpa-policy__dot"></span>{{ policy.text }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ----- NAVEGACIÓN DEL SISTEMA ----- -->
+    @if (platform === 'ios') {
+      <span class="vpa-home"></span>
+    } @else {
+      <span class="vpa-gesture"></span>
+    }
+  </div>
+</div>

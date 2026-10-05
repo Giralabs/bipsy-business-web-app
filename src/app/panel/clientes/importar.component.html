@@ -1,0 +1,167 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <a class="pn-btn pn-btn--text pn-btn--sm im-back" routerLink="/panel/clientes">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Clientes
+      </a>
+      <p class="pn-head__greet">Desde tu agenda o desde un archivo. No hay que escribir nada.</p>
+      <h1>Trae tus clientes</h1>
+    </div>
+  </div>
+
+  <div class="pn-grid">
+    <div class="pn-col-5 im-sources">
+      @if (canUseAddressBook) {
+        <section class="pn-card">
+          <div class="pn-block__head">
+            <span class="material-symbols-rounded">contacts</span>
+            <h2>La agenda de tu móvil</h2>
+          </div>
+          <p class="pn-dim im-help">
+            Tu navegador puede abrir los contactos del teléfono. Eliges a quién y solo esos
+            salen de aquí.
+          </p>
+          <button type="button" class="pn-btn pn-btn--primary pn-btn--block"
+                  [disabled]="reading() || busy()" (click)="fromAddressBook()">
+            <span class="material-symbols-rounded">phone_iphone</span>
+            Abrir mis contactos
+          </button>
+        </section>
+      }
+
+      <section class="pn-card">
+        <div class="pn-block__head">
+          <span class="material-symbols-rounded">upload_file</span>
+          <h2>Un archivo del ordenador</h2>
+        </div>
+        <p class="pn-dim im-help">
+          La exportación de tus contactos: un <strong>.vcf</strong> (tarjetas de visita) o un
+          <strong>.csv</strong> de Google Contacts, Outlook o el programa que usaras antes.
+        </p>
+
+        <label class="im-drop" [class.im-drop--over]="over()" [class.im-drop--busy]="reading()"
+               (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+          <input type="file" [accept]="accept" (change)="onPick($event)"
+                 aria-label="Elegir un archivo de contactos" />
+          <span class="material-symbols-rounded">{{ reading() ? 'hourglass_top' : 'drag_pan' }}</span>
+          <span class="im-drop__label">{{ reading() ? 'Leyendo…' : 'Arrastra el archivo aquí' }}</span>
+          <span class="im-drop__hint">o haz clic para buscarlo · .vcf y .csv</span>
+        </label>
+
+        <details class="im-how">
+          <summary>¿De dónde saco ese archivo?</summary>
+          <ul>
+            <li><strong>iPhone:</strong> Contactos → selecciona → Compartir → guarda el .vcf.</li>
+            <li><strong>Android / Google:</strong> contacts.google.com → Exportar → Google CSV o vCard.</li>
+            <li><strong>Outlook:</strong> Archivo → Abrir y exportar → Importar o exportar → CSV.</li>
+            <li><strong>Otro programa:</strong> busca «exportar clientes»; casi todos hacen CSV.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="pn-card im-app">
+        <div class="pn-block__head">
+          <span class="material-symbols-rounded">smartphone</span>
+          <h2>¿No te encaja ninguna?</h2>
+        </div>
+        <p class="pn-dim im-help">
+          Instala <strong>Bipsy Negocio</strong> en tu móvil y entra en Clientes → Importar
+          contactos: la app lee tu agenda directamente, sin archivos ni exportaciones. Lo que
+          importes allí aparece aquí al instante.
+        </p>
+      </section>
+    </div>
+
+    <section class="pn-card pn-col-7 im-review">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">how_to_reg</span>
+        <h2>Los que se van a guardar</h2>
+        @if (rows().length > 0) {
+          <span class="pn-block__more pn-muted">{{ keeping() }} de {{ rows().length }}</span>
+        }
+      </div>
+
+      @if (result(); as done) {
+        <pn-empty icon="task_alt" title="Ya están en tu agenda"
+                  [text]="count(done.imported, 'cliente añadido', 'clientes añadidos') +
+                          (done.skipped > 0 ? ' · ' + count(done.skipped, 'ya estaba', 'ya estaban') : '')">
+          <div class="im-done">
+            <a class="pn-btn pn-btn--primary" routerLink="/panel/clientes">Ver mis clientes</a>
+            <button type="button" class="pn-btn pn-btn--secondary" (click)="startOver()">
+              Importar más
+            </button>
+          </div>
+        </pn-empty>
+      } @else if (rows().length === 0) {
+        <pn-empty icon="contacts"
+                  title="Aquí verás a quién vas a guardar"
+                  [text]="canUseAddressBook
+                    ? 'Abre tu agenda o suelta un archivo y aparecerán todos aquí: nombre, teléfono y correo. Podrás desmarcar a quien no quieras antes de guardar nada.'
+                    : 'Suelta un archivo de contactos y aparecerán todos aquí: nombre, teléfono y correo. Podrás desmarcar a quien no quieras antes de guardar nada.'" />
+      } @else {
+        <div class="im-from">
+          <span class="material-symbols-rounded">description</span>
+          <span class="im-from__name">{{ origin() }}</span>
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="startOver()">
+            Cambiar
+          </button>
+        </div>
+
+        @if (dropped() > 0 || known() > 0) {
+          <p class="pn-dim im-note">
+            @if (known() > 0) {
+              {{ count(known(), 'contacto ya está', 'contactos ya están') }} en tu agenda y
+              {{ known() === 1 ? 'viene desmarcado' : 'vienen desmarcados' }}.
+            }
+            @if (dropped() > 0) {
+              Hemos dejado fuera {{ count(dropped(), 'contacto', 'contactos') }} sin teléfono ni correo.
+            }
+          </p>
+        }
+
+        <div class="im-actions">
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="toggleAll(true)">Marcar todos</button>
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="toggleAll(false)">Desmarcar todos</button>
+        </div>
+
+        <div class="im-list">
+          @for (row of rows(); track $index) {
+            <label class="im-row">
+              <input type="checkbox" [checked]="row.keep" (change)="toggle($index)" />
+              <span class="im-row__main">
+                <span class="im-row__name">
+                  {{ row.name }}
+                  @if (row.known) {
+                    <span class="pn-status pn-status--grey">Ya en tu agenda</span>
+                  }
+                </span>
+                <span class="im-row__meta">
+                  {{ row.phone ?? 'Sin teléfono' }}
+                  @if (row.email) { · {{ row.email }} }
+                </span>
+              </span>
+            </label>
+          }
+        </div>
+
+        @if (overLimit()) {
+          <p class="pn-field__error im-limit">
+            Puedes guardar hasta {{ max }} de una vez. Desmarca {{ keeping() - max }} y repite
+            después con el resto.
+          </p>
+        }
+
+        <button type="button" class="pn-btn pn-btn--primary pn-btn--block im-save"
+                [disabled]="busy() || keeping() === 0 || overLimit()" (click)="save()">
+          @if (busy()) {
+            <span class="pn-spinner"></span>
+          } @else {
+            <span class="material-symbols-rounded">download</span>
+            Guardar {{ count(keeping(), 'cliente', 'clientes') }}
+          }
+        </button>
+      }
+    </section>
+  </div>
+</main>

@@ -1,0 +1,106 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm fi-back" routerLink="/panel/equipo">
+    <span class="material-symbols-rounded">arrow_back</span>Equipo
+  </a>
+
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Entradas y salidas de tu equipo</p>
+      <h1>Fichajes</h1>
+    </div>
+  </div>
+
+  <div class="pn-grid">
+    <section class="pn-card pn-col-8">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">radio_button_checked</span>
+        <h2>Quién está fichado ahora</h2>
+      </div>
+
+      @if (team.activeClocks.value().length === 0) {
+        <pn-empty icon="schedule" title="Nadie fichado"
+                  text="Cuando alguien fiche entrada desde su app, aparecerá aquí con su cronómetro." />
+      } @else {
+        @for (clock of team.activeClocks.value(); track clock.workerId) {
+          <div class="fi-live">
+            <pn-avatar [name]="clock.workerName" />
+            <span class="fi-live__main">
+              <span class="fi-live__name">{{ clock.workerName }}</span>
+              <span class="fi-live__since pn-muted">Entró a las {{ hhmm(toDate(clock.checkInAt)) }}</span>
+            </span>
+            <span class="pn-status pn-status--success">
+              <span class="material-symbols-rounded">timer</span>
+              {{ elapsed(clock.checkInAt) }}
+            </span>
+          </div>
+        }
+      }
+    </section>
+
+    <section class="pn-card pn-col-4">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">functions</span>
+        <h2>Horas acumuladas</h2>
+      </div>
+      @if (totals().length === 0) {
+        <p class="pn-dim">Sin jornadas registradas todavía.</p>
+      } @else {
+        <div class="pn-group__body">
+          @for (total of totals(); track total.name) {
+            <div class="pn-row">
+              <span class="pn-row__main"><span class="pn-row__title">{{ total.name }}</span></span>
+              <span class="pn-row__value pn-tabular">{{ total.label }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="pn-card pn-col-12">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">history</span>
+        <h2>Registro</h2>
+        <div class="fi-month pn-block__more">
+          <button type="button" class="pn-icon-btn pn-icon-btn--ghost" (click)="stepMonth(-1)" aria-label="Mes anterior">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+          <span class="fi-month__label">{{ monthLabel() }}</span>
+          <button type="button" class="pn-icon-btn pn-icon-btn--ghost" (click)="stepMonth(1)"
+                  [disabled]="isCurrentMonth()" aria-label="Mes siguiente">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      @if (team.clockHistory.error(); as problem) {
+        <p class="pn-field__error">{{ problem }}</p>
+      } @else if (days().length === 0) {
+        <pn-empty icon="history_toggle_off" title="Sin jornadas este mes"
+                  text="Aquí irá quedando lo que fiche tu equipo, día a día." />
+      } @else {
+        @for (day of days(); track day.key) {
+          <div class="fi-day">
+            <div class="fi-day__head">
+              <span class="fi-day__label">{{ day.label }}</span>
+              @if (day.label !== dayTitle(day.key)) {
+                <span class="fi-day__date pn-muted">{{ dayTitle(day.key) }}</span>
+              }
+              <span class="fi-day__total pn-tabular">{{ hoursLabel(day.minutes) }}</span>
+            </div>
+            @for (entry of day.entries; track entry.id) {
+              <div class="fi-entry">
+                <span class="fi-entry__name">{{ nameOf(entry) }}</span>
+                <span class="fi-entry__times pn-tabular">
+                  {{ hhmm(toDate(entry.checkInAt)) }}
+                  →
+                  @if (entry.checkOutAt) { {{ hhmm(toDate(entry.checkOutAt)) }} } @else { <em>en curso</em> }
+                </span>
+                <span class="fi-entry__dur pn-tabular">{{ hoursLabel(minutesOf(entry)) }}</span>
+              </div>
+            }
+          </div>
+        }
+      }
+    </section>
+  </div>
+</main>

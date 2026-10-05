@@ -1,0 +1,239 @@
+<main class="pn-main">
+  <pn-desk-hero [greet]="greeting() + ' · ' + todayLabel()" [title]="auth.businessName()" [line]="summary()">
+    @if (agenda.pendingCount() > 0) {
+      <a class="pn-count pn-count--warn" routerLink="/panel/agenda" [queryParams]="{ vista: 'pendientes' }"
+         [attr.aria-label]="countLabel(agenda.pendingCount(), 'cita pendiente', 'citas pendientes') + ' de confirmar'">
+        <span class="material-symbols-rounded">notifications_active</span>
+        Pendiente
+      </a>
+    }
+    @if (waitlist.enabled() && waitlist.count() > 0) {
+      <a class="pn-count pn-count--info" routerLink="/panel/agenda" [queryParams]="{ vista: 'espera' }"
+         [attr.aria-label]="countLabel(waitlist.count(), 'persona esperando', 'personas esperando') + ' un hueco'">
+        <span class="material-symbols-rounded">hourglass_top</span>
+        En espera
+      </a>
+    }
+  </pn-desk-hero>
+
+  <!-- ===== EL DÍA ===== -->
+  <section class="day">
+    <div class="day__main">
+      <header class="day__top">
+        <span class="day__tag">
+          <span class="material-symbols-rounded">calendar_month</span>
+          Agenda de hoy
+        </span>
+        <span class="day__hours pn-tabular">
+          @if (todayHours(); as hours) { Abierto {{ hours }} } @else { Sin horario configurado }
+        </span>
+      </header>
+
+      <div class="day__numbers">
+        <div class="pn-kpi">
+          <span class="pn-kpi__value">{{ today().length }}</span>
+          <span class="pn-kpi__label">CITAS HOY</span>
+        </div>
+        <div class="pn-kpi">
+          <span class="pn-kpi__value">{{ upcoming().length }}</span>
+          <span class="pn-kpi__label">POR ATENDER</span>
+        </div>
+        <div class="pn-kpi">
+          <span class="pn-kpi__value">{{ doneToday() }}</span>
+          <span class="pn-kpi__label">ATENDIDAS</span>
+        </div>
+
+        <!-- El dinero va aparte: es de otra naturaleza que los conteos y, al
+             ser el texto más ancho, en una rejilla de cuatro iguales acababa
+             pegado al canto de la tarjeta. -->
+        <div class="pn-kpi day__money">
+          <span class="pn-kpi__value">{{ money(expectedToday()) }}</span>
+          <span class="pn-kpi__label">PREVISTO HOY</span>
+        </div>
+      </div>
+
+      @if (today().length > 0) {
+        <div class="day__progress">
+          <div class="pn-bar">
+            <div class="pn-bar__fill" [style.width.%]="progress() * 100"></div>
+          </div>
+          <span class="day__progress-text">
+            {{ doneToday() }} de {{ today().length }} atendidas
+          </span>
+        </div>
+      }
+
+      <a class="pn-btn pn-btn--primary day__cta" routerLink="/panel/agenda">
+        <span class="material-symbols-rounded">calendar_month</span>
+        Abrir la agenda
+      </a>
+    </div>
+
+    <div class="day__rest">
+      <p class="day__rest-label">Lo que queda hoy</p>
+
+      @if (upcoming().length === 0) {
+        <pn-empty icon="event_available" title="Nada más por hoy"
+                  text="Las reservas que entren aparecerán aquí solas." />
+      } @else {
+        @for (booking of upcoming().slice(0, 5); track booking.id; let first = $first) {
+          <a class="next" [class.next--now]="first" routerLink="/panel/agenda">
+            <span class="next__bar" [style.background]="look[stateOf(booking)].color"></span>
+            <span class="next__time pn-tabular">{{ hhmm(toDate(booking.startDateTime)) }}</span>
+            <span class="next__main">
+              <span class="next__name">{{ who(booking) }}</span>
+              <span class="next__service">
+                {{ booking.serviceName }}@if (booking.workerName) { · {{ booking.workerName }} }
+              </span>
+            </span>
+            @if (first) {
+              <span class="pn-status pn-status--accent">Siguiente</span>
+            }
+          </a>
+        }
+        @if (upcoming().length > 5) {
+          <a class="day__more" routerLink="/panel/agenda">
+            Y {{ upcoming().length - 5 }} más
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- ===== LO QUE HAY QUE ATENDER ===== -->
+  <div class="pn-grid board">
+    <section class="pn-card pn-col-5 pn-block">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">notifications_active</span>
+        <h2>Esperando tu respuesta</h2>
+        @if (pending().length > 0) {
+          <a class="pn-block__more pn-btn pn-btn--text pn-btn--sm" routerLink="/panel/agenda"
+             [queryParams]="{ vista: 'pendientes' }">Ver todas</a>
+        }
+      </div>
+
+      @if (pending().length === 0) {
+        <pn-empty icon="task_alt" title="Sin pendientes" text="No hay citas esperando confirmación." />
+      } @else {
+        @for (booking of pending().slice(0, 4); track booking.id) {
+          <div class="pending">
+            <div class="pending__main">
+              <p class="pending__name">{{ who(booking) }}</p>
+              <p class="pending__meta">
+                {{ relativeDay(toDate(booking.startDateTime)) }} · {{ hhmm(toDate(booking.startDateTime)) }}
+                · {{ booking.serviceName }}
+              </p>
+            </div>
+            <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" (click)="confirm(booking, $event)">
+              Confirmar
+            </button>
+          </div>
+        }
+      }
+    </section>
+
+    <section class="pn-card pn-col-4 pn-block">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">bolt</span>
+        <h2>Avisos</h2>
+      </div>
+
+      @if (alerts().length === 0) {
+        <pn-empty icon="verified" title="Todo al día" text="Cuando algo necesite tu atención, te lo diremos aquí." />
+      } @else {
+        <div class="alerts">
+          @for (alert of alerts(); track alert.id) {
+            <a class="alert" [routerLink]="alert.route" [queryParams]="alert.query ?? null">
+              <span class="alert__icon"><span class="material-symbols-rounded">{{ alert.icon }}</span></span>
+              <span class="alert__main">
+                <span class="alert__title">{{ alert.title }}</span>
+                <span class="alert__sub">{{ alert.sub }}</span>
+              </span>
+              <span class="material-symbols-rounded alert__go">arrow_forward</span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+
+    @if (!auth.isAutonomous()) {
+      <section class="pn-card pn-col-3 pn-block">
+        <div class="pn-block__head">
+          <span class="material-symbols-rounded">timer</span>
+          <h2>Fichados</h2>
+        </div>
+
+        @if (team.activeClocks.value().length === 0) {
+          <pn-empty icon="schedule" title="Nadie fichado" text="Aparecerá aquí en cuanto alguien fiche." />
+        } @else {
+          @for (clock of team.activeClocks.value(); track clock.workerId) {
+            <div class="staff">
+              <pn-avatar [name]="clock.workerName" size="sm" />
+              <span class="staff__name">{{ clock.workerName }}</span>
+              <span class="pn-status pn-status--success">{{ hhmm(fromInstant(clock.checkInAt)) }}</span>
+            </div>
+          }
+          <a class="pn-btn pn-btn--secondary pn-btn--sm pn-btn--block" style="margin-top:16px"
+             routerLink="/panel/equipo/fichajes">Ver registro</a>
+        }
+      </section>
+    }
+
+    @if (!setup.complete()) {
+      <section class="pn-card pn-col-7 pn-block" data-coach="setup:checklist">
+        <div class="pn-block__head">
+          <span class="material-symbols-rounded">checklist</span>
+          <h2>Completar mi perfil</h2>
+          <span class="pn-block__more setup__count pn-tabular">{{ setup.doneCount() }}/{{ setup.total() }}</span>
+        </div>
+
+        <p class="pn-dim setup__intro">
+          Completarlo nos ayuda a promocionar tu negocio entre más personas.
+        </p>
+        <div class="setup__bar">
+          <div class="pn-bar"><div class="pn-bar__fill" [style.width.%]="setup.progress() * 100"></div></div>
+        </div>
+
+        <div class="setup__list">
+          @for (step of setup.steps(); track step.id) {
+            @if (!step.done) {
+              <a class="pn-row" [routerLink]="step.route">
+                <span class="material-symbols-rounded pn-row__icon">{{ step.icon }}</span>
+                <span class="pn-row__main">
+                  <span class="pn-row__title">{{ step.title }}</span>
+                  <span class="pn-row__sub">{{ step.subtitle }}</span>
+                </span>
+                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+              </a>
+            }
+          }
+        </div>
+      </section>
+    }
+
+    @if (waitlist.enabled() && waitlist.all().length > 0) {
+      <section class="pn-card pn-col-5 pn-block">
+        <div class="pn-block__head">
+          <span class="material-symbols-rounded">hourglass_top</span>
+          <h2>Lista de espera</h2>
+          <a class="pn-block__more pn-btn pn-btn--text pn-btn--sm" routerLink="/panel/agenda"
+             [queryParams]="{ vista: 'espera' }">Gestionar</a>
+        </div>
+
+        @for (entry of waitlist.all().slice(0, 4); track entry.id) {
+          <div class="wait">
+            <span class="wait__pos">{{ entry.position }}</span>
+            <span class="wait__main">
+              <span class="wait__name">{{ entry.customerName }}</span>
+              <span class="wait__service">{{ entry.serviceName }}</span>
+            </span>
+            @if (entry.openOffer) {
+              <span class="pn-status pn-status--info">Avisado</span>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</main>

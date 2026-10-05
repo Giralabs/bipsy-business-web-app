@@ -1,0 +1,280 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Lo que el cliente acepta al reservar contigo</p>
+      <h1>{{ orderingCategories() ? 'Ordenar categorías' : 'Políticas y normas' }}</h1>
+    </div>
+    <div class="pn-head__actions">
+      @if (orderingCategories()) {
+        <button type="button" class="pn-btn pn-btn--primary" (click)="stopOrderingCategories()">Hecho</button>
+      } @else {
+        @if (groups.value().length > 1) {
+          <button type="button" class="pn-btn pn-btn--secondary" (click)="startOrderingCategories()">
+            <span class="material-symbols-rounded">swap_vert</span>
+            Ordenar categorías
+          </button>
+        }
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="startCreateCategory()">
+          <span class="material-symbols-rounded">create_new_folder</span>
+          Nueva categoría
+        </button>
+        <button type="button" class="pn-btn pn-btn--primary" (click)="openCatalog()">
+          <span class="material-symbols-rounded">add</span>
+          Añadir
+        </button>
+      }
+    </div>
+  </div>
+
+  <p class="nm-hint pn-muted">
+    @if (orderingCategories()) {
+      Súbelas o bájalas para decidir en qué orden las lee un cliente en tu ficha. Este orden es solo tuyo.
+    } @else {
+      Salen en tu ficha, entre tus fotos y tu galería. Ayudan al cliente a saber a qué atenerse antes de reservar.
+    }
+  </p>
+
+  @if (groups.error() && !groups.isLoaded) {
+    <div class="pn-notice pn-notice--error">
+      <span class="material-symbols-rounded">error</span>
+      <div>
+        <strong>No se han podido cargar tus normas</strong>
+        <span class="pn-notice__body">{{ groups.error() }}</span>
+      </div>
+    </div>
+  } @else if (groups.isLoaded && shown().length === 0) {
+    <section class="pn-card">
+      <pn-empty icon="rule" title="Sin normas todavía"
+                text="Pulsa «Añadir» y marca las que se apliquen a tu negocio, o escribe las tuyas.">
+        <button type="button" class="pn-btn pn-btn--primary" (click)="openCatalog()">Añadir</button>
+      </pn-empty>
+    </section>
+  } @else {
+    @for (group of shown(); track group.categoryId; let i = $index; let first = $first; let last = $last) {
+      <div class="pn-group nm-group">
+        <div class="nm-group__head">
+          <span class="pn-group__head nm-group__title">
+            <span class="material-symbols-rounded">{{ iconFor(group.icon) }}</span>
+            {{ group.name }}
+          </span>
+
+          <span class="nm-group__actions">
+            @if (orderingCategories()) {
+              <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Subir"
+                      [disabled]="first" (click)="moveCategory(i, -1)">
+                <span class="material-symbols-rounded">keyboard_arrow_up</span>
+              </button>
+              <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Bajar"
+                      [disabled]="last" (click)="moveCategory(i, 1)">
+                <span class="material-symbols-rounded">keyboard_arrow_down</span>
+              </button>
+            } @else if (isOrdering(group)) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="stopOrderingPolicies()">Hecho</button>
+            } @else {
+              @if (group.policies.length > 1) {
+                <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="startOrderingPolicies(group)">
+                  <span class="material-symbols-rounded">swap_vert</span>Ordenar
+                </button>
+              }
+              @if (group.custom) {
+                <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Editar categoría"
+                        title="Editar categoría" (click)="startEditCategory(group)">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+                <button type="button" class="pn-icon-btn pn-icon-btn--ghost nm-danger" aria-label="Borrar categoría"
+                        title="Borrar categoría" (click)="deleteCategory(group)">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              }
+            }
+          </span>
+        </div>
+
+        @if (!orderingCategories()) {
+          <div class="pn-group__body">
+            @for (policy of policiesOf(group); track policy.id; let pFirst = $first; let pLast = $last; let j = $index) {
+              <div class="pn-row nm-row">
+                @if (policy.custom && !isOrdering(group)) {
+                  <button type="button" class="nm-row__main" (click)="startEditPolicy(policy, group.categoryId)">
+                    <span class="pn-row__title nm-text">{{ policy.text }}</span>
+                    <span class="pn-status pn-status--accent">Tuya</span>
+                    <span class="material-symbols-rounded pn-row__chev">chevron_right</span>
+                  </button>
+                } @else {
+                  <span class="nm-row__main nm-row__main--static">
+                    <span class="pn-row__title nm-text">{{ policy.text }}</span>
+                    @if (policy.custom) {
+                      <span class="pn-status pn-status--accent">Tuya</span>
+                    }
+                  </span>
+                }
+
+                @if (isOrdering(group)) {
+                  <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Subir"
+                          [disabled]="pFirst" (click)="movePolicy(j, -1)">
+                    <span class="material-symbols-rounded">keyboard_arrow_up</span>
+                  </button>
+                  <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Bajar"
+                          [disabled]="pLast" (click)="movePolicy(j, 1)">
+                    <span class="material-symbols-rounded">keyboard_arrow_down</span>
+                  </button>
+                } @else {
+                  <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Quitar norma"
+                          title="Quitar" (click)="removePolicy(policy)">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (!isOrdering(group)) {
+              <button type="button" class="pn-row nm-add" (click)="startWrite(group.categoryId)">
+                <span class="material-symbols-rounded pn-row__icon">add</span>
+                <span class="pn-row__main"><span class="pn-row__title">Escribir una norma aquí</span></span>
+              </button>
+            }
+          </div>
+          @if (group.policies.length === 0) {
+            <p class="pn-group__foot">
+              Todavía no has puesto nada aquí. Hasta que lo hagas, esta categoría no sale en tu ficha.
+            </p>
+          }
+        } @else {
+          <p class="pn-group__foot">{{ countLabel(group) }}</p>
+        }
+      </div>
+    }
+  }
+</main>
+
+@switch (dialog()) {
+  @case ('catalog') {
+    <pn-dialog title="Añadir normas" [wide]="true" (closed)="close()">
+      <div class="pn-group">
+        <div class="pn-group__body">
+          <button type="button" class="pn-row nm-add" (click)="startWrite()">
+            <span class="material-symbols-rounded pn-row__icon">edit</span>
+            <span class="pn-row__main"><span class="pn-row__title">Escribir la mía</span></span>
+          </button>
+        </div>
+        <p class="pn-group__foot">Marca las que se apliquen a tu negocio. Se publican al instante.</p>
+      </div>
+
+      @if (catalog.error() && !catalog.isLoaded) {
+        <div class="pn-notice pn-notice--error">
+          <span class="material-symbols-rounded">error</span>
+          <div>
+            <strong>No se ha podido cargar el catálogo</strong>
+            <span class="pn-notice__body">{{ catalog.error() }}</span>
+          </div>
+        </div>
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="catalog.reload()">Reintentar</button>
+      } @else if (catalog.loading() && !catalog.isLoaded) {
+        <p class="pn-muted">Cargando…</p>
+      }
+
+      @for (category of catalog.value(); track category.id) {
+        @if (category.templates.length > 0) {
+          <div class="pn-group">
+            <span class="pn-group__head nm-group__title">
+              <span class="material-symbols-rounded">{{ iconFor(category.icon) }}</span>
+              {{ category.name }}
+            </span>
+            <div class="pn-group__body">
+              @for (template of category.templates; track template.id) {
+                <button type="button" class="pn-row" [disabled]="pending().has(template.id)"
+                        [attr.aria-pressed]="published().has(template.id)" (click)="toggle(template)">
+                  <span class="pn-row__main">
+                    <span class="pn-row__title nm-text" [class.nm-text--on]="published().has(template.id)">
+                      {{ template.text }}
+                    </span>
+                  </span>
+                  @if (pending().has(template.id)) {
+                    <span class="material-symbols-rounded pn-row__icon nm-spin">progress_activity</span>
+                  } @else if (published().has(template.id)) {
+                    <span class="material-symbols-rounded pn-row__icon nm-check">check</span>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <ng-container dialogActions>
+        <button type="button" class="pn-btn pn-btn--primary" (click)="close()">Hecho</button>
+      </ng-container>
+    </pn-dialog>
+  }
+
+  @case ('policy') {
+    <pn-dialog [title]="editingPolicy() ? 'Editar norma' : 'Escribir una norma'" (closed)="close()">
+      <label class="pn-field">
+        <span class="pn-field__label">Categoría</span>
+        <select class="pn-select" name="categoryId" [(ngModel)]="policyForm.categoryId"
+                [disabled]="categoryOptions().length === 0" (ngModelChange)="error.set(null)">
+          <option [ngValue]="null" disabled>Elige en qué categoría va</option>
+          @for (category of categoryOptions(); track category.id) {
+            <option [ngValue]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="pn-field">
+        <span class="pn-field__label">Norma</span>
+        <textarea class="pn-textarea" rows="4" name="text" maxlength="300" [(ngModel)]="policyForm.text"
+                  (ngModelChange)="error.set(null)" placeholder="Servimos café mientras esperas"></textarea>
+        @if (error(); as text) {
+          <span class="pn-field__error">{{ text }}</span>
+        } @else {
+          <span class="pn-field__hint">{{ policyForm.text.length }}/300</span>
+        }
+      </label>
+
+      @if (editingPolicy(); as policy) {
+        <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="removePolicy(policy)">
+          Quitar norma
+        </button>
+      }
+
+      <ng-container dialogActions>
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="close()">Cancelar</button>
+        <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="savePolicy()">
+          Guardar
+        </button>
+      </ng-container>
+    </pn-dialog>
+  }
+
+  @case ('category') {
+    <pn-dialog [title]="editingCategory() ? 'Editar categoría' : 'Nueva categoría'" (closed)="close()">
+      <label class="pn-field">
+        <span class="pn-field__label">Nombre</span>
+        <input class="pn-input" name="name" maxlength="60" [(ngModel)]="categoryForm.name"
+               (ngModelChange)="error.set(null)" placeholder="Nuestra forma de trabajar" />
+        @if (error(); as text) {
+          <span class="pn-field__error">{{ text }}</span>
+        } @else {
+          <span class="pn-field__hint">Es el epígrafe bajo el que se agrupan tus normas en la ficha.</span>
+        }
+      </label>
+
+      <p class="pn-field__label">Icono</p>
+      <div class="nm-icons" role="radiogroup" aria-label="Icono">
+        @for (icon of icons; track icon[0]) {
+          <button type="button" class="nm-icon" role="radio" [attr.aria-checked]="categoryForm.icon === icon[0]"
+                  [attr.aria-label]="icon[2]" [title]="icon[2]" (click)="pickIcon(icon[0])">
+            <span class="material-symbols-rounded">{{ icon[1] }}</span>
+          </button>
+        }
+      </div>
+
+      <ng-container dialogActions>
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="close()">Cancelar</button>
+        <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="saveCategory()">
+          {{ editingCategory() ? 'Guardar' : 'Crear categoría' }}
+        </button>
+      </ng-container>
+    </pn-dialog>
+  }
+}

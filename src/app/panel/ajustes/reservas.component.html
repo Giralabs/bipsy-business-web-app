@@ -1,0 +1,233 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm back" routerLink="/panel/ajustes">
+    <span class="material-symbols-rounded">arrow_back</span>Ajustes
+  </a>
+
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Las reglas con las que te pueden reservar</p>
+      <h1>Reservas</h1>
+    </div>
+    <div class="pn-head__actions">
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="save()">
+        @if (busy()) { <span class="pn-spinner"></span> } @else { Guardar }
+      </button>
+    </div>
+  </div>
+
+  <div class="pn-grid">
+    <div class="pn-col-6">
+      <div class="pn-group">
+        <p class="pn-group__head">Cuándo pueden reservarte</p>
+        <div class="pn-group__body">
+          <div class="pn-row">
+            <span class="pn-row__main">
+              <span class="pn-row__title">Antelación máxima</span>
+              <span class="pn-row__sub">{{ horizonSummary }}</span>
+            </span>
+            <span class="field-row">
+              <input class="pn-input" type="number" min="1" max="365" name="horizon" [(ngModel)]="horizon" />
+              <span class="unit">días</span>
+            </span>
+          </div>
+
+          <div class="pn-row">
+            <span class="pn-row__main">
+              <span class="pn-row__title">Antelación mínima</span>
+              <span class="pn-row__sub">{{ noticeSummary }}</span>
+            </span>
+            <span class="field-row">
+              <input class="pn-input" type="number" min="0" name="notice" [(ngModel)]="notice" />
+              <select class="pn-select" name="noticeUnit" [(ngModel)]="noticeUnit">
+                <option value="min">min</option>
+                <option value="h">horas</option>
+                <option value="d">días</option>
+              </select>
+            </span>
+          </div>
+
+          <div class="pn-row">
+            <span class="pn-row__main">
+              <span class="pn-row__title">Horas que se ofrecen</span>
+              <span class="pn-row__sub">
+                Los huecos van de {{ slot }} en {{ slot }} minutos. Al cambiarlo ajustamos la duración de
+                tus servicios al nuevo intervalo.
+              </span>
+            </span>
+            <span class="field-row">
+              <input class="pn-input" type="number" min="5" max="240" step="5" name="slot" [(ngModel)]="slot" />
+              <span class="unit">min</span>
+            </span>
+          </div>
+
+          <!-- Trabajando solo, las horas extra son de aquí. Con equipo se
+               deciden en «Tú y tu horario», como en la app. -->
+          @if (!hasTeam()) {
+            <div class="pn-row">
+              <span class="pn-row__main">
+                <span class="pn-row__title">Admitir horas extra</span>
+                <span class="pn-row__sub">Deja reservar aunque se salga un poco de tu horario.</span>
+              </span>
+              <pn-switch [checked]="allowOvertime" label="Admitir horas extra"
+                         (toggle)="allowOvertime = $event" />
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- «Ida y vuelta a domicilio». Solo para quien se desplaza: en un
+           negocio de local no hay viaje que cubrir. De cinco en cinco: nadie
+           distingue 35 de 37 minutos de coche. -->
+      @if (travels()) {
+        <div class="pn-group">
+          <p class="pn-group__head">Ida y vuelta a domicilio</p>
+          <div class="pn-group__body">
+            <div class="travel">
+              <span class="travel__head">
+                <span class="pn-row__title">Tiempo de desplazamiento</span>
+                <span class="travel__value pn-tabular">
+                  {{ +travelBuffer === 0 ? 'Sin margen' : travelBuffer + ' min' }}
+                </span>
+              </span>
+              <input
+                class="travel__slider"
+                type="range"
+                name="travelBuffer"
+                min="0"
+                max="120"
+                step="5"
+                aria-label="Tiempo de desplazamiento"
+                [disabled]="busy()"
+                [(ngModel)]="travelBuffer"
+                (change)="travelBufferSettled = travelBuffer"
+              />
+            </div>
+          </div>
+          <p class="pn-group__foot">{{ travelSummary }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- «Tú y tu horario» (`booking_settings_screen.dart`). Sin equipo no hay
+         nada que decidir: el negocio es la única persona que atiende. -->
+    @if (hasTeam()) {
+      <div class="pn-col-6">
+        <div class="pn-group">
+          <p class="pn-group__head">Tú y tu horario</p>
+          <div class="pn-group__body">
+            <div class="pn-row">
+              <span class="pn-row__main">
+                <span class="pn-row__title">Atiendo citas</span>
+                <span class="pn-row__sub">Tú también prestas servicios.</span>
+              </span>
+              <pn-switch [checked]="ownerPerforms" label="Atiendo citas" (toggle)="ownerPerforms = $event" />
+            </div>
+
+            @if (ownerPerforms) {
+              <div class="pn-row">
+                <span class="pn-row__main">
+                  <span class="pn-row__title">Tu foto</span>
+                  <span class="pn-row__sub">La que te representa como profesional, no la del negocio.</span>
+                </span>
+                <span class="owner-photo">
+                  @if (auth.profile()?.ownerImageUrl) {
+                    <img [src]="auth.profile()?.ownerImageUrl" alt="" />
+                  } @else {
+                    <span class="material-symbols-rounded">person</span>
+                  }
+                </span>
+              </div>
+              <div class="pn-row">
+                <span class="pn-row__main owner-picker">
+                  <pn-photo-picker
+                    label="Cambiar tu foto"
+                    hint="Cuadrada. Es la que ve el cliente al elegirte."
+                    [current]="auth.profile()?.ownerImageUrl ?? null"
+                    [busy]="uploading()"
+                    (picked)="uploadOwnerPhoto($event)"
+                  />
+                  @if (auth.profile()?.ownerImageUrl) {
+                    <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="removeOwnerPhoto()">
+                      Quitar tu foto
+                    </button>
+                  }
+                </span>
+              </div>
+
+              <div class="pn-row">
+                <span class="pn-row__main">
+                  <span class="pn-row__title">Nombre personal</span>
+                </span>
+                <span class="field-row">
+                  <input class="pn-input" type="text" name="ownerName" placeholder="Tu nombre"
+                         [(ngModel)]="ownerDisplayName" />
+                </span>
+              </div>
+
+              <div class="pn-row">
+                <span class="pn-row__main">
+                  <span class="pn-row__title">Admitir horas extra</span>
+                  <span class="pn-row__sub">La cita puede acabar fuera de horario.</span>
+                </span>
+                <pn-switch [checked]="allowOvertime" label="Admitir horas extra"
+                           (toggle)="allowOvertime = $event" />
+              </div>
+            }
+          </div>
+          @if (ownerPerforms) {
+            <p class="pn-group__foot">
+              Aquí te configuras tú como profesional. Con las horas extra, una reserva puede salir de tu horario.
+            </p>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="pn-col-6">
+      <div class="pn-group">
+        <p class="pn-group__head">Cuando entra una reserva</p>
+        <div class="pn-group__body">
+          <div class="pn-row">
+            <span class="pn-row__main">
+              <span class="pn-row__title">Aceptar citas automáticamente</span>
+              <span class="pn-row__sub">
+                @if (auth.isAutonomous()) {
+                  Si lo apagas, cada cita entra como pendiente y la confirmas tú.
+                } @else {
+                  Encendido, aceptan automáticamente todos los trabajadores. Apagado, cada uno puede
+                  activarlo para sus propias citas desde Equipo.
+                }
+              </span>
+            </span>
+            <pn-switch [checked]="autoAccept" label="Aceptar automáticamente" (toggle)="autoAccept = $event" />
+          </div>
+        </div>
+      </div>
+
+      <div class="pn-group">
+        <p class="pn-group__head">Límite por cliente</p>
+        <div class="pn-group__body">
+          <div class="pn-row">
+            <span class="pn-row__main">
+              <span class="pn-row__title">Limitar citas sin pasar</span>
+              <span class="pn-row__sub">Evita que una misma persona bloquee media agenda.</span>
+            </span>
+            <pn-switch [checked]="limitEnabled" label="Limitar citas" (toggle)="limitEnabled = $event" />
+          </div>
+          @if (limitEnabled) {
+            <div class="pn-row">
+              <span class="pn-row__main">
+                <span class="pn-row__title">Máximo</span>
+                <span class="pn-row__sub">{{ limitSummary }}</span>
+              </span>
+              <span class="field-row">
+                <input class="pn-input" type="number" min="1" max="100" name="limit" [(ngModel)]="limit" />
+                <span class="unit">citas</span>
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

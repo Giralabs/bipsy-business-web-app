@@ -1,0 +1,27 @@
+:host { display: block; }
+
+.we-day { display: flex; gap: 24px; padding: 18px 4px; }
+.we-day + .we-day { border-top: 1px solid var(--pn-line); }
+.we-day--closed .we-day__name span:first-child { color: var(--clr-text-3); }
+
+.we-day__name { width: 190px; flex: none; }
+.we-day__name span:first-child {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.we-day__sum { display: block; margin-top: 3px; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+
+.we-day__ranges { flex: 1; min-width: 0; }
+
+.we-range { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.we-select { width: 116px; padding: 11px 14px; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.we-range__dash { color: var(--clr-text-3); }
+
+.we-day__actions { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -12px; }
+
+@media (max-width: 700px) {
+  .we-day { flex-direction: column; gap: 10px; }
+  .we-day__name { width: auto; }
+}

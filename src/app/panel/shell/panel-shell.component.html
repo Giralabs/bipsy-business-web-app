@@ -1,0 +1,188 @@
+<div class="pn shell" [class.shell--rail]="rail()" [class.shell--drawer]="drawerOpen()">
+  <a class="pn-skip" href="#contenido-panel">Saltar al contenido</a>
+
+  <!-- ----- MÓVIL: la barra se esconde en un cajón ----- -->
+  <header class="mtop">
+    <button type="button" class="pn-icon-btn pn-icon-btn--ghost" (click)="drawerOpen.set(true)"
+            aria-label="Abrir el menú" [attr.aria-expanded]="drawerOpen()" aria-controls="panel-nav">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
+    <a class="mtop__brand" routerLink="/panel" aria-label="Inicio">
+      <img class="theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
+      <img class="theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+    </a>
+    <button type="button" class="pn-icon-btn pn-icon-btn--ghost" (click)="togglePalette()" aria-label="Buscar">
+      <span class="material-symbols-rounded">search</span>
+    </button>
+  </header>
+
+  @if (drawerOpen()) {
+    <div class="shell__scrim" (click)="drawerOpen.set(false)"></div>
+  }
+
+  <!-- ----- BARRA LATERAL ----- -->
+  <aside class="sb" id="panel-nav" aria-label="Navegación del panel">
+    <div class="sb__head">
+      @if (rail()) {
+        <button type="button" class="sb__mark" (click)="toggleRail()"
+                [attr.aria-label]="'Desplegar la barra lateral (' + modKey + ' B)'"
+                [attr.title]="'Desplegar (' + modKey + ' B)'">
+          <img class="sb__symbol theme-dark-only" src="assets_bipsy_business/Brand Marks/apricot_dark_symbol_nobackground_trim.webp" alt="" />
+          <img class="sb__symbol theme-light-only" src="assets_bipsy_business/Brand Marks/apricot_light_symbol_nobackground_trim.webp" alt="" />
+          <span class="material-symbols-rounded sb__mark-open">left_panel_open</span>
+        </button>
+      } @else {
+        <a class="sb__brand" routerLink="/panel" aria-label="Bipsy Business, inicio">
+          <img class="theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
+          <img class="theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+        </a>
+        <button type="button" class="sb__fold" (click)="toggleRail()"
+                [attr.aria-label]="'Plegar la barra lateral (' + modKey + ' B)'"
+                [attr.title]="'Plegar (' + modKey + ' B)'">
+          <span class="material-symbols-rounded">left_panel_close</span>
+        </button>
+        <button type="button" class="sb__close pn-icon-btn pn-icon-btn--ghost" (click)="drawerOpen.set(false)"
+                aria-label="Cerrar el menú">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      }
+    </div>
+
+    <button type="button" class="sb__search" (click)="togglePalette()" [attr.title]="rail() ? 'Ir a… (' + modKey + ' K)' : null">
+      <span class="material-symbols-rounded">search</span>
+      <span class="sb__label">Ir a…</span>
+      <kbd class="sb__kbd">{{ modKey }} K</kbd>
+    </button>
+
+    <nav class="sb__nav">
+      @for (section of sections(); track section.id; let i = $index) {
+        @if (i > 0 && sections()[i - 1].group !== section.group) {
+          <span class="sb__gap" aria-hidden="true"></span>
+        }
+        <a class="sb__item" [routerLink]="section.route"
+           [class.is-here]="here()?.id === section.id"
+           [attr.aria-current]="here()?.id === section.id ? 'page' : null"
+           [attr.data-coach]="'nav:' + section.id"
+           [attr.title]="rail() ? section.label : null">
+          <span class="sb__icon">
+            <span class="material-symbols-rounded" [class.fill]="here()?.id === section.id">{{ section.icon }}</span>
+            @if (badgeOf(section) > 0) {
+              <span class="sb__dot" aria-hidden="true"></span>
+            }
+          </span>
+          <span class="sb__label">{{ section.label }}</span>
+          @if (badgeOf(section) > 0) {
+            <span class="sb__badge" [attr.aria-label]="badgeOf(section) + ' pendientes'">{{ badgeOf(section) }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sb__foot">
+      @if (auth.isBusiness()) {
+        <a class="sb__item" routerLink="/panel/ajustes"
+           [class.is-here]="isSettings()"
+           [attr.aria-current]="isSettings() ? 'page' : null"
+           [attr.title]="rail() ? 'Ajustes' : null">
+          <span class="sb__icon">
+            <span class="material-symbols-rounded" [class.fill]="isSettings()">settings</span>
+          </span>
+          <span class="sb__label">Ajustes</span>
+        </a>
+      }
+
+      <div class="sb__me-wrap">
+        <button type="button" class="sb__me" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()"
+                aria-haspopup="menu" [attr.aria-label]="'Cuenta de ' + who()">
+          <pn-avatar [name]="who()" [url]="auth.profile()?.profileImageUrl ?? null" size="sm" />
+          <span class="sb__me-text">
+            <span class="sb__me-name">{{ who() }}</span>
+            <span class="sb__me-role">{{ roleLabel() }}</span>
+          </span>
+          <span class="material-symbols-rounded sb__me-chev">unfold_more</span>
+        </button>
+
+        @if (menuOpen()) {
+          <div class="sb__backdrop" (click)="closeMenu()"></div>
+          <div class="sb__menu" role="menu">
+            <div class="sb__menu-head">
+              <p class="sb__menu-name">{{ auth.user()?.name || who() }}</p>
+              <p class="sb__menu-mail">{{ auth.user()?.email }}</p>
+            </div>
+
+            @if (auth.isBusiness()) {
+              <a class="sb__menu-row" role="menuitem" routerLink="/panel/ajustes/suscripcion" (click)="closeMenu()">
+                <span class="material-symbols-rounded">workspace_premium</span> Mi plan
+              </a>
+            } @else {
+              <a class="sb__menu-row" role="menuitem" routerLink="/panel/mi-perfil" (click)="closeMenu()">
+                <span class="material-symbols-rounded">account_circle</span> Mi perfil
+              </a>
+            }
+            <a class="sb__menu-row" role="menuitem" routerLink="/panel/ajustes/cuenta" (click)="closeMenu()">
+              <span class="material-symbols-rounded">lock</span> Tu cuenta
+            </a>
+            @if (auth.isBusiness()) {
+              <button type="button" class="sb__menu-row" role="menuitem" (click)="replayTour()">
+                <span class="material-symbols-rounded">school</span> Ver el tutorial otra vez
+              </button>
+            }
+            <a class="sb__menu-row" role="menuitem" routerLink="/panel/soporte" (click)="closeMenu()">
+              <span class="material-symbols-rounded">support_agent</span> Soporte
+            </a>
+            <a class="sb__menu-row" role="menuitem" routerLink="/ayuda" (click)="closeMenu()">
+              <span class="material-symbols-rounded">help</span> Centro de ayuda
+            </a>
+            <span class="sb__menu-sep" aria-hidden="true"></span>
+            <button type="button" class="sb__menu-row sb__menu-row--danger" role="menuitem" (click)="logout()">
+              <span class="material-symbols-rounded">logout</span> Cerrar sesión
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <!-- ----- CONTENIDO ----- -->
+  <div class="shell__main">
+    @if (expired) {
+      <div class="pn-strip" role="alert">
+        <span class="material-symbols-rounded">schedule</span>
+        Tu sesión ha caducado. Vuelve a entrar para seguir trabajando.
+      </div>
+    }
+
+    <!-- payouts_pending_banner.dart. El alta recomienda pedir tarjeta y la
+         mayoría dice que sí, pero la cuenta de Stripe se puede dejar para
+         luego: su elección queda entonces guardada y sin efecto, y eso solo se
+         veía entrando en Funcionalidades. Un negocio podía pasarse meses
+         creyendo que pedía tarjeta.
+
+         No se puede aceptar, solo apartar: lo que lo hace desaparecer de
+         verdad es configurar los cobros. -->
+    @if (payoutsPending()) {
+      <div class="pn-strip pn-strip--info" role="status">
+        <span class="material-symbols-rounded">account_balance</span>
+        <a routerLink="/panel/ajustes/cobros">
+          Tienes pendiente configurar los cobros para poder cobrar cancelaciones y citas.
+        </a>
+        <button type="button" class="pn-strip__close" aria-label="Cerrar"
+                (click)="payoutsBannerDismissed.set(true)">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+    }
+
+    <div id="contenido-panel" tabindex="-1">
+      <router-outlet />
+    </div>
+  </div>
+
+  @if (paletteOpen()) {
+    <pn-command-palette [items]="paletteItems()" (close)="paletteOpen.set(false)" />
+  }
+
+  <pn-toasts />
+  <pn-confirm-host />
+  <app-coach-overlay />
+</div>

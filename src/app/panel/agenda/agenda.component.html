@@ -1,0 +1,212 @@
+<main class="pn-main pn-main--wide">
+  <div class="pn-head ag-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">{{ auth.businessName() }}</p>
+      <h1>Tu agenda</h1>
+    </div>
+
+    <div class="pn-head__actions">
+      <!-- Without the figure, like the app: with it the pill changes width every
+           time an appointment comes in or is settled and the row shifts. The
+           number is on the «Pendientes» tab and in the label read aloud. -->
+      @if (agenda.pendingCount() > 0) {
+        <button type="button" class="pn-count pn-count--warn" (click)="setView('pendientes')"
+                [attr.aria-label]="count(agenda.pendingCount(), 'cita pendiente', 'citas pendientes') + ' de confirmar'">
+          <span class="material-symbols-rounded">notifications_active</span>
+          Pendiente
+        </button>
+      }
+      @if (waitlist.enabled() && waitlist.count() > 0) {
+        <button type="button" class="pn-count pn-count--info" (click)="setView('espera')"
+                [attr.aria-label]="count(waitlist.count(), 'persona esperando', 'personas esperando') + ' un hueco'">
+          <span class="material-symbols-rounded">hourglass_top</span>
+          En espera
+        </button>
+      }
+      <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Qué significa cada color"
+              (click)="legendOpen.set(true)">
+        <span class="material-symbols-rounded">info</span>
+      </button>
+      @if (auth.isBusiness()) {
+        <button type="button" class="pn-btn pn-btn--primary" (click)="give()">
+          <span class="material-symbols-rounded">add</span>
+          Dar cita
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="ag-bar">
+    <pn-segmented [options]="tabs()" [value]="view()" label="Vista de la agenda"
+                  (valueChange)="setView($event)" />
+
+    @if (view() === 'semana' || view() === 'dia' || view() === 'lista') {
+      <div class="ag-nav">
+        <button type="button" class="pn-icon-btn" (click)="step(-1)"
+                [attr.aria-label]="view() === 'semana' ? 'Semana anterior' : 'Día anterior'">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+        <span class="ag-range">{{ rangeLabel() }}</span>
+        <button type="button" class="pn-icon-btn" (click)="step(1)"
+                [attr.aria-label]="view() === 'semana' ? 'Semana siguiente' : 'Día siguiente'">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+        @if (!showsToday) {
+          <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="goToday()">Hoy</button>
+        }
+      </div>
+
+      @if (view() !== 'semana') {
+        <span class="ag-hours pn-muted">{{ dayHours() }}</span>
+      }
+    }
+  </div>
+
+  @if (agenda.bookings.loading() && agenda.all().length === 0) {
+    <div class="ag-loading">
+      @for (block of [1, 2, 3]; track block) {
+        <div class="pn-skeleton" style="height:130px"></div>
+      }
+    </div>
+  }
+
+  <!-- ----- SEMANA ----- -->
+  @if (view() === 'semana') {
+    <app-agenda-grid [columns]="weekColumns()" [pickable]="auth.isBusiness()"
+                     [slotMinutes]="auth.profile()?.slotMinutes ?? 15"
+                     (picked)="open($event)" (spotPicked)="giveAt($event)" />
+  }
+
+  <!-- ----- DÍA ----- -->
+  @if (view() === 'dia') {
+    <app-agenda-grid [columns]="dayColumns()" [scale]="2" [pickable]="auth.isBusiness()"
+                     [slotMinutes]="auth.profile()?.slotMinutes ?? 15"
+                     (picked)="open($event)" (spotPicked)="giveAt($event)" />
+  }
+
+  <!-- ----- LISTA ----- -->
+  @if (view() === 'lista') {
+    <section class="pn-card ag-list">
+      @if (dayList().length === 0) {
+        <pn-empty icon="event_busy" title="Sin citas este día"
+                  [text]="'No hay reservas para ' + relativeDay(day()) + '.'" />
+      } @else {
+        @for (booking of dayList(); track booking.id) {
+          <button type="button" class="bkc" (click)="open(booking)"
+                  [style.--ev]="look[stateOf(booking)].color"
+                  [class.bkc--off]="stateOf(booking) === 'cancelada' || stateOf(booking) === 'noVino'">
+            <span class="bkc__time">
+              <span class="bkc__hour pn-tabular">{{ hhmm(toDate(booking.startDateTime)) }}</span>
+              <span class="bkc__len">{{ lengthOf(booking) }}</span>
+            </span>
+
+            <span class="bkc__main">
+              <!-- Who shows up, which may not be who booked. -->
+              <span class="bkc__name">{{ who(booking) }}</span>
+              <span>
+                <span class="bkc__service">{{ booking.serviceName }}</span>
+                @if (booking.workerName) {
+                  <span class="bkc__meta">
+                    <span class="material-symbols-rounded">person</span>{{ booking.workerName }}
+                  </span>
+                }
+                @if (atHome(booking)) {
+                  <span class="bkc__meta">
+                    <span class="material-symbols-rounded">directions_car</span>A domicilio
+                  </span>
+                }
+                @if (forSomeoneElse(booking)) {
+                  <span class="bkc__meta">
+                    <span class="material-symbols-rounded">group</span>Reservó: {{ booking.customerName }}
+                  </span>
+                }
+                @if (booking.notes) {
+                  <span class="bkc__meta" title="Tiene una nota">
+                    <span class="material-symbols-rounded">sticky_note_2</span>Con nota
+                  </span>
+                }
+              </span>
+            </span>
+
+            <span class="bkc__stripe">
+              <span class="material-symbols-rounded">{{ look[stateOf(booking)].icon }}</span>
+              {{ look[stateOf(booking)].label }}
+            </span>
+          </button>
+        }
+      }
+    </section>
+  }
+
+  <!-- ----- PENDIENTES ----- -->
+  @if (view() === 'pendientes') {
+    <section class="pn-card ag-list">
+      @if (pending().length === 0) {
+        <pn-empty icon="task_alt" title="Sin pendientes" text="No hay citas esperando confirmación." />
+      } @else {
+        @for (booking of pending(); track booking.id) {
+          <button type="button" class="bkc" (click)="open(booking)" [style.--ev]="look['pendiente'].color">
+            <span class="bkc__time">
+              <span class="bkc__hour pn-tabular">{{ hhmm(toDate(booking.startDateTime)) }}</span>
+              <span class="bkc__len">{{ relativeDay(toDate(booking.startDateTime)) }}</span>
+            </span>
+            <span class="bkc__main">
+              <span class="bkc__name">{{ who(booking) }}</span>
+              <span>
+                <span class="bkc__service">{{ booking.serviceName }}</span>
+                @if (booking.workerName) {
+                  <span class="bkc__meta">
+                    <span class="material-symbols-rounded">person</span>{{ booking.workerName }}
+                  </span>
+                }
+                @if (atHome(booking)) {
+                  <span class="bkc__meta">
+                    <span class="material-symbols-rounded">directions_car</span>A domicilio
+                  </span>
+                }
+              </span>
+            </span>
+            <span class="bkc__stripe">
+              <span class="material-symbols-rounded">schedule</span>
+              Confirmar
+            </span>
+          </button>
+        }
+      }
+    </section>
+  }
+
+  <!-- ----- ESPERA ----- -->
+  @if (view() === 'espera') {
+    <app-waitlist-panel />
+  }
+</main>
+
+@if (picked(); as booking) {
+  <app-booking-dialog [booking]="booking" (closed)="close()" />
+}
+
+@if (giving(); as seed) {
+  <app-create-booking-dialog [day]="seed.day" [time]="seed.time" [workerId]="seed.workerId"
+                             (closed)="giving.set(null)" (created)="onGiven($event)" />
+}
+
+@if (legendOpen()) {
+  <pn-dialog title="Qué significa cada color" (closed)="legendOpen.set(false)">
+    <!-- Only the name, like the app since 2/10: seven explanations in a row
+         are not read, and what is asked here is «what does this colour mean?». -->
+    @for (state of legend; track state) {
+      <div class="lg">
+        <span class="lg__stripe" [style.background]="look[state].color">
+          <span class="material-symbols-rounded">{{ look[state].icon }}</span>
+        </span>
+        <strong>{{ look[state].label }}</strong>
+      </div>
+    }
+    <p class="lg__foot">Abre una cita para ver qué puedes hacer con ella.</p>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--primary" (click)="legendOpen.set(false)">Entendido</button>
+    </ng-container>
+  </pn-dialog>
+}

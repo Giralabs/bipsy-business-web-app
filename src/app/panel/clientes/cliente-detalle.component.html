@@ -1,0 +1,269 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm cd-back" routerLink="/panel/clientes">
+    <span class="material-symbols-rounded">arrow_back</span>
+    Clientes
+  </a>
+
+  @if (loading()) {
+    <div class="pn-skeleton" style="height:180px"></div>
+  }
+
+  @if (detail(); as data) {
+    <header class="pn-card cd-head">
+      <pn-avatar [name]="data.customer.name" [url]="data.customer.profileImageUrl" size="xl" />
+      <div class="cd-head__text">
+        <h1>{{ data.customer.name }}</h1>
+        <p class="cd-head__meta">
+          {{ count(data.customer.bookingCount, 'cita', 'citas') }}
+          @if (data.customer.lastBookingAt) { · última {{ relativeDay(toDate(data.customer.lastBookingAt)) }} }
+          · {{ sourceLabel(data.customer.source) }}
+        </p>
+        <div class="cd-head__tags">
+          @if (data.customer.linkedCustomerId) {
+            <span class="pn-status pn-status--accent">Tiene cuenta en Bipsy</span>
+          } @else {
+            <span class="pn-status pn-status--grey">Sin cuenta en Bipsy</span>
+          }
+          @if (data.customer.trusted) {
+            <span class="pn-status pn-status--accent">
+              <span class="material-symbols-rounded">workspace_premium</span>Cliente de confianza
+            </span>
+          }
+          @if (data.customer.banned) {
+            <span class="pn-status pn-status--danger">Vetado</span>
+          }
+        </div>
+      </div>
+
+      <div class="cd-head__actions">
+        @if (data.customer.phone) {
+          <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="whatsappHref" target="_blank" rel="noopener">
+            <span class="material-symbols-rounded">chat</span>WhatsApp
+          </a>
+          <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="phoneHref">
+            <span class="material-symbols-rounded">call</span>Llamar
+          </a>
+        }
+        @if (data.customer.email) {
+          <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="mailHref">
+            <span class="material-symbols-rounded">mail</span>Email
+          </a>
+        }
+        @if (data.customer.linkedCustomerId && auth.canUseChat()) {
+          <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" (click)="message()">
+            <span class="material-symbols-rounded">forum</span>Mensaje
+          </button>
+        }
+      </div>
+    </header>
+
+    <div class="cd-tabs">
+      <pn-segmented [options]="tabs()" [value]="tab()" label="Secciones de la ficha"
+                    (valueChange)="tab.set($event)" />
+    </div>
+
+    <!-- ----- INFO ----- -->
+    @if (tab() === 'info') {
+      <div class="pn-grid">
+        <!-- First in the tab: the only thing the shop DECIDES here, and the only
+             one with an effect on what its customer sees when booking. Only
+             where a card is asked for, and only with a Bipsy account (same rule
+             as banning): the level is resolved per account. -->
+        @if (data.paymentsEnabled && data.customer.linkedCustomerId) {
+          <section class="pn-card pn-col-12 cd-trust">
+            <span class="material-symbols-rounded pn-row__icon">workspace_premium</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Cliente de confianza</span>
+              <span class="pn-row__sub">No le pido tarjeta para reservar</span>
+            </span>
+            <pn-switch [checked]="data.customer.trusted === true" [disabled]="savingTrust()"
+                       label="Cliente de confianza" (toggle)="setTrusted($event)" />
+          </section>
+        }
+
+        <section class="pn-card pn-col-6">
+          <div class="pn-block__head">
+            <span class="material-symbols-rounded">sticky_note_2</span>
+            <h2>Sobre el cliente</h2>
+            <button type="button" class="pn-block__more pn-btn pn-btn--text pn-btn--sm" (click)="editing.set(true)">
+              Editar
+            </button>
+          </div>
+          @if (data.customer.notes) {
+            <p class="cd-notes">{{ data.customer.notes }}</p>
+          } @else {
+            <p class="pn-dim cd-notes">
+              Aún no has apuntado nada. Aquí van las alergias, cómo le gusta el corte o lo que no hay que
+              olvidar. Estas notas solo las ves tú.
+            </p>
+          }
+        </section>
+
+        <section class="pn-card pn-col-6">
+          <div class="pn-block__head">
+            <span class="material-symbols-rounded">contact_page</span>
+            <h2>Contacto</h2>
+          </div>
+          <div class="pn-group__body">
+            <div class="pn-row">
+              <span class="material-symbols-rounded pn-row__icon">call</span>
+              <span class="pn-row__main"><span class="pn-row__title">Teléfono</span></span>
+              <span class="pn-row__value">{{ data.customer.phone ?? '—' }}</span>
+            </div>
+            <div class="pn-row">
+              <span class="material-symbols-rounded pn-row__icon">mail</span>
+              <span class="pn-row__main"><span class="pn-row__title">Correo</span></span>
+              <span class="pn-row__value">{{ data.customer.email ?? '—' }}</span>
+            </div>
+            <div class="pn-row">
+              <span class="material-symbols-rounded pn-row__icon">event</span>
+              <span class="pn-row__main"><span class="pn-row__title">Cliente desde</span></span>
+              <span class="pn-row__value">{{ longDate(fromInstant(data.customer.createdAt)) }}</span>
+            </div>
+            <div class="pn-row">
+              <span class="material-symbols-rounded pn-row__icon">{{ sourceIcon(data.customer.source) }}</span>
+              <span class="pn-row__main"><span class="pn-row__title">Origen</span></span>
+              <span class="pn-row__value">{{ sourceLabel(data.customer.source) }}</span>
+            </div>
+          </div>
+
+          <div class="cd-danger">
+            <button type="button" class="pn-btn pn-btn--danger pn-btn--sm"
+                    [disabled]="!data.customer.linkedCustomerId || data.customer.banned"
+                    [title]="data.customer.linkedCustomerId ? '' : 'Solo se puede vetar a quien tiene cuenta en Bipsy'"
+                    (click)="ban()">Vetar cliente</button>
+            <button type="button" class="pn-btn pn-btn--danger pn-btn--sm" (click)="remove()">Eliminar</button>
+          </div>
+          @if (!data.customer.linkedCustomerId) {
+            <p class="pn-field__hint">
+              Solo se puede vetar a quien tiene cuenta en Bipsy: el veto impide reservar desde la app, y este
+              contacto no la tiene.
+            </p>
+          }
+        </section>
+      </div>
+    }
+
+    <!-- ----- CITAS ----- -->
+    @if (tab() === 'citas') {
+      <section class="pn-card">
+        @if (data.bookings.length === 0) {
+          <pn-empty icon="event_busy" title="Sin citas todavía"
+                    text="Cuando reserve contigo, sus citas aparecerán aquí." />
+        } @else {
+          @if (upcoming().length > 0) {
+            <p class="cd-sub">Próximas</p>
+            @for (booking of upcoming(); track booking.id) {
+              <div class="cd-bk">
+                <span class="cd-bk__date">
+                  {{ relativeDay(toDate(booking.startDateTime)) }}
+                  <span class="pn-tabular">{{ hhmm(toDate(booking.startDateTime)) }}</span>
+                </span>
+                <span class="cd-bk__service">
+                  {{ booking.serviceName }}
+                  @if (attendee(booking); as name) {
+                    <span class="cd-bk__for">· Para {{ name }}</span>
+                  }
+                </span>
+                <span class="cd-bk__state" [style.color]="look[stateOf(booking)].color">
+                  {{ look[stateOf(booking)].label }}
+                </span>
+              </div>
+            }
+          }
+          @if (past().length > 0) {
+            <p class="cd-sub">Historial</p>
+            @for (booking of past(); track booking.id) {
+              <div class="cd-bk">
+                <span class="cd-bk__date">
+                  {{ longDate(toDate(booking.startDateTime)) }}
+                  <span class="pn-tabular">{{ hhmm(toDate(booking.startDateTime)) }}</span>
+                </span>
+                <span class="cd-bk__service">
+                  {{ booking.serviceName }}
+                  @if (attendee(booking); as name) {
+                    <span class="cd-bk__for">· Para {{ name }}</span>
+                  }
+                </span>
+                <span class="cd-bk__state" [style.color]="look[stateOf(booking)].color">
+                  {{ look[stateOf(booking)].label }}
+                </span>
+              </div>
+            }
+          }
+        }
+      </section>
+    }
+
+    <!-- ----- RESEÑAS ----- -->
+    @if (tab() === 'resenas') {
+      <section class="pn-card">
+        @if (data.reviews.length === 0) {
+          <pn-empty icon="reviews" title="Sin reseñas de este cliente"
+                    text="Cuando valore una cita contigo, la verás aquí." />
+        } @else {
+          @for (review of data.reviews; track review.id) {
+            <article class="cd-rev">
+              <div class="cd-rev__stars" aria-hidden="true">
+                @for (star of [1, 2, 3, 4, 5]; track star) {
+                  <span class="material-symbols-rounded fill" [style.opacity]="review.rating >= star ? 1 : 0.2">star</span>
+                }
+              </div>
+              <p class="cd-rev__text">{{ review.comment }}</p>
+              <p class="cd-rev__meta">{{ review.serviceName }} · {{ longDate(toDate(review.createdAt)) }}</p>
+            </article>
+          }
+        }
+      </section>
+    }
+
+    <!-- ----- PAGOS ----- -->
+    @if (tab() === 'pagos') {
+      <section class="pn-card">
+        @if (!data.paymentsEnabled) {
+          <pn-empty icon="credit_card_off" title="No tienes los cobros activados"
+                    text="Con los cobros por la app verás aquí lo que te ha pagado cada cliente.">
+            <a class="pn-btn pn-btn--secondary" routerLink="/panel/ajustes/cobros">Ver cobros</a>
+          </pn-empty>
+        } @else if (data.payments.length === 0) {
+          <pn-empty icon="receipt_long" title="Sin cobros" text="Todavía no te ha pagado nada por la app." />
+        } @else {
+          @for (payment of data.payments; track payment.id) {
+            <div class="cd-bk">
+              <span class="cd-bk__date">{{ longDate(toDate(payment.createdAt)) }}</span>
+              <span class="cd-bk__service">{{ payment.description ?? 'Cobro' }}</span>
+              <span class="cd-bk__state pn-tabular">{{ money(payment.amountCents) }}</span>
+            </div>
+          }
+        }
+      </section>
+    }
+  }
+</main>
+
+@if (editing()) {
+  <pn-dialog title="Editar cliente" (closed)="editing.set(false)">
+    <label class="pn-field">
+      <span class="pn-field__label">Nombre</span>
+      <input class="pn-input" type="text" name="name" [(ngModel)]="form.name" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Teléfono</span>
+      <input class="pn-input" type="tel" name="phone" [(ngModel)]="form.phone" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Correo</span>
+      <input class="pn-input" type="email" name="email" [(ngModel)]="form.email" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Notas</span>
+      <textarea class="pn-textarea" rows="4" name="notes" [(ngModel)]="form.notes"></textarea>
+      <span class="pn-field__hint">Estas notas solo las ves tú.</span>
+    </label>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="editing.set(false)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="saveEdit()">Guardar</button>
+    </ng-container>
+  </pn-dialog>
+}

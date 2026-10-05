@@ -1,0 +1,208 @@
+:host { display: block; }
+
+/* ----- EL DÍA ---------------------------------------------------------- */
+
+.day {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: var(--pn-gap);
+}
+
+.day__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  border-radius: var(--pn-radius-card);
+  /* El bloque del día es el único con color de marca: es lo que se mira. */
+  background: linear-gradient(150deg, var(--pn-card) 0%, var(--pn-card) 55%, var(--pn-day-glow) 100%);
+  box-shadow: var(--pn-rim);
+  --pn-day-glow: rgba(192, 238, 211, 0.10);
+}
+@media (prefers-color-scheme: light) {
+  .day__main { --pn-day-glow: rgba(131, 163, 142, 0.12); }
+}
+
+.day__top { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.day__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 11px;
+  border-radius: var(--r-pill);
+  background: var(--pn-field);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.day__tag .material-symbols-rounded { font-size: 18px; }
+.day__hours { margin-left: auto; font-size: 0.875rem; color: var(--clr-text-3); }
+
+/* Cada cifra ocupa lo suyo, no una cuarta parte: con columnas iguales el
+   importe se comía su hueco y quedaba tocando el borde. */
+.day__numbers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 18px 44px;
+}
+.day__numbers .pn-kpi { flex: 0 0 auto; }
+.day__numbers .pn-kpi__value { font-size: clamp(2.25rem, 3.2vw, 3rem); }
+
+/* El importe, un punto por debajo de los conteos y con su propia separación:
+   es el resultado del día, no otro contador más. */
+.day__money { padding-left: 44px; border-left: 1px solid var(--pn-line); }
+.day__money .pn-kpi__value { font-size: clamp(1.625rem, 2.2vw, 2.125rem); }
+
+@media (max-width: 620px) {
+  .day__money { padding-left: 0; border-left: 0; }
+}
+
+.day__progress { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+.day__progress .pn-bar { flex: 1; }
+.day__progress-text { font-size: 0.875rem; font-weight: 700; color: var(--clr-text-2); }
+
+.day__cta { margin-top: 24px; align-self: flex-start; text-decoration: none; }
+
+/* La columna derecha: lo que queda por atender, que es lo que se mira. */
+.day__rest {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: var(--pn-radius-card);
+  background: var(--pn-card);
+  box-shadow: var(--pn-rim);
+}
+.day__rest-label {
+  margin-bottom: 12px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+
+.next {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 10px;
+  border-radius: 14px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) ease;
+}
+.next:hover { background: var(--pn-field); }
+.next--now { background: var(--pn-field); }
+.next__bar { width: 4px; height: 34px; border-radius: 2px; flex: none; }
+.next__time { width: 48px; flex: none; font-size: 1rem; font-weight: 800; }
+.next__main { flex: 1; min-width: 0; }
+.next__name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.next__service {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--clr-text-2);
+  text-decoration: none;
+}
+.day__more .material-symbols-rounded { font-size: 17px; }
+
+/* ----- LO QUE TE ESPERA ------------------------------------------------ */
+
+/* Cards in the same row share the tallest one's height: with `start` (the
+   grid's default here) «Esperando tu respuesta» ended up shorter than the
+   two beside it and the row looked broken. */
+.board { margin-top: var(--pn-gap); align-items: stretch; }
+.board > .pn-block { height: 100%; }
+/* Empty states then centre themselves in the space instead of clinging to
+   the top of a taller card. */
+.board > .pn-block pn-empty { margin: auto 0; }
+
+.alerts { display: flex; flex-direction: column; gap: 6px; margin: -4px -10px 0; }
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) ease;
+}
+.alert:hover { background: var(--pn-field); }
+.alert__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  background: rgba(232, 182, 87, 0.16);
+  color: var(--clr-warn-text);
+}
+.alert__icon .material-symbols-rounded { font-size: 20px; }
+.alert__main { flex: 1; min-width: 0; }
+.alert__title { display: block; font-size: 0.9375rem; font-weight: 700; }
+.alert__sub { display: block; margin-top: 2px; font-size: 0.8125rem; color: var(--clr-text-3); }
+.alert__go { font-size: 18px; color: var(--clr-text-3); transition: translate var(--dur-fast) ease; }
+.alert:hover .alert__go { translate: 3px 0; color: var(--clr-text); }
+
+.setup__count { font-size: 0.875rem; font-weight: 800; color: var(--clr-text-2); }
+
+.pending { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.pending + .pending { border-top: 1px solid var(--pn-line); }
+.pending__main { flex: 1; min-width: 0; }
+.pending__name { font-size: 0.9375rem; font-weight: 700; }
+.pending__meta { margin-top: 3px; font-size: 0.8125rem; color: var(--clr-text-3); }
+
+.setup__intro { font-size: 0.875rem; line-height: 1.55; }
+.setup__bar { display: flex; align-items: center; gap: 14px; margin: 18px 0 8px; }
+.setup__bar .pn-bar { flex: 1; }
+.setup__bar span { font-size: 0.875rem; font-weight: 800; }
+.setup__list { margin: 10px -20px -8px; }
+.setup__list .pn-row { padding-inline: 20px; }
+
+.staff { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
+.staff + .staff { border-top: 1px solid var(--pn-line); }
+.staff__name { flex: 1; font-size: 0.875rem; font-weight: 600; }
+
+.wait { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
+.wait + .wait { border-top: 1px solid var(--pn-line); }
+.wait__pos {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--pn-field);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.wait__main { flex: 1; min-width: 0; }
+.wait__name { display: block; font-size: 0.875rem; font-weight: 600; }
+.wait__service { display: block; font-size: 0.8125rem; color: var(--clr-text-3); }
+
+@media (max-width: 1040px) {
+  .day { grid-template-columns: 1fr; }
+  .day__numbers { grid-template-columns: repeat(2, 1fr); }
+}

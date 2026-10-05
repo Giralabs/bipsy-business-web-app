@@ -1,0 +1,55 @@
+<app-auth-layout bip="MB-08" claim="Te ayudamos a volver a entrar.">
+  <h1 class="auth-title">{{ title() }}</h1>
+
+  @if (phase() === 1) {
+    <p class="auth-lead">Dinos con qué correo entras y te mandamos un código de seis dígitos.</p>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Tu correo</span>
+      <input class="pn-input" type="email" name="email" autocomplete="email"
+             placeholder="hola@tunegocio.es" [(ngModel)]="email" />
+    </label>
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+            [disabled]="busy()" (click)="requestCode()">
+      @if (busy()) { <span class="pn-spinner"></span> } @else { Enviar código }
+    </button>
+  }
+
+  @if (phase() === 2) {
+    <p class="auth-lead">
+      Si <b>{{ email }}</b> tiene cuenta en Bipsy, ya va de camino un código. Mira también en spam.
+    </p>
+
+    <input class="auth-code" type="text" inputmode="numeric" maxlength="6"
+           placeholder="······" name="code" [(ngModel)]="code" />
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" style="margin-top:16px" role="alert">{{ text }}</p> }
+
+    <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+            style="margin-top:20px" [disabled]="busy()" (click)="verify()">
+      @if (busy()) { <span class="pn-spinner"></span> } @else { Continuar }
+    </button>
+  }
+
+  @if (phase() === 3) {
+    <p class="auth-lead">Al cambiarla se cierra tu sesión en todos los dispositivos.</p>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Nueva contraseña</span>
+      <input class="pn-input" type="password" name="password" autocomplete="new-password"
+             placeholder="Mínimo 8 caracteres" [(ngModel)]="password" />
+    </label>
+
+    @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }
+
+    <button type="button" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block"
+            [disabled]="busy()" (click)="reset()">
+      @if (busy()) { <span class="pn-spinner"></span> } @else { Guardar y entrar }
+    </button>
+  }
+
+  <p class="auth-foot">¿Ya te acuerdas? <a routerLink="/acceder">Volver a iniciar sesión</a></p>
+</app-auth-layout>

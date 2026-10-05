@@ -1,0 +1,146 @@
+:host { display: block; }
+
+/* La rejilla no es una tabla: cada día (o cada trabajador) es su propio panel
+   redondeado, con su cabecera, y las horas viven fuera, en un canalón. Así el
+   día se lee como una columna de papel y no como una hoja de cálculo. */
+.cal {
+  display: grid;
+  grid-template-columns: 62px repeat(var(--cols), minmax(0, 1fr));
+  gap: 0 10px;
+  align-items: start;
+}
+
+.cal__corner { height: 62px; }
+
+.cal__head {
+  position: sticky;
+  top: var(--pn-top-h);
+  z-index: 3;
+  height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 18px 18px 0 0;
+  background: var(--clr-base);
+}
+.cal__head-name {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+.cal__head-sub {
+  font-family: var(--ff-display);
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+}
+/* Hoy: el número en una pastilla de acento. Nada de teñir la columna entera. */
+.cal__head--on .cal__head-sub {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--pn-accent);
+  color: var(--pn-on-accent);
+}
+.cal__head--on .cal__head-name { color: var(--clr-text); }
+
+.cal__gutter { position: relative; }
+.cal__hour {
+  position: absolute;
+  right: 12px;
+  translate: 0 -50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--clr-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal__col {
+  position: relative;
+  border-radius: 0 0 18px 18px;
+  background: var(--pn-card);
+  box-shadow: var(--pn-rim);
+  overflow: hidden;
+}
+
+/* El dueño da cita pinchando en un hueco: el papel lo dice con el cursor. */
+.cal__col--pick { cursor: copy; }
+
+/* Fuera de horario: el papel se apaga. Es lo que dice «aquí está cerrado». */
+.cal__closed { position: absolute; inset-inline: 0; background: var(--clr-base); opacity: 0.55; }
+
+.cal__line { position: absolute; inset-inline: 0; height: 1px; background: var(--pn-line); }
+
+.cal__now { position: absolute; inset-inline: 0; height: 2px; background: var(--clr-danger); z-index: 2; }
+.cal__now-dot {
+  position: absolute;
+  left: -1px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--clr-danger);
+}
+
+/* ----- UNA CITA -------------------------------------------------------- */
+
+.ev {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 10px 6px 14px;
+  border: 0;
+  border-radius: 12px;
+  /* El color del estado tiñe la tarjeta entera y marca el canto izquierdo:
+     de un vistazo se ve qué está confirmado y qué espera respuesta. */
+  background: color-mix(in srgb, var(--ev) 20%, var(--pn-card));
+  box-shadow: inset 4px 0 0 var(--ev);
+  color: var(--clr-text);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 120ms var(--ease-out), filter var(--dur-fast) ease;
+}
+.ev:hover { filter: brightness(1.12); transform: translateY(-1px); z-index: 2; }
+.ev:active { transform: scale(0.99); }
+
+.ev__row { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.ev__time { flex: none; font-size: 0.75rem; font-weight: 800; letter-spacing: -0.2px; }
+.ev__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ev__service {
+  font-size: 0.75rem;
+  color: var(--clr-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ev__marks { position: absolute; right: 7px; bottom: 5px; display: flex; gap: 4px; opacity: 0.55; }
+.ev__marks .material-symbols-rounded { font-size: 13px; }
+
+.ev--tight { justify-content: center; padding-block: 2px; }
+.ev--off { opacity: 0.7; }
+.ev--off .ev__name { text-decoration: line-through; }
+
+@media (max-width: 1000px) {
+  .cal { grid-template-columns: 46px repeat(var(--cols), minmax(0, 1fr)); gap: 0 6px; }
+  .ev__service { display: none; }
+}

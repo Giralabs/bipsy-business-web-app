@@ -1,0 +1,386 @@
+:host { display: block; }
+
+/* ----- MARCO ------------------------------------------------------------
+   Two columns: the sidebar and the page. The sidebar sits on the same ground
+   as the page, with no border and no shadow — it is told apart by air, and
+   the section you are in is the only thing lifted (a card-coloured pill). */
+
+.shell {
+  --sb-w: 252px;
+  --pn-top-h: 0px;
+  display: grid;
+  grid-template-columns: var(--sb-w) minmax(0, 1fr);
+  transition: grid-template-columns var(--dur-medium) var(--ease-out);
+}
+.shell--rail { --sb-w: 76px; }
+
+.shell__main { min-width: 0; }
+
+/* ----- BARRA LATERAL ---------------------------------------------------- */
+
+.sb {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding: 20px 14px 14px;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.sb::-webkit-scrollbar { display: none; }
+
+.sb__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 52px;
+  margin: 0 0 16px;
+  padding: 0 4px 0 8px;
+}
+
+.sb__brand { display: flex; align-items: center; min-width: 0; }
+/* Big enough to read «Business» under the name: at 27 px it was a smudge. */
+.sb__brand img { height: 40px; width: auto; }
+
+.sb__fold,
+.sb__mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--clr-text-3);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.sb__fold { margin-left: auto; opacity: 0; }
+.sb:hover .sb__fold, .sb__fold:focus-visible { opacity: 1; }
+.sb__fold:hover, .sb__mark:hover { background: var(--pn-field); color: var(--clr-text); }
+.sb__fold .material-symbols-rounded, .sb__mark .material-symbols-rounded { font-size: 20px; }
+
+/* Folded, the mark stands in for the logo; on hover it turns into the
+   "open" icon, which is what clicking it does. */
+.sb__mark { position: relative; width: 44px; height: 44px; margin-left: -6px; border-radius: 13px; }
+.sb__symbol { width: 30px; height: auto; transition: opacity var(--dur-fast) ease; }
+.sb__mark-open { position: absolute; opacity: 0; transition: opacity var(--dur-fast) ease; }
+.sb__mark:hover .sb__symbol, .sb__mark:focus-visible .sb__symbol { opacity: 0; }
+.sb__mark:hover .sb__mark-open, .sb__mark:focus-visible .sb__mark-open { opacity: 1; }
+
+.sb__close { display: none; margin-left: auto; }
+
+/* The search: looks like a field, opens «Ir a…». */
+.sb__search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  margin-bottom: 18px;
+  padding: 0 10px 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--pn-field);
+  color: var(--clr-text-3);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.sb__search:hover { background: var(--pn-field-strong); color: var(--clr-text-2); }
+.sb__search > .material-symbols-rounded { font-size: 20px; }
+.sb__kbd {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 7px;
+  background: var(--pn-field);
+  font: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sb__nav { display: flex; flex-direction: column; gap: 2px; }
+.sb__gap { height: 16px; flex: none; }
+
+.sb__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 10px 0 11px;
+  border-radius: 12px;
+  color: var(--clr-text-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.sb__item:hover { background: var(--pn-field); color: var(--clr-text); }
+.sb__item.is-here {
+  background: var(--pn-card);
+  color: var(--clr-text);
+  font-weight: 750;
+  box-shadow: var(--pn-rim);
+}
+@media (prefers-color-scheme: light) {
+  .sb__item.is-here { box-shadow: 0 1px 2px rgba(26, 37, 41, 0.06); }
+}
+
+.sb__icon { position: relative; display: grid; place-items: center; width: 24px; flex: none; }
+.sb__icon .material-symbols-rounded { font-size: 21px; }
+.sb__dot {
+  position: absolute;
+  top: -1px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clr-danger);
+  box-shadow: 0 0 0 2px var(--clr-base);
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+
+.sb__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--dur-fast) ease; }
+
+.sb__badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--clr-danger);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* ----- PIE: AJUSTES Y CUENTA -------------------------------------------- */
+
+.sb__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.sb__me-wrap { position: relative; margin-top: 8px; }
+
+.sb__me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease;
+}
+.sb__me:hover, .sb__me[aria-expanded='true'] { background: var(--pn-field); }
+.sb__me-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.sb__me-name {
+  font-size: 0.875rem;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sb__me-role { font-size: 0.75rem; color: var(--clr-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb__me-chev { font-size: 18px; color: var(--clr-text-3); }
+
+.sb__backdrop { position: fixed; inset: 0; z-index: 50; }
+
+/* Fixed, not absolute: the sidebar scrolls (overflow) and would clip a menu
+   wider than itself — always, in the 76 px rail. Anchored just above the
+   account button, which is pinned to the bottom. */
+.sb__menu {
+  position: fixed;
+  left: 14px;
+  bottom: 80px;
+  z-index: 60;
+  width: 264px;
+  padding: 6px;
+  border-radius: 20px;
+  background: var(--pn-card);
+  box-shadow: var(--shadow-float), var(--pn-rim);
+  animation: sb-menu-in var(--dur-fast) var(--ease-out) both;
+  transform-origin: 20% 100%;
+}
+@keyframes sb-menu-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.sb__menu-head { padding: 12px 12px 10px; }
+.sb__menu-name { font-size: 0.9375rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb__menu-mail {
+  margin-top: 2px;
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb__menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--clr-text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sb__menu-row:hover { background: var(--pn-field); }
+.sb__menu-row .material-symbols-rounded { font-size: 19px; color: var(--clr-text-3); }
+.sb__menu-row--danger, .sb__menu-row--danger .material-symbols-rounded { color: var(--clr-danger-text); }
+.sb__menu-sep { display: block; height: 1px; margin: 6px 8px; background: var(--pn-line); }
+
+/* ----- CARRIL (plegada) ------------------------------------------------- */
+
+.shell--rail .sb { padding-inline: 14px; }
+.shell--rail .sb__head { justify-content: center; padding: 0; }
+.shell--rail .sb__mark { margin: 0; }
+.shell--rail .sb__search,
+.shell--rail .sb__item,
+.shell--rail .sb__me { justify-content: center; padding-inline: 0; gap: 0; }
+.shell--rail .sb__label,
+.shell--rail .sb__kbd,
+.shell--rail .sb__badge,
+.shell--rail .sb__me-text,
+.shell--rail .sb__me-chev { display: none; }
+.shell--rail .sb__dot { opacity: 1; }
+
+/* ----- MÓVIL ------------------------------------------------------------ */
+
+.mtop { display: none; }
+.shell__scrim { display: none; }
+
+@media (max-width: 960px) {
+  .shell {
+    --sb-w: 0px;
+    --pn-top-h: 60px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mtop {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--pn-top-h);
+    padding: 0 10px;
+    background: var(--clr-nav-bg);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+  .mtop__brand { display: flex; margin-right: auto; }
+  .mtop__brand img { height: 32px; width: auto; }
+
+  /* The sidebar becomes a drawer, always fully open (no rail on a phone). */
+  .sb {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 90;
+    width: min(300px, 86vw);
+    padding: 16px 14px;
+    background: var(--clr-base);
+    box-shadow: var(--shadow-float);
+    transform: translateX(-104%);
+    transition: transform var(--dur-medium) var(--ease-out);
+  }
+  .shell--drawer .sb { transform: none; }
+
+  .shell__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    background: rgba(12, 14, 16, 0.5);
+    backdrop-filter: blur(4px);
+    animation: sb-fade var(--dur-fast) ease both;
+  }
+  @keyframes sb-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .sb__fold, .sb__kbd { display: none; }
+  .sb__close { display: inline-flex; }
+}
+
+/* ----- AVISO DE SESIÓN -------------------------------------------------- */
+
+.pn-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(232, 182, 87, 0.18);
+  color: var(--clr-warn-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.pn-strip .material-symbols-rounded { font-size: 18px; }
+
+/* El de cobros no es una alarma: es un recordatorio de algo que falta por
+   hacer, y en ámbar compite con la caducidad de sesión, que sí urge. */
+.pn-strip--info {
+  position: relative;
+  background: var(--pn-accent-soft);
+  color: var(--clr-text);
+  padding-inline: 56px;
+}
+.pn-strip--info a { color: inherit; text-decoration: none; }
+.pn-strip--info a:hover { text-decoration: underline; }
+
+.pn-strip__close {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  translate: 0 -50%;
+  /* 44 de objetivo táctil: es lo mínimo que se toca sin apuntar, y aquí está
+     pegado al texto que navega. */
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--clr-text-2);
+  cursor: pointer;
+}
+.pn-strip__close:hover { background: var(--pn-field); color: var(--clr-text); }
+.pn-strip__close .material-symbols-rounded { font-size: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shell, .sb, .sb__menu, .shell__scrim { transition-duration: 0s; animation-duration: 0s; }
+}

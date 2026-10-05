@@ -1,0 +1,218 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Lo que te escriben tus clientes</p>
+      <h1>Mensajes</h1>
+    </div>
+  </div>
+
+  <div class="ms">
+    <aside class="pn-card pn-card--flush ms__list">
+      @if (inbox.all().length === 0) {
+        @if (inbox.conversations.error(); as problem) {
+          <pn-error [text]="problem" (retry)="inbox.conversations.reload()" />
+        } @else if (!inbox.conversations.loading()) {
+          <pn-empty icon="forum" title="Sin conversaciones"
+                    text="Cuando un cliente te escriba, aparecerá aquí. También puedes empezar tú desde la ficha de un cliente." />
+        }
+      } @else {
+        @for (conversation of inbox.all(); track conversation.id) {
+          <button type="button" class="ms-row" [class.ms-row--on]="conversation.id === inbox.openId()"
+                  [class.ms-row--unread]="conversation.unread > 0"
+                  (click)="open(conversation.id)">
+            <pn-avatar [name]="conversation.otherPartyName" [url]="conversation.otherPartyImageUrl" />
+            <span class="ms-row__main">
+              <span class="ms-row__top">
+                <span class="ms-row__name">{{ conversation.otherPartyName }}</span>
+                @if (conversation.lastMessageAt) {
+                  <span class="ms-row__when">{{ agoInstant(conversation.lastMessageAt) }}</span>
+                }
+              </span>
+              <span class="ms-row__last">
+                @if (conversation.lastMessagePreview) {
+                  @if (conversation.lastMessageSide === 'BUSINESS') { Tú: }
+                  {{ conversation.lastMessagePreview }}
+                } @else {
+                  Sin mensajes todavía
+                }
+              </span>
+            </span>
+            @if (conversation.unread > 0) {
+              <span class="ms-row__badge" [attr.aria-label]="conversation.unread + ' sin leer'">{{ conversation.unread }}</span>
+            }
+          </button>
+        }
+      }
+    </aside>
+
+    <section class="pn-card pn-card--flush ms__thread" [class.ms__thread--drop]="dragging()"
+             (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+      @if (!inbox.openId()) {
+        <pn-empty icon="chat" title="Elige una conversación"
+                  text="Aquí se abre el hilo con tu cliente." />
+      } @else {
+        <header class="ms-head">
+          <pn-avatar [name]="inbox.open()?.otherPartyName ?? ''" [url]="inbox.open()?.otherPartyImageUrl ?? null" />
+          <div class="ms-head__text">
+            <p class="ms-head__name">{{ inbox.open()?.otherPartyName ?? 'Conversación' }}</p>
+            @if (inbox.open()?.canWrite === false) {
+              <p class="ms-head__state pn-muted">Solo lectura</p>
+            } @else if (inbox.offline()) {
+              <p class="ms-head__state pn-muted">Sin conexión en directo · se actualiza cada 20 s</p>
+            }
+          </div>
+        </header>
+
+        <div class="ms-thread" #thread aria-live="polite">
+          @if (inbox.threadError() && inbox.messages().length === 0) {
+            <pn-error text="No hemos podido abrir la conversación." (retry)="open(inbox.openId()!)" />
+          } @else if (inbox.loadingThread() && inbox.messages().length === 0) {
+            <div class="ms-thread__center"><span class="pn-spinner" aria-label="Cargando"></span></div>
+          } @else if (inbox.messages().length === 0) {
+            <pn-empty icon="chat_bubble" title="Escribe el primer mensaje"
+                      text="Aquí verás la conversación con este cliente." />
+          } @else {
+            @if (inbox.hasMore()) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm ms-more"
+                      [disabled]="inbox.loadingMore()" (click)="loadOlder()">
+                {{ inbox.loadingMore() ? 'Cargando…' : 'Ver mensajes anteriores' }}
+              </button>
+            }
+
+            @for (message of inbox.messages(); track trackMessage(message); let i = $index) {
+              @if (startsDay(i)) {
+                <p class="ms-day">{{ relativeDay(fromInstant(message.createdAt)) }}</p>
+              }
+
+              @if (message.kind === 'SYSTEM' || message.side === 'SYSTEM') {
+                <p class="ms-sys">{{ message.body }}</p>
+              } @else {
+                <div class="ms-bubble" [class.ms-bubble--out]="message.side === 'BUSINESS'"
+                     [class.ms-bubble--pending]="message.pending"
+                     [class.ms-bubble--media]="message.kind === 'IMAGE' && message.attachment">
+                  @if (message.attachment; as file) {
+                    @if (message.kind === 'IMAGE') {
+                      @if (imageUrl(message); as src) {
+                        <button type="button" class="ms-image" (click)="view(message)" [attr.aria-label]="'Ver ' + file.filename">
+                          <img [src]="src" [alt]="file.filename" (load)="onImageLoad($event)" />
+                        </button>
+                      } @else if (imageFailed(message)) {
+                        <button type="button" class="ms-image ms-image--empty" (click)="retryImage(message)">
+                          <span class="material-symbols-rounded" aria-hidden="true">broken_image</span>
+                          No se pudo cargar
+                        </button>
+                      } @else {
+                        <div class="ms-image ms-image--empty" aria-label="Cargando imagen">
+                          <span class="pn-spinner"></span>
+                        </div>
+                      }
+                    } @else {
+                      <button type="button" class="ms-file" (click)="download(message)"
+                              [attr.aria-label]="'Descargar ' + file.filename">
+                        <span class="ms-file__icon material-symbols-rounded" aria-hidden="true">{{ fileIcon(file.contentType) }}</span>
+                        <span class="ms-file__text">
+                          <span class="ms-file__name">{{ file.filename }}</span>
+                          <span class="ms-file__size pn-tabular">{{ sizeLabel(file.sizeBytes) }}</span>
+                        </span>
+                        <span class="material-symbols-rounded ms-file__go" aria-hidden="true">download</span>
+                      </button>
+                    }
+                  }
+
+                  <div class="ms-bubble__body">
+                    @if (message.booking; as booking) {
+                      <div class="ms-booking">
+                        <span class="material-symbols-rounded" aria-hidden="true">event</span>
+                        <span>
+                          <strong>{{ booking.serviceName }}</strong>
+                          <span class="ms-booking__when">{{ bookingWhen(booking.startDateTime) }}</span>
+                        </span>
+                      </div>
+                    }
+                    @if (message.body) {
+                      <p class="ms-bubble__text">{{ message.body }}</p>
+                    }
+                    @if (message.failed) {
+                      <button type="button" class="ms-bubble__retry" (click)="retry(message)">
+                        <span class="material-symbols-rounded" aria-hidden="true">error</span>
+                        Reintentar
+                      </button>
+                    } @else {
+                      <span class="ms-bubble__meta pn-tabular">
+                        {{ hhmm(fromInstant(message.createdAt)) }}
+                        @if (message.side === 'BUSINESS') {
+                          @switch (inbox.deliveryOf(message)) {
+                            @case ('pending') {
+                              <span class="material-symbols-rounded ms-tick" aria-label="Enviando">schedule</span>
+                            }
+                            @case ('sent') {
+                              <span class="material-symbols-rounded ms-tick" aria-label="Enviado">check</span>
+                            }
+                            @case ('delivered') {
+                              <span class="material-symbols-rounded ms-tick" aria-label="Entregado">done_all</span>
+                            }
+                            @case ('read') {
+                              <span class="material-symbols-rounded ms-tick ms-tick--read" aria-label="Leído">done_all</span>
+                            }
+                          }
+                        }
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          }
+        </div>
+
+        @if (inbox.open()?.canWrite !== false) {
+          <footer class="ms-composer">
+            <input #picker type="file" class="ms-composer__file" [accept]="accept" multiple
+                   tabindex="-1" aria-hidden="true" (change)="onPicked($event)" />
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Adjuntar" title="Adjuntar"
+                    (click)="pick()">
+              <span class="material-symbols-rounded">attach_file</span>
+            </button>
+            <textarea class="pn-textarea ms-composer__input" rows="1" name="draft" maxlength="4000"
+                      placeholder="Escribe un mensaje" [(ngModel)]="draft"
+                      (keydown)="onKey($event)" (paste)="onPaste($event)"></textarea>
+            <button type="button" class="pn-icon-btn pn-icon-btn--accent" aria-label="Enviar"
+                    [disabled]="!draft.trim()" (click)="send()">
+              <span class="material-symbols-rounded">send</span>
+            </button>
+          </footer>
+        } @else {
+          <p class="ms-closed">
+            Esta conversación está cerrada. Solo puedes escribir a clientes con una cita activa o reciente.
+          </p>
+        }
+
+        @if (dragging()) {
+          <div class="ms-drop" aria-hidden="true">
+            <span class="material-symbols-rounded">upload_file</span>
+            Suelta para adjuntar
+          </div>
+        }
+      }
+    </section>
+  </div>
+
+  @if (viewing(); as shown) {
+    <div class="pn-scrim ms-viewer" role="dialog" aria-modal="true"
+         [attr.aria-label]="shown.message.attachment?.filename ?? 'Imagen'" (click)="viewing.set(null)">
+      <figure class="ms-viewer__frame" (click)="$event.stopPropagation()">
+        <img [src]="shown.url" [alt]="shown.message.attachment?.filename ?? ''" />
+        <figcaption class="ms-viewer__bar">
+          <span class="ms-viewer__name">{{ shown.message.attachment?.filename }}</span>
+          <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="download(shown.message)">
+            <span class="material-symbols-rounded" aria-hidden="true">download</span>
+            Descargar
+          </button>
+          <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Cerrar" (click)="viewing.set(null)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </figcaption>
+      </figure>
+    </div>
+  }
+</main>

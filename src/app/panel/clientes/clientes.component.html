@@ -1,0 +1,135 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Tu agenda. Toca a un cliente para ver su ficha.</p>
+      <h1>Clientes</h1>
+    </div>
+    <div class="pn-head__actions">
+      <a class="pn-btn pn-btn--secondary" routerLink="/panel/clientes/importar">
+        <span class="material-symbols-rounded">upload</span>
+        Importar
+      </a>
+      <button type="button" class="pn-btn pn-btn--primary" (click)="startCreate()">
+        <span class="material-symbols-rounded">person_add</span>
+        Nuevo cliente
+      </button>
+    </div>
+  </div>
+
+  <div class="cl-bar">
+    <label class="pn-search cl-search">
+      <span class="material-symbols-rounded">search</span>
+      <input type="search" placeholder="Nombre, teléfono o email"
+             [ngModel]="store.query()" (ngModelChange)="store.setQuery($event)" name="q" />
+    </label>
+    <pn-segmented [options]="origins" [value]="originValue()" label="Filtros"
+                  (valueChange)="setOrigin($event)" />
+    <span class="pn-muted cl-count" [class.cl-count--busy]="store.searching()">
+      {{ count(store.filtered().length, 'cliente', 'clientes') }}
+    </span>
+    @if (store.banned().length > 0) {
+      <span class="pn-status pn-status--danger">{{ count(store.banned().length, 'vetado', 'vetados') }}</span>
+    }
+  </div>
+
+  <!-- The app keeps these in a sheet behind a button, to save a line of a phone
+       screen. On a desk they fit in the open and one click sets them. -->
+  <div class="cl-filters" role="group" aria-label="Filtros">
+    @if (asksForCard()) {
+      <button type="button" class="pn-chip" [attr.aria-pressed]="store.trusted() === true"
+              (click)="store.toggleTrusted()">
+        <span class="material-symbols-rounded">workspace_premium</span>
+        De confianza
+      </button>
+    }
+    <button type="button" class="pn-chip" [attr.aria-pressed]="store.withBooking() === true"
+            (click)="store.toggleWithBooking(true)">Con cita</button>
+    <button type="button" class="pn-chip" [attr.aria-pressed]="store.withBooking() === false"
+            (click)="store.toggleWithBooking(false)">Sin cita</button>
+    @if (store.filtersActive()) {
+      <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="store.clearFilters()">
+        Quitar filtros
+      </button>
+    }
+  </div>
+
+  <section class="pn-card cl">
+    @if (store.searchFailed()) {
+      <pn-error text="No hemos podido cargar tus clientes." (retry)="store.search()" />
+    } @else if (store.all().length === 0 && !store.filtersActive()) {
+      <pn-empty icon="contacts" title="Tu agenda está vacía"
+                text="Aquí guardas tus contactos: los que te llaman por teléfono, los de siempre, los que no reservan por la app.">
+        <button type="button" class="pn-btn pn-btn--primary" (click)="startCreate()">Añadir el primero</button>
+      </pn-empty>
+    } @else if (store.filtered().length === 0) {
+      <!-- With filters on, getting out is the hard part: from the empty space it
+           is not obvious which one is in the way. -->
+      @if (store.filtersActive()) {
+        <pn-empty icon="search_off" title="Sin resultados" text="Ningún cliente coincide con estos filtros.">
+          <button type="button" class="pn-btn pn-btn--secondary" (click)="store.clearFilters()">
+            Quitar filtros
+          </button>
+        </pn-empty>
+      } @else {
+        <pn-empty icon="search_off" title="Sin resultados" text="Ningún cliente coincide con lo que has escrito." />
+      }
+    } @else {
+      @for (section of store.sections(); track section.letter) {
+        <p class="cl__letter">{{ section.letter }}</p>
+        @for (person of section.people; track person.id) {
+          <a class="cl-row" [routerLink]="['/panel/clientes', person.id]">
+            <pn-avatar [name]="person.name" [url]="person.profileImageUrl" />
+            <span class="cl-row__main">
+              <span class="cl-row__name">
+                {{ person.name }}
+                @if (person.linkedCustomerId) {
+                  <span class="pn-status pn-status--accent">En Bipsy</span>
+                }
+                <!-- In the row and not only in the file: it is the one thing of
+                     the level the shop sees, and it wants it at a glance. -->
+                @if (person.trusted) {
+                  <span class="material-symbols-rounded cl-row__trusted" role="img"
+                        aria-label="Cliente de confianza" title="Cliente de confianza">workspace_premium</span>
+                }
+              </span>
+              <span class="cl-row__meta">
+                {{ contact(person) }}
+                · {{ count(person.bookingCount, 'cita', 'citas') }}
+                · {{ lastVisit(person) }}
+              </span>
+            </span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
+        }
+      }
+    }
+  </section>
+</main>
+
+@if (creating()) {
+  <pn-dialog title="Nuevo cliente" (closed)="creating.set(false)">
+    <label class="pn-field">
+      <span class="pn-field__label">Nombre</span>
+      <input class="pn-input" type="text" name="name" placeholder="Laura Sáez" [(ngModel)]="form.name" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Teléfono</span>
+      <input class="pn-input" type="tel" name="phone" placeholder="600 00 00 00" [(ngModel)]="form.phone" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Correo <span class="pn-muted">· opcional</span></span>
+      <input class="pn-input" type="email" name="email" placeholder="laura@correo.com" [(ngModel)]="form.email" />
+    </label>
+    <label class="pn-field">
+      <span class="pn-field__label">Notas</span>
+      <textarea class="pn-textarea" rows="3" name="notes"
+                placeholder="Alergias, cómo le gusta el corte, lo que sea." [(ngModel)]="form.notes"></textarea>
+      <span class="pn-field__hint">Estas notas solo las ves tú.</span>
+    </label>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="creating.set(false)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="save()">Guardar</button>
+    </ng-container>
+  </pn-dialog>
+}

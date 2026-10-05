@@ -1,0 +1,311 @@
+:host { display: block; }
+
+.ms {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: var(--pn-gap);
+  height: calc(100vh - var(--pn-top-h) - 160px);
+  min-height: 520px;
+}
+
+.ms__list { overflow-y: auto; padding: 8px; }
+.ms__thread { position: relative; display: flex; flex-direction: column; overflow: hidden; }
+
+.ms-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--pn-radius-row);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease;
+}
+.ms-row:hover { background: var(--pn-field); }
+.ms-row--on { background: var(--pn-accent-soft); }
+
+.ms-row__main { flex: 1; min-width: 0; }
+.ms-row__top { display: flex; align-items: baseline; gap: 8px; }
+.ms-row__name { flex: 1; font-size: 0.9375rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-row__when { font-size: 0.75rem; color: var(--clr-text-3); }
+.ms-row__last {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ms-row--unread .ms-row__name { font-weight: 800; }
+.ms-row--unread .ms-row__last { color: var(--clr-text-2); }
+.ms-row__badge {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--pn-accent);
+  color: var(--pn-on-accent);
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.ms-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--clr-hairline);
+}
+.ms-head__text { min-width: 0; }
+.ms-head__name { font-size: 0.9375rem; font-weight: 700; }
+.ms-head__state { font-size: 0.8125rem; }
+
+.ms-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ms-thread__center { flex: 1; display: grid; place-items: center; color: var(--clr-text-3); }
+
+.ms-more { align-self: center; margin-bottom: 8px; }
+
+.ms-day {
+  align-self: center;
+  margin: 12px 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--clr-text-3);
+}
+
+.ms-sys {
+  align-self: center;
+  max-width: 78%;
+  margin: 10px 0;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--pn-subtle);
+  font-size: 0.75rem;
+  color: var(--clr-text-2);
+  text-align: center;
+}
+
+/* No tail on the bubble: the app dropped it on purpose, it fought the brand. */
+.ms-bubble {
+  position: relative;
+  align-self: flex-start;
+  /* Room for the clock (and the ticks) on the last line: a two-letter
+     message used to come out as a pill with the time squeezed under it. */
+  min-width: 92px;
+  max-width: min(78%, 520px);
+  border-radius: 18px;
+  margin-bottom: 2px;
+  background: var(--pn-subtle);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  overflow: hidden;
+}
+.ms-bubble--out { align-self: flex-end; background: var(--clr-mint); color: #2E343B; }
+/* The provisional bubble is dimmer until the server confirms it. */
+.ms-bubble--pending { opacity: 0.75; }
+.ms-bubble__body { padding: 8px 12px; }
+.ms-bubble--media .ms-bubble__body { padding-top: 6px; }
+.ms-bubble__text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ms-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  margin-top: 1px;
+  line-height: 1.2;
+  font-size: 0.6875rem;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+.ms-tick { font-size: 15px; line-height: 1; }
+/* A saturated blue with a job of its own (`GipsiColors.chatRead`): read vs. delivered must jump out. */
+.ms-tick--read { color: #0B8FE8; }
+.ms-bubble__retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clr-danger, #D9534F);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ms-bubble__retry .material-symbols-rounded { font-size: 15px; }
+
+.ms-booking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  font-size: 0.8125rem;
+}
+.ms-booking .material-symbols-rounded { font-size: 16px; opacity: 0.8; }
+.ms-booking strong { display: block; font-weight: 700; }
+.ms-booking__when { display: block; font-size: 0.75rem; opacity: 0.75; }
+
+/* The image goes edge to edge; the bubble clips its corners. */
+.ms-image {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.ms-image img {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  max-height: 320px;
+  min-width: 160px;
+  object-fit: cover;
+}
+.ms-image--empty {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  width: 240px;
+  height: 180px;
+  color: inherit;
+  font: inherit;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  cursor: default;
+}
+button.ms-image--empty { cursor: pointer; }
+
+/* Every file chip the same width, whatever the file is called: a long name
+   made one bubble twice as wide as the next and the thread looked ragged. */
+.ms-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 280px;
+  max-width: 100%;
+  padding: 10px 12px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ms-file__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  font-size: 22px;
+}
+.ms-file__text { flex: 1; min-width: 0; }
+.ms-file__name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ms-file__size { display: block; font-size: 0.75rem; opacity: 0.7; }
+.ms-file__go { font-size: 20px; opacity: 0.6; }
+.ms-file:hover .ms-file__go { opacity: 1; }
+
+.ms-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--clr-hairline);
+}
+.ms-composer__input { min-height: 46px; max-height: 140px; }
+.ms-composer__file { display: none; }
+
+.ms-closed {
+  padding: 18px;
+  border-top: 1px solid var(--clr-hairline);
+  font-size: 0.875rem;
+  color: var(--clr-text-3);
+  text-align: center;
+}
+
+.ms-drop {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  border: 2px dashed var(--pn-accent-line);
+  border-radius: calc(var(--pn-radius-card) - 6px);
+  background: color-mix(in srgb, var(--pn-card) 88%, transparent);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+.ms-drop .material-symbols-rounded { font-size: 32px; }
+
+.ms-viewer__frame {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: min(92vw, 1100px);
+  max-height: 92vh;
+  margin: 0;
+}
+.ms-viewer__frame img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(92vh - 64px);
+  margin: 0 auto;
+  border-radius: 18px;
+  object-fit: contain;
+}
+.ms-viewer__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--pn-card);
+  color: var(--clr-text);
+}
+.ms-viewer__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .ms { grid-template-columns: 1fr; height: auto; }
+  .ms__list { max-height: 320px; }
+  .ms__thread { min-height: 460px; }
+  .ms-file { min-width: 0; }
+}

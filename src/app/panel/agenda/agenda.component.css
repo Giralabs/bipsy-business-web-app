@@ -1,0 +1,138 @@
+:host { display: block; }
+
+.ag-head { margin-bottom: 20px; }
+
+/* La barra de la agenda: vista a la izquierda, fecha en el centro, contexto a
+   la derecha. Todo a la misma altura para que no baile. */
+.ag-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ag-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--pn-field);
+}
+.ag-nav .pn-icon-btn { width: 36px; height: 36px; background: transparent; }
+.ag-nav .pn-icon-btn:hover { background: var(--pn-field-strong); }
+.ag-range {
+  min-width: 210px;
+  text-align: center;
+  font-family: var(--ff-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.ag-nav .pn-btn { height: 36px; }
+
+.ag-hours {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: var(--pn-field);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--clr-text-2);
+}
+
+.ag-loading { display: grid; gap: 12px; }
+
+/* ----- VISTA DE LISTA -------------------------------------------------- */
+
+/* Una lista de un día no necesita 1800px de ancho: a plena anchura la fila se
+   convierte en una losa con el centro vacío. Se acota y se lee de un barrido. */
+.ag-list { max-width: 940px; padding: 8px; }
+
+.bkc {
+  --ev: var(--clr-grey-state);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 13px 18px;
+  margin-bottom: 6px;
+  border: 0;
+  border-radius: 16px;
+  /* Un punto de tinte, no un bloque de color: al ocupar toda la fila, el color
+     al 14 % se veía sucio. El canto de la izquierda es el que manda. */
+  background: color-mix(in srgb, var(--ev) 7%, var(--pn-card));
+  box-shadow: inset 4px 0 0 var(--ev);
+  color: var(--clr-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: filter var(--dur-fast) ease;
+}
+.bkc:hover { filter: brightness(1.12); }
+.bkc:active { transform: scale(0.997); }
+.bkc:last-child { margin-bottom: 0; }
+
+.bkc__time { display: flex; flex-direction: column; width: 58px; flex: none; }
+.bkc__hour { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.4px; }
+.bkc__len { font-size: 0.75rem; font-weight: 600; color: var(--clr-text-3); }
+
+.bkc__main { flex: 1; min-width: 0; }
+.bkc__name { display: block; font-size: 1rem; font-weight: 700; }
+.bkc__service { display: inline; font-size: 0.875rem; color: var(--clr-text-2); }
+.bkc__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+}
+.bkc__meta .material-symbols-rounded { font-size: 14px; }
+
+.bkc__stripe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--ev);
+  color: #11150F;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.bkc__stripe .material-symbols-rounded { font-size: 16px; }
+
+.bkc--off .bkc__name, .bkc--off .bkc__service { text-decoration: line-through; }
+.bkc--off { opacity: 0.75; }
+
+/* ----- LEYENDA --------------------------------------------------------- */
+
+/* Una línea y un cuadrito de color por estado: se mira de golpe, no se lee. */
+.lg { display: flex; align-items: center; gap: 14px; padding: 9px 0; }
+.lg + .lg { border-top: 1px solid var(--pn-line); }
+.lg__stripe {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 11px;
+}
+.lg__stripe .material-symbols-rounded { font-size: 19px; color: #11150F; }
+.lg strong { font-size: 0.9375rem; font-weight: 700; }
+.lg__foot { margin-top: 18px; font-size: 0.8125rem; color: var(--clr-text-3); line-height: 1.55; }
+
+@media (max-width: 860px) {
+  .ag-bar { gap: 10px; }
+  .ag-range { min-width: 150px; font-size: 0.9375rem; }
+  .ag-hours { margin-left: 0; }
+  .bkc { gap: 12px; padding: 14px 16px; }
+  .bkc__time { width: 58px; }
+}

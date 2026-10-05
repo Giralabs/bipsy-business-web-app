@@ -1,0 +1,134 @@
+:host { display: block; }
+
+.vp-skel { height: 560px; }
+
+/* ----- CONMUTADOR ---------------------------------------------------- */
+.vp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.vp-bar .pn-seg button { display: inline-flex; align-items: center; gap: 6px; }
+.vp-bar .pn-seg .material-symbols-rounded { font-size: 18px; }
+
+.vp-bar__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clr-text-2);
+}
+.vp-bar__note .material-symbols-rounded { font-size: 18px; }
+
+/* ----- EL ESCENARIO ---------------------------------------------------
+   El marco se pinta a su tamaño de verdad —1280, 834, 390 o el de cada
+   teléfono— y solo se ENCOGE para caber. Si se maquetara al ancho del panel
+   la vista previa mentiría justo en lo que viene a enseñar. */
+.vp-stage {
+  position: relative;
+  width: 100%;
+  height: calc(var(--vp-fh) * var(--vp-scale));
+}
+
+.vp-stage__fit {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--vp-fw);
+  height: var(--vp-fh);
+  transform: translateX(-50%) scale(var(--vp-scale));
+  transform-origin: top center;
+}
+
+/* ----- LA VENTANA DEL NAVEGADOR -------------------------------------- */
+.vp-browser {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--pn-card);
+  box-shadow: var(--shadow-float);
+}
+
+.vp-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 14px;
+  background: var(--pn-field-strong);
+}
+
+.vp-browser__dots { display: flex; gap: 6px; flex: none; }
+.vp-browser__dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--pn-subtle); }
+
+.vp-browser__url {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--pn-card);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clr-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vp-browser__url .material-symbols-rounded { font-size: 14px; color: var(--clr-success); }
+
+.vp-browser__size {
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--clr-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* El contenedor de consulta: `preview-web.component.css` rompe contra ESTO,
+   que mide lo que mide la ventana simulada, y no contra el panel. */
+.vp-browser__view {
+  height: var(--vp-view-h);
+  overflow-y: auto;
+  overflow-x: hidden;
+  container-type: size;
+  background: var(--clr-base);
+  /* Sin barra de desplazamiento: en Windows se lleva 15 px y el contenedor
+     dejaría de medir los 1280 exactos que dice el conmutador. */
+  scrollbar-width: none;
+}
+.vp-browser__view::-webkit-scrollbar { display: none; }
+
+/* ----- LOS DOS TELÉFONOS --------------------------------------------- */
+.vp-phones {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  height: 100%;
+}
+
+.vp-phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.vp-phone figcaption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--clr-text-3);
+}
+
+.vp-foot { text-align: center; margin: 18px 0 0; }

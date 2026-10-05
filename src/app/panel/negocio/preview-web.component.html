@@ -1,0 +1,321 @@
+<!-- Copy of `bipsy-web-app/src/app/app.component.html` (the page chrome) and of
+     `pages/business-detail/business-detail.component.html` (the ficha). -->
+<div class="app-root">
+
+  <!-- ══════════ CROMO DE MÓVIL Y TABLET ══════════ -->
+  <!-- components/app-banner -->
+  <aside class="appbanner only-touch">
+    <button type="button" class="appbanner__close" aria-label="Cerrar" (click)="act.emit()">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+    <span class="appbanner__icon" aria-hidden="true">
+      <img src="assets_bipsy/Resized/256px/Brand Marks/mint_symbol_nobackground.webp" alt="" class="theme-dark-only" />
+      <img src="assets_bipsy/Resized/256px/Brand Marks/carbon_symbol_nobackground.webp" alt="" class="theme-light-only" />
+    </span>
+    <span class="appbanner__text">
+      <strong>Bipsy</strong>
+      <small>Pide cita sin llamar</small>
+    </span>
+    <button type="button" class="appbanner__go" (click)="act.emit()">Obtener</button>
+  </aside>
+
+  <!-- ══════════ CROMO DE ESCRITORIO ══════════ -->
+  <!-- components/promo-bar -->
+  <aside class="promobar only-desk">
+    <button type="button" class="promobar__cta" (click)="act.emit()">
+      <span class="material-symbols-rounded promobar__icon">storefront</span>
+      <span class="promobar__text">
+        Añade ya tu negocio a Bipsy
+        <strong>Pruébalo gratis</strong>
+      </span>
+      <span class="material-symbols-rounded promobar__arrow">arrow_forward</span>
+    </button>
+    <button type="button" class="promobar__close" aria-label="Ocultar el aviso" (click)="act.emit()">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+  </aside>
+
+  <!-- components/navbar, sin sesión: es lo que ve quien llega a tu ficha
+       desde un enlace compartido o desde Google. -->
+  <header class="navbar only-desk">
+    <div class="navbar-inner">
+      <span class="navbar-logo">
+        <img src="assets_bipsy/Combination Marks/combinationmark_mint_horizontal_nobackground.webp"
+             alt="Bipsy" class="navbar-logo-img theme-dark-only" />
+        <img src="assets_bipsy/Combination Marks/combinationmark_carbon_horizontal_nobackground.webp"
+             alt="Bipsy" class="navbar-logo-img theme-light-only" />
+      </span>
+      <div class="navbar-user">
+        <button type="button" class="bipsy-btn bipsy-btn--secondary bipsy-btn--medium nav-session" (click)="act.emit()">
+          Iniciar sesión
+        </button>
+        <button type="button" class="bipsy-btn bipsy-btn--primary bipsy-btn--medium nav-session" (click)="act.emit()">
+          Registrarse
+        </button>
+        <span class="nav-divider"></span>
+        <span class="biz-promo-link">
+          <span class="material-symbols-rounded" style="font-size:18px; color:var(--clr-mint); margin-right:6px">storefront</span>
+          ¿Tienes un negocio?
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="detail">
+
+      <!-- ══════════ PORTADA ══════════ -->
+      <div class="cover">
+        @if (vm.coverUrl; as url) {
+          <img class="cover__img" [src]="url" [alt]="vm.business.name" />
+        } @else {
+          <div class="cover__img cover__img--none"></div>
+        }
+        <div class="cover__veil"></div>
+
+        <div class="cover__bar">
+          <button type="button" class="cover__btn" (click)="act.emit()">
+            <span class="material-symbols-rounded">arrow_back</span>
+            Volver
+          </button>
+          <button type="button" class="cover__btn cover__btn--icon" aria-label="Añadir a favoritos" (click)="act.emit()">
+            <span class="material-symbols-rounded">favorite</span>
+          </button>
+        </div>
+
+        <div class="cover__info">
+          <h1 class="cover__title">{{ vm.business.name }}</h1>
+          <div class="cover__meta">
+            @if (vm.locationDisplay) {
+              <span class="badge badge--photo">
+                <span class="material-symbols-rounded cover__meta-icon">location_on</span>
+                {{ vm.locationDisplay }}
+              </span>
+            }
+            @if (vm.score.count > 0 && vm.score.value != null) {
+              <span class="badge badge--photo">
+                <span class="material-symbols-rounded fill cover__meta-icon" style="color: var(--clr-warn)">star</span>
+                {{ ratingDisplay }} ({{ vm.score.count }})
+              </span>
+            }
+            @if (vm.categoryName) {
+              <span class="badge badge--photo">{{ vm.categoryName }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ CUERPO ══════════ -->
+      <div class="detail__body">
+        <div class="detail__main">
+
+          @if (vm.business.description) {
+            <section class="card">
+              <h2 class="card__title">
+                <span class="material-symbols-rounded card__title-icon">info</span>
+                Acerca del negocio
+              </h2>
+              <p class="card__text">{{ vm.business.description }}</p>
+              @if (vm.business.phone) {
+                <p class="card__meta">
+                  <span class="material-symbols-rounded card__meta-icon">phone</span>
+                  {{ vm.business.phone }}
+                </p>
+              }
+            </section>
+          }
+
+          <!-- Políticas: posición fija, antes que el escaparate. Es lo que el
+               cliente necesita para decidir. -->
+          @if (vm.totalPolicies > 0) {
+            <section class="card">
+              <h2 class="card__title">
+                <span class="material-symbols-rounded card__title-icon">rule</span>
+                Antes de reservar
+              </h2>
+              @for (group of visiblePolicies; track group.categoryId) {
+                @if (group.policies.length > 0) {
+                  <p class="policy__group">{{ group.name }}</p>
+                  <ul class="policy__list">
+                    @for (policy of group.policies; track policy.id) {
+                      <li>{{ policy.text }}</li>
+                    }
+                  </ul>
+                }
+              }
+              @if (vm.totalPolicies > 5) {
+                <button type="button" class="card__more" (click)="allPoliciesOpen.set(!allPoliciesOpen())">
+                  {{ allPoliciesOpen() ? 'Ver menos' : 'Ver las ' + vm.totalPolicies + ' normas' }}
+                </button>
+              }
+            </section>
+          }
+
+          <!-- Galería -->
+          @if (vm.portfolio.length > 0) {
+            <section class="card">
+              <h2 class="card__title">
+                <span class="material-symbols-rounded card__title-icon">photo_library</span>
+                Trabajos
+              </h2>
+              <div class="gallery">
+                @for (item of vm.portfolio; track item.id) {
+                  <img class="gallery__img" [src]="item.url" [alt]="item.caption || vm.business.name"
+                       loading="lazy" (error)="hideBroken($event)" />
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Servicios -->
+          <section class="card">
+            <h2 class="card__title">
+              <span class="material-symbols-rounded card__title-icon">content_cut</span>
+              Servicios
+            </h2>
+
+            @if ((vm.services ?? []).length === 0) {
+              <p class="card__text">Este negocio todavía no ha publicado su catálogo.</p>
+            } @else {
+              <div class="services">
+                @for (srv of vm.services ?? []; track srv.id) {
+                  <div class="service">
+                    <div class="service__info">
+                      <p class="service__name">{{ srv.name }}</p>
+                      @if (srv.description) {
+                        <p class="service__desc">{{ srv.description }}</p>
+                      }
+                      <p class="service__meta">
+                        <span class="material-symbols-rounded service__meta-icon">schedule</span>
+                        {{ duration(srv.duration) }}
+                      </p>
+                    </div>
+                    <div class="service__right">
+                      <span class="service__price">{{ price(srv.price) }}</span>
+                      <button type="button"
+                              class="bipsy-btn bipsy-btn--primary bipsy-btn--small bipsy-btn--on-card"
+                              (click)="act.emit()">Reservar</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+
+          <!-- Reseñas -->
+          @if ((vm.reviews ?? []).length > 0) {
+            <section class="card">
+              <h2 class="card__title">
+                <span class="material-symbols-rounded card__title-icon">reviews</span>
+                Reseñas
+              </h2>
+              <div class="reviews">
+                @for (review of vm.reviews ?? []; track review.id) {
+                  <article class="review">
+                    <header class="review__head">
+                      <span class="review__avatar">{{ reviewInitial(review.customerName) }}</span>
+                      <span class="review__who">
+                        <strong>{{ reviewAuthor(review.customerName) }}</strong>
+                        <span class="review__stars">
+                          @for (filled of stars(review.rating); track $index) {
+                            <span class="material-symbols-rounded review__star" [class.fill]="filled">star</span>
+                          }
+                        </span>
+                      </span>
+                    </header>
+                    @if (review.comment) {
+                      <p class="review__text">{{ review.comment }}</p>
+                    }
+                    @if (review.reply) {
+                      <p class="review__reply">
+                        <strong>Respuesta del negocio:</strong> {{ review.reply }}
+                      </p>
+                    }
+                  </article>
+                }
+              </div>
+            </section>
+          }
+        </div>
+
+        <!-- ══════════ LATERAL ══════════ -->
+        <aside class="detail__aside">
+          <div class="card card--sticky">
+            <h2 class="card__title">Reservar</h2>
+            <p class="card__text">Elige un servicio y te enseñamos los huecos libres.</p>
+
+            <button type="button"
+                    class="bipsy-btn bipsy-btn--primary bipsy-btn--large bipsy-btn--full-width bipsy-btn--on-card"
+                    (click)="act.emit()">
+              <span class="material-symbols-rounded btn-icon">event_available</span>
+              Pedir cita
+            </button>
+
+            @if (chargesCancellation) {
+              <p class="card__note">
+                <span class="material-symbols-rounded card__meta-icon">credit_card</span>
+                Este negocio cobra el {{ vm.business.cancellationFeePercent }} % si cancelas con menos de
+                {{ vm.business.cancellationWindowHours }} h de antelación.
+              </p>
+            }
+
+            <div class="side-actions">
+              @if (vm.business.chatEnabled !== false) {
+                <button type="button" class="side-action" (click)="act.emit()">
+                  <span class="material-symbols-rounded side-action__icon">forum</span>
+                  Escribir al negocio
+                </button>
+              }
+
+              @if (vm.business.phone) {
+                <button type="button" class="side-action" (click)="act.emit()">
+                  <span class="material-symbols-rounded side-action__icon">phone</span>
+                  Llamar
+                </button>
+              }
+
+              @if (vm.hasSchedule) {
+                <button type="button" class="side-action" (click)="scheduleOpen.set(!scheduleOpen())">
+                  <span class="material-symbols-rounded side-action__icon">schedule</span>
+                  Horario
+                  <span class="material-symbols-rounded side-action__chevron">
+                    {{ scheduleOpen() ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                @if (scheduleOpen()) {
+                  <ul class="schedule">
+                    @for (row of vm.week; track row.label) {
+                      <li class="schedule__row" [class.schedule__row--closed]="row.closed">
+                        <span>{{ row.label }}</span>
+                        <span>{{ row.hours }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- components/tab-bar: flotante sobre el contenido, solo en táctil. -->
+  <nav class="tabbar only-touch" aria-label="Secciones">
+    <div class="tabbar__pill">
+      <span class="tabbar__blob" aria-hidden="true"></span>
+      <span class="tabbar__tab tabbar__tab--on">
+        <span class="tabbar__icon-wrap"><span class="material-symbols-rounded">explore</span></span>
+        <span class="tabbar__label">Explorar</span>
+      </span>
+      <span class="tabbar__tab">
+        <span class="tabbar__icon-wrap"><span class="material-symbols-rounded">schedule</span></span>
+        <span class="tabbar__label">Mis citas</span>
+      </span>
+      <span class="tabbar__tab">
+        <span class="tabbar__icon-wrap"><span class="material-symbols-rounded">chat_bubble</span></span>
+        <span class="tabbar__label">Chat</span>
+      </span>
+    </div>
+  </nav>
+</div>

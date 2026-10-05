@@ -1,0 +1,51 @@
+@for (day of weekdays; track day; let index = $index) {
+  <div class="we-day" [class.we-day--closed]="week[index].length === 0">
+    <div class="we-day__name">
+      <span>{{ day }}</span>
+      <span class="we-day__sum pn-muted">{{ summary(index) }}</span>
+    </div>
+
+    <div class="we-day__ranges">
+      @for (range of week[index]; track $index; let rangeIndex = $index) {
+        <div class="we-range">
+          <!-- `selected` en la opción y no `[value]` en el select: las opciones
+               las pinta un @for, así que cuando corre el binding todavía no hay
+               nada con lo que casar. -->
+          <select class="pn-select we-select"
+                  (change)="setTime(index, rangeIndex, 'startTime', $any($event.target).value)"
+                  [attr.aria-label]="'Hora de apertura, ' + day">
+            @for (time of times; track time) {
+              <option [value]="time" [selected]="time === range.startTime">{{ time }}</option>
+            }
+          </select>
+          <span class="we-range__dash">–</span>
+          <select class="pn-select we-select"
+                  (change)="setTime(index, rangeIndex, 'endTime', $any($event.target).value)"
+                  [attr.aria-label]="'Hora de cierre, ' + day">
+            @for (time of times; track time) {
+              <option [value]="time" [selected]="time === range.endTime">{{ time }}</option>
+            }
+          </select>
+          <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Quitar tramo"
+                  (click)="removeRange(index, rangeIndex)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      }
+
+      <div class="we-day__actions">
+        <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="addRange(index)">
+          <span class="material-symbols-rounded">add</span>Añadir tramo
+        </button>
+        @if (week[index].length > 0) {
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="copyToAll(index)">
+            Copiar al resto
+          </button>
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="closeDay(index)">
+            Cerrar este día
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

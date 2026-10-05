@@ -1,0 +1,77 @@
+<div class="cal" [style.--cols]="cols().length">
+  <!-- Cabeceras: una por columna, pegadas arriba al hacer scroll. -->
+  <div class="cal__corner"></div>
+  @for (column of cols(); track column.id) {
+    <div class="cal__head" [class.cal__head--on]="column.highlight">
+      <span class="cal__head-name">{{ column.title }}</span>
+      @if (column.subtitle) {
+        <span class="cal__head-sub">{{ column.subtitle }}</span>
+      }
+    </div>
+  }
+
+  <!-- Horas -->
+  <div class="cal__gutter" [style.height.px]="height()">
+    @for (hour of hours(); track hour) {
+      <span class="cal__hour" [style.top.px]="topOf(hour)">{{ labelOf(hour) }}</span>
+    }
+  </div>
+
+  <!-- Columnas -->
+  @for (column of cols(); track column.id; let index = $index) {
+    <div class="cal__col" [class.cal__col--on]="column.highlight" [class.cal__col--pick]="pickable"
+         [style.height.px]="height()" (click)="onColumnClick(column, $event)">
+      @for (band of closedBands(column); track $index) {
+        <div class="cal__closed" [style.top.px]="band.top" [style.height.px]="band.height"></div>
+      }
+
+      @for (hour of hours(); track hour) {
+        <div class="cal__line" [style.top.px]="topOf(hour)"></div>
+      }
+
+      @for (item of placed()[index]; track item.booking.id) {
+        <button
+          type="button"
+          class="ev"
+          [class.ev--tight]="item.height < 46"
+          [class.ev--off]="item.state === 'cancelada' || item.state === 'noVino'"
+          [style.top.px]="item.top"
+          [style.height.px]="item.height"
+          [style.left.%]="(item.lane * 100) / item.lanes"
+          [style.width.%]="100 / item.lanes"
+          [style.--ev]="item.color"
+          (click)="picked.emit(item.booking)"
+          [attr.aria-label]="item.time + ' ' + item.who + ', ' + item.label + (item.atHome ? ', A domicilio' : '')"
+        >
+          <span class="ev__row">
+            <span class="ev__time pn-tabular">{{ item.time }}</span>
+            <span class="ev__name">{{ item.who }}</span>
+          </span>
+          @if (!item.tight) {
+            <span class="ev__service">{{ item.booking.serviceName }}</span>
+          }
+          <!-- Announced, not read: the address, the account and the note are one click away. -->
+          @if (item.atHome || item.forOther || item.booking.notes) {
+            <span class="ev__marks">
+              @if (item.atHome) {
+                <span class="material-symbols-rounded" title="A domicilio">directions_car</span>
+              }
+              @if (item.forOther) {
+                <span class="material-symbols-rounded" [title]="'Reservó: ' + item.booking.customerName">group</span>
+              }
+              @if (item.booking.notes) {
+                <span class="material-symbols-rounded" title="Tiene una nota">sticky_note_2</span>
+              }
+            </span>
+          }
+        </button>
+      }
+
+      @if (nowTop() !== null && column.highlight) {
+        <div class="cal__now" [style.top.px]="nowTop()" aria-hidden="true">
+          <span class="cal__now-dot"></span>
+        </div>
+      }
+    </div>
+  }
+</div>

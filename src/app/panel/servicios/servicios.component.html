@@ -1,0 +1,218 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Lo que ofreces a tus clientes</p>
+      <h1>Servicios</h1>
+    </div>
+    <div class="pn-head__actions">
+      <button type="button" class="pn-btn pn-btn--primary" (click)="startCreate()">
+        <span class="material-symbols-rounded">add</span>
+        Nuevo servicio
+      </button>
+    </div>
+  </div>
+
+  @if (store.withoutStaff().length > 0 && !auth.isAutonomous()) {
+    <div class="pn-notice pn-notice--warn sv-warn">
+      <span class="material-symbols-rounded">warning</span>
+      <div>
+        <strong>Hay servicios sin personal</strong>
+        <span class="pn-notice__body">
+          Un servicio sin nadie asignado no se puede reservar. Ábrelo y elige quién lo hace.
+        </span>
+      </div>
+    </div>
+  }
+
+  <section class="pn-card sv">
+    @if (store.all().length === 0) {
+      <pn-empty icon="format_list_bulleted" title="Aún no tienes servicios"
+                text="Crea tu primer servicio para que tus clientes puedan reservar.">
+        <button type="button" class="pn-btn pn-btn--primary" (click)="startCreate()">Crear servicio</button>
+      </pn-empty>
+    } @else {
+      <p class="sv__hint pn-muted">
+        Este es el orden en el que los ve el cliente. Toca uno para editarlo.
+      </p>
+
+      @for (service of store.all(); track service.id; let first = $first; let last = $last) {
+        <div class="sv-row" [class.sv-row--off]="!service.active">
+          <span class="sv-row__order">
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Subir"
+                    [disabled]="first" (click)="move(service, -1)">
+              <span class="material-symbols-rounded">keyboard_arrow_up</span>
+            </button>
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Bajar"
+                    [disabled]="last" (click)="move(service, 1)">
+              <span class="material-symbols-rounded">keyboard_arrow_down</span>
+            </button>
+          </span>
+
+          <button type="button" class="sv-row__main" (click)="startEdit(service)">
+            <span class="sv-row__photo">
+              @if (service.imageUrl) {
+                <img [src]="service.imageUrl" alt="" />
+              } @else {
+                <span class="material-symbols-rounded">content_cut</span>
+              }
+            </span>
+            <span class="sv-row__text">
+              <span class="sv-row__name">{{ service.name }}</span>
+              <span class="sv-row__meta">
+                <span class="pn-tabular">{{ price(service.price) }}</span>
+                · {{ durationText(service.duration) }}
+                ·
+                <span [class.sv-row__nostaff]="service.workerIds.length === 0">{{ workersOf(service) }}</span>
+                <!-- Dónde se presta, y solo si el negocio hace las dos cosas:
+                     si hace una, todas las filas dirían lo mismo. -->
+                @if (placeOf(service); as place) {
+                  · {{ place }}
+                }
+              </span>
+            </span>
+          </button>
+
+          <pn-switch [checked]="service.active" [label]="'Activar ' + service.name"
+                     (toggle)="setActive(service, $event)" />
+        </div>
+      }
+    }
+  </section>
+</main>
+
+@if (open()) {
+  <pn-dialog [title]="editing() ? 'Editar servicio' : 'Nuevo servicio'" (closed)="close()">
+    <pn-photo-picker
+      class="sv-photo"
+      label="Foto del servicio"
+      hint="Cuadrada. Se ve en tu ficha junto al precio."
+      [current]="editing()?.imageUrl ?? null"
+      [busy]="uploading()"
+      (picked)="pickPhoto($event)"
+    />
+    @if (editing()?.imageUrl) {
+      <button type="button" class="pn-btn pn-btn--text pn-btn--sm sv-photo-remove"
+              (click)="removePhoto(editing()!)">Quitar la foto</button>
+    }
+
+    <label class="pn-field">
+      <span class="pn-field__label">Nombre</span>
+      <input class="pn-input" type="text" name="name" placeholder="Corte de caballero" [(ngModel)]="form.name" />
+    </label>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
+      <textarea class="pn-textarea" name="description" rows="3"
+                placeholder="Lavado, corte a tijera y peinado." [(ngModel)]="form.description"></textarea>
+    </label>
+
+    <div class="sv-form-grid">
+      <label class="pn-field">
+        <span class="pn-field__label">Precio (€)</span>
+        <input class="pn-input" type="number" min="0" step="0.5" name="price" [(ngModel)]="form.price" />
+      </label>
+
+      <div class="pn-field">
+        <span class="pn-field__label">Duración</span>
+        <div class="sv-stepper">
+          <button type="button" class="pn-icon-btn" aria-label="Menos" (click)="bumpDuration(-1)">
+            <span class="material-symbols-rounded">remove</span>
+          </button>
+          <span class="sv-stepper__value pn-tabular">{{ durationText(form.duration) }}</span>
+          <button type="button" class="pn-icon-btn" aria-label="Más" (click)="bumpDuration(1)">
+            <span class="material-symbols-rounded">add</span>
+          </button>
+        </div>
+        <span class="pn-field__hint">Va de {{ step() }} en {{ step() }} minutos, como tus horas de reserva.</span>
+      </div>
+    </div>
+
+    <!-- Dónde se presta ESTE servicio (`_PlaceField`). En la app es una hoja
+         con las tres opciones; aquí caben a la vista, como en «Tu ficha». Con
+         un negocio que solo atiende de una forma no se esconde: se enseña
+         apagado diciendo de dónde sale el valor. -->
+    <p class="pn-field__label">Dónde se presta</p>
+    @if (canChoosePlace()) {
+      <div class="sv-places" role="radiogroup" aria-label="Dónde se presta">
+        @for (place of places; track place.id) {
+          <button type="button" class="sv-place" role="radio" [attr.aria-checked]="form.serviceMode === place.id"
+                  (click)="setPlace(place.id)">
+            <span class="material-symbols-rounded">{{ place.icon }}</span>
+            <span class="sv-place__title">{{ place.title }}</span>
+            <span class="sv-place__sub">{{ place.sub }}</span>
+          </button>
+        }
+      </div>
+      <p class="pn-field__hint sv-places__hint">
+        Puedes ofrecer unos servicios solo en tu local y otros también a domicilio.
+      </p>
+    } @else {
+      <p class="sv-place-fixed">
+        <span class="material-symbols-rounded">{{ businessMode() === 'AT_BUSINESS' ? 'storefront' : 'directions_car' }}</span>
+        Como tu negocio: {{ modeShort[businessMode()] }}
+      </p>
+    }
+
+    <!-- Solo si este servicio se desplaza: en uno de local, un recargo es una
+         pregunta sin respuesta posible. -->
+    @if (travels) {
+      <label class="pn-field">
+        <span class="pn-field__label">Recargo a domicilio (€)</span>
+        <input class="pn-input" type="number" min="0" max="200" step="0.5" name="surcharge" placeholder="0"
+               [class.pn-input--invalid]="!!surchargeError()"
+               [(ngModel)]="form.surcharge" (ngModelChange)="surchargeError.set(null)" />
+        @if (surchargeError(); as text) {
+          <span class="pn-field__error" role="alert">{{ text }}</span>
+        } @else {
+          <span class="pn-field__hint">
+            Se suma al precio solo cuando la cita es a domicilio. Déjalo vacío si cuesta lo mismo.
+          </span>
+        }
+      </label>
+    }
+
+    @if (!auth.isAutonomous() && team.all().length > 0) {
+      <div class="pn-group">
+        <p class="pn-group__head">Quién lo hace</p>
+        <div class="pn-group__body">
+          @for (worker of team.all(); track worker.id) {
+            <button type="button" class="pn-row" (click)="toggleWorker(worker.id)">
+              <span class="material-symbols-rounded pn-row__icon">person</span>
+              <span class="pn-row__main"><span class="pn-row__title">{{ worker.name }}</span></span>
+              @if (form.workerIds.includes(worker.id)) {
+                <span class="material-symbols-rounded pn-row__icon">check</span>
+              }
+            </button>
+          }
+        </div>
+        <p class="pn-group__foot">Sin nadie marcado, este servicio no se puede reservar.</p>
+      </div>
+    }
+
+    <pn-service-hours
+      [grid]="slotGrid()"
+      [slotMinutes]="step()"
+      [enabled]="form.onlySomeHours"
+      [bands]="form.bands"
+      (enabledChange)="setOnlySomeHours($event)"
+      (bandsChange)="form.bands = $event"
+    />
+
+    @if (hoursError(); as text) {
+      <p class="pn-field__error" role="alert">{{ text }}</p>
+    }
+
+    @if (editing(); as service) {
+      <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="remove(service)">
+        Eliminar servicio
+      </button>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="close()">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="save()">
+        @if (busy()) { <span class="pn-spinner"></span> } @else { Guardar }
+      </button>
+    </ng-container>
+  </pn-dialog>
+}

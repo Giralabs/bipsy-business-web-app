@@ -1,0 +1,231 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm au-back" routerLink="/panel/equipo">
+    <span class="material-symbols-rounded">arrow_back</span>Equipo
+  </a>
+
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Vacaciones, días libres y bajas de tu equipo</p>
+      <h1>Ausencias</h1>
+    </div>
+    @if (team.enabled()) {
+      <div class="pn-head__actions">
+        <pn-segmented [options]="tabs()" [value]="tab()" label="Ausencias" (valueChange)="tab.set($event)" />
+        <button type="button" class="pn-btn pn-btn--primary" (click)="open()">
+          <span class="material-symbols-rounded">add</span>
+          Registrar ausencia
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Working alone `/absences/**` answers 409. What that business has for
+       the days it is not there is closing the shop. -->
+  @if (!team.enabled()) {
+    <section class="pn-card">
+      <pn-empty icon="groups" title="Trabajas solo"
+                text="Trabajando solo no hay trabajadores, invitaciones, ausencias ni fichaje. Se activa en Funcionalidades.">
+        <a class="pn-btn pn-btn--primary" routerLink="/panel/ajustes/cierres">Días de cierre</a>
+      </pn-empty>
+    </section>
+  } @else {
+  <section class="pn-card">
+    @if (shown().length === 0) {
+      <pn-empty icon="event_available" title="Sin solicitudes"
+                [text]="tab() === 'pendientes'
+                  ? 'Cuando alguien de tu equipo pida días, lo verás aquí.'
+                  : 'Aquí quedará lo que ya hayas resuelto.'" />
+    } @else {
+      @for (absence of shown(); track trackOf(absence)) {
+        <article class="au">
+          <div class="au__main">
+            <p class="au__who">
+              {{ whoOf(absence) }}
+              <!-- Nobody approves the owner's day off: an «Aprobada» there
+                   would say somebody decided it. -->
+              @if (!absence.ownerDay) {
+                <span class="pn-status"
+                      [class.pn-status--warn]="absence.status === 'PENDING'"
+                      [class.pn-status--success]="absence.status === 'APPROVED'"
+                      [class.pn-status--danger]="absence.status === 'REJECTED'">
+                  {{ absence.status === 'PENDING' ? 'Pendiente' : absence.status === 'APPROVED' ? 'Aprobada' : 'Rechazada' }}
+                </span>
+              }
+            </p>
+            <p class="au__type">{{ typeOf(absence) }}</p>
+            <p class="au__range">{{ rangeOf(absence) }}</p>
+            @if (absence.reason) {
+              <p class="au__reason">«{{ absence.reason }}»</p>
+            }
+            @if (absence.conflictingBookingsCount > 0 && absence.status === 'PENDING') {
+              <p class="au__conflicts">
+                <span class="material-symbols-rounded">warning</span>
+                {{ count(absence.conflictingBookingsCount, 'cita choca', 'citas chocan') }} con estas fechas
+              </p>
+            }
+          </div>
+
+          @if (absence.status === 'PENDING') {
+            <div class="au__actions">
+              <button type="button" class="pn-btn pn-btn--danger pn-btn--sm" (click)="reject(absence)">
+                Rechazar
+              </button>
+              <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" (click)="start(absence)">
+                @if (absence.conflictingBookingsCount > 0) { Revisar y aprobar } @else { Aprobar }
+              </button>
+            </div>
+          } @else {
+            <!-- The only place where an absence can be REMOVED: what the
+                 business registers is born approved, and the worker can only
+                 withdraw what is still pending. -->
+            <div class="au__actions">
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="remove(absence)">
+                Quitar
+              </button>
+            </div>
+          }
+        </article>
+      }
+    }
+  </section>
+  }
+</main>
+
+@if (creating()) {
+  <pn-dialog title="Registrar ausencia" (closed)="creating.set(false)">
+    <p class="pn-dim au-help">Crea directamente una ausencia aprobada sobre un trabajador.</p>
+
+    @if (professionals().length === 0) {
+      <p class="au-none">No tienes trabajadores en tu equipo.</p>
+    } @else {
+      <label class="pn-field">
+        <span class="pn-field__label">Trabajador</span>
+        <select class="pn-select" name="worker" [ngModel]="workerId()" (ngModelChange)="pick($event)">
+          <option [ngValue]="null" disabled>Elige un trabajador</option>
+          @for (worker of professionals(); track worker.id) {
+            <option [ngValue]="worker.id">{{ worker.id === team.owner()?.id ? 'Yo' : worker.name }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <!-- The type belongs to a staff absence; the owner's day off has none, so
+         the field goes away instead of showing something that is not saved. -->
+    @if (!forOwner()) {
+      <label class="pn-field">
+        <span class="pn-field__label">Tipo</span>
+        <select class="pn-select" name="type" [(ngModel)]="type">
+          @for (option of types; track option.id) {
+            <option [ngValue]="option.id">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <div class="au-dates">
+      <label class="pn-field">
+        <span class="pn-field__label">Desde</span>
+        <input class="pn-input" type="date" name="from" [min]="minDay" [max]="maxDay"
+               [ngModel]="from" (ngModelChange)="setFrom($event)" />
+      </label>
+      <label class="pn-field">
+        <span class="pn-field__label">Hasta</span>
+        <input class="pn-input" type="date" name="to" [min]="from || minDay" [max]="maxDay"
+               [ngModel]="to" (ngModelChange)="setTo($event)" />
+      </label>
+    </div>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Motivo (opcional)</span>
+      <input class="pn-input" name="reason" maxlength="255"
+             placeholder="Baja por enfermedad, vacaciones de empresa..." [(ngModel)]="reason" />
+    </label>
+
+    @if (inTheWay().length > 0) {
+      <div class="pn-notice pn-notice--warn">
+        <span class="material-symbols-rounded">warning</span>
+        <div>
+          <strong>{{ count(inTheWay().length, 'cita que resolver', 'citas que resolver') }}</strong>
+          <span class="pn-notice__body">
+            Reasígnalas o cancélalas en la <a routerLink="/panel/agenda">agenda</a> antes de bloquear esos días.
+          </span>
+        </div>
+      </div>
+      @for (booking of inTheWay(); track booking.id) {
+        <div class="au-cf">
+          <span class="au-cf__when pn-tabular">
+            {{ shortDate(toDate(booking.startDateTime)) }} · {{ hhmm(toDate(booking.startDateTime)) }}
+          </span>
+          <span class="au-cf__who">{{ booking.serviceName }} · {{ booking.customerName }}</span>
+        </div>
+      }
+    }
+
+    @if (formError(); as text) {
+      <p class="pn-field__error" role="alert">{{ text }}</p>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" [disabled]="saving()" (click)="creating.set(false)">
+        Cancelar
+      </button>
+      <!-- With appointments inside the server refuses anyway: a button that
+           always fails is worse than one switched off with the reason above. -->
+      <button type="button" class="pn-btn pn-btn--primary"
+              [disabled]="saving() || checking() || inTheWay().length > 0" (click)="save()">
+        @if (saving()) { <span class="pn-spinner"></span> } @else { Registrar ausencia }
+      </button>
+    </ng-container>
+  </pn-dialog>
+}
+
+@if (resolving(); as absence) {
+  <pn-dialog title="Citas que chocan" [wide]="true" (closed)="resolving.set(null)">
+    <p class="pn-dim au-help">
+      Antes de aprobar los días de {{ absence.workerName }} hay que resolver estas citas: pásalas a alguien
+      libre o cancélalas. Cuando no quede ninguna, podrás aprobar.
+    </p>
+
+    @if (conflicts().length === 0) {
+      <div class="au-clear">
+        <span class="material-symbols-rounded">check_circle</span>
+        <p>No queda ninguna cita por resolver.</p>
+      </div>
+    } @else {
+      @for (conflict of conflicts(); track conflict.id) {
+        <article class="au-cf">
+          <div class="au-cf__head">
+            <span class="au-cf__when pn-tabular">
+              {{ longDate(toDate(conflict.startDateTime)) }} · {{ hhmm(toDate(conflict.startDateTime)) }}
+            </span>
+            <span class="au-cf__who">{{ conflict.customerName }} · {{ conflict.serviceName }}</span>
+          </div>
+
+          <div class="au-cf__actions">
+            @if (candidates()[conflict.id].length > 0) {
+              <span class="au-cf__label">Pasar a</span>
+              @for (worker of candidates()[conflict.id]; track worker.id) {
+                <button type="button" class="pn-chip" (click)="reassign(conflict, worker.id)">
+                  {{ worker.name }}
+                </button>
+              }
+            } @else {
+              <span class="au-cf__label pn-muted">No hay nadie libre a esa hora</span>
+            }
+            <button type="button" class="pn-btn pn-btn--danger pn-btn--sm" (click)="cancelConflict(conflict)">
+              Cancelar cita
+            </button>
+          </div>
+        </article>
+      }
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="resolving.set(null)">Dejarlo</button>
+      <button type="button" class="pn-btn pn-btn--primary"
+              [disabled]="conflicts().length > 0 || busy()" (click)="approve(absence)">
+        Aprobar ausencia
+      </button>
+    </ng-container>
+  </pn-dialog>
+}

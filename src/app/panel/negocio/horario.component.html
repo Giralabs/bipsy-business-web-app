@@ -1,0 +1,94 @@
+<main class="pn-main">
+  <a class="pn-btn pn-btn--text pn-btn--sm ho-back" routerLink="/panel/negocio">
+    <span class="material-symbols-rounded">arrow_back</span>Tu ficha
+  </a>
+
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Los clientes solo pueden reservar en los tramos que abras</p>
+      <h1>Horario</h1>
+    </div>
+    <div class="pn-head__actions">
+      @if (dirty()) {
+        <span class="pn-status pn-status--warn">Sin guardar</span>
+      }
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy() || !dirty()" (click)="save()">
+        @if (busy()) { <span class="pn-spinner"></span> } @else { Guardar cambios }
+      </button>
+    </div>
+  </div>
+
+  @if (isEmpty()) {
+    <div class="pn-notice pn-notice--warn ho-empty">
+      <span class="material-symbols-rounded">schedule</span>
+      <div>
+        <strong>Todavía no abres ningún día</strong>
+        <span class="pn-notice__body">
+          Mientras el horario esté vacío nadie puede reservarte.
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="suggest()">
+            Poner L-V de 9 a 14 y de 16 a 20
+          </button>
+        </span>
+      </div>
+    </div>
+  }
+
+  <section class="pn-card ho">
+    @for (day of weekdays; track day; let index = $index) {
+      <div class="ho-day" [class.ho-day--closed]="week()[index].length === 0">
+        <div class="ho-day__name">
+          <span>{{ day }}</span>
+          <span class="ho-day__sum pn-muted">{{ summary(index) }}</span>
+        </div>
+
+        <div class="ho-day__ranges">
+          @for (range of week()[index]; track $index; let rangeIndex = $index) {
+            <div class="ho-range">
+              <!-- `selected` on the option and not `[value]` on the select:
+                   the options are rendered by @for, so the select has nothing
+                   to match against when the value binding runs. -->
+              <select class="pn-select ho-select"
+                      (change)="setTime(index, rangeIndex, 'startTime', $any($event.target).value)"
+                      [attr.aria-label]="'Hora de apertura, ' + day">
+                @for (time of times; track time) {
+                  <option [value]="time" [selected]="time === range.startTime">{{ time }}</option>
+                }
+              </select>
+              <span class="ho-range__dash">–</span>
+              <select class="pn-select ho-select"
+                      (change)="setTime(index, rangeIndex, 'endTime', $any($event.target).value)"
+                      [attr.aria-label]="'Hora de cierre, ' + day">
+                @for (time of times; track time) {
+                  <option [value]="time" [selected]="time === range.endTime">{{ time }}</option>
+                }
+              </select>
+              <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Quitar tramo"
+                      (click)="removeRange(index, rangeIndex)">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          }
+
+          <div class="ho-day__actions">
+            <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="addRange(index)">
+              <span class="material-symbols-rounded">add</span>Añadir tramo
+            </button>
+            @if (week()[index].length > 0) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="copyToAll(index)">
+                Copiar al resto
+              </button>
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="closeDay(index)">
+                Cerrar este día
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <p class="ho-foot pn-muted">
+      El hueco entre dos tramos es el descanso: no hay que marcarlo aparte. Las vacaciones y los días
+      sueltos van en Ausencias.
+    </p>
+  </section>
+</main>

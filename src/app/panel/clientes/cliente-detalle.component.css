@@ -1,0 +1,70 @@
+﻿:host { display: block; }
+
+.cd-back { margin: 0 0 14px -12px; text-decoration: none; }
+
+.cd-head {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.cd-head__text { flex: 1; min-width: 220px; }
+.cd-head h1 {
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.cd-head__meta { margin-top: 4px; font-size: 0.875rem; color: var(--clr-text-3); }
+.cd-head__tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.cd-head__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cd-head__actions .pn-btn { text-decoration: none; }
+
+.cd-tabs { margin-bottom: 18px; }
+
+.cd-trust { display: flex; align-items: center; gap: 14px; }
+
+.cd-notes { font-size: 0.9375rem; line-height: 1.6; white-space: pre-wrap; }
+
+.cd-danger { display: flex; gap: 8px; margin-top: 18px; }
+
+.cd-sub {
+  padding: 14px 4px 8px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+
+.cd-bk {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 4px;
+}
+.cd-bk + .cd-bk { border-top: 1px solid var(--clr-hairline); }
+.cd-bk__date {
+  display: flex;
+  gap: 8px;
+  width: 230px;
+  flex: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.cd-bk__service { flex: 1; min-width: 0; font-size: 0.875rem; color: var(--clr-text-2); }
+.cd-bk__for { color: var(--clr-text-3); }
+.cd-bk__state { flex: none; font-size: 0.8125rem; font-weight: 700; }
+
+.cd-rev { padding: 14px 4px; }
+.cd-rev + .cd-rev { border-top: 1px solid var(--clr-hairline); }
+.cd-rev__stars { display: flex; gap: 1px; color: var(--clr-star); }
+.cd-rev__stars .material-symbols-rounded { font-size: 16px; }
+.cd-rev__text { margin-top: 6px; font-size: 0.9375rem; line-height: 1.55; }
+.cd-rev__meta { margin-top: 6px; font-size: 0.8125rem; color: var(--clr-text-3); }
+
+@media (max-width: 760px) {
+  .cd-bk { flex-wrap: wrap; gap: 6px; }
+  .cd-bk__date { width: auto; }
+}

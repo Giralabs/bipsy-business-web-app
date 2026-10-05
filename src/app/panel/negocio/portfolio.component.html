@@ -1,0 +1,230 @@
+<main class="pn-main">
+  <div class="pn-head">
+    <div class="pn-head__text">
+      <p class="pn-head__greet">Es lo que mira un cliente antes de decidirse</p>
+      <h1>Portfolio</h1>
+    </div>
+    <div class="pn-head__actions">
+      <!-- Instagram solo existe si el servidor tiene la app de Meta puesta
+           (`available`); si no, sus endpoints responden 503 y no se enseña. -->
+      @if (instagram()?.available) {
+        @if (instagram()?.connected) {
+          <button type="button" class="pn-btn pn-btn--secondary" [disabled]="igBusy()" (click)="openImport()">
+            <span class="material-symbols-rounded">photo_camera</span>Importar de Instagram
+          </button>
+        } @else {
+          <button type="button" class="pn-btn pn-btn--secondary" [disabled]="igBusy()" (click)="connect()">
+            <span class="material-symbols-rounded">photo_camera</span>Traer fotos de Instagram
+          </button>
+        }
+      }
+      <span class="pn-status pn-status--accent">{{ photos().length }} de {{ limitLabel() }}</span>
+    </div>
+  </div>
+
+  @if (instagram()?.available && instagram()?.connected) {
+    <p class="pf-ig-account">
+      {{ igAccountLabel() }}
+      <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="disconnect()">
+        Desconectar Instagram
+      </button>
+    </p>
+  }
+
+  @if (igWaiting()) {
+    <div class="pn-notice pn-notice--info">
+      <span class="material-symbols-rounded">open_in_new</span>
+      <div>
+        <span class="pn-notice__body">
+          Autoriza a Bipsy en la ventana que se ha abierto. Cuando termines, vuelve aquí y pulsa Actualizar.
+        </span>
+        <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" [disabled]="igBusy()"
+                (click)="refreshInstagram()">
+          Actualizar
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (igError(); as text) {
+    <p class="pn-field__error" role="alert">{{ text }}</p>
+  }
+
+  @if (full() && !unlimited()) {
+    <div class="pn-notice pn-notice--info pf-full">
+      <span class="material-symbols-rounded">auto_awesome</span>
+      <div>
+        <strong>Has llegado a las 10 fotos de tu plan</strong>
+        <span class="pn-notice__body">
+          Con Quality subes todas las que quieras. Mientras tanto, quita alguna para subir otra.
+        </span>
+      </div>
+    </div>
+  } @else {
+    @for (key of [pickerKey()]; track key) {
+      <pn-photo-picker
+        class="pf-add"
+        label="Añadir una foto al portfolio"
+        hint="Arrástrala aquí o haz clic para elegirla"
+        [busy]="uploading()"
+        (picked)="pick($event)"
+      />
+    }
+  }
+
+  @if (photos().length === 0) {
+    <section class="pn-card">
+      <pn-empty icon="photo_library" title="Aún no has subido ninguna foto"
+                text="Sube fotos de trabajos tuyos y etiquétalas por servicio. Es lo que convence al cliente que todavía no te conoce." />
+    </section>
+  } @else {
+    <p class="pf-label">En tu ficha · las 10 primeras</p>
+    <div class="pf-grid">
+      @for (photo of front(); track photo.id; let first = $first) {
+        <figure class="pf-tile">
+          <img [src]="photo.url" [alt]="photo.caption ?? ''" />
+          <figcaption class="pf-tile__bar">
+            <span class="pf-tile__text">{{ photo.caption || serviceName(photo) }}</span>
+            <span class="pf-tile__actions">
+              <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Subir"
+                      [disabled]="first" (click)="move(photo, -1)">
+                <span class="material-symbols-rounded">arrow_back</span>
+              </button>
+              <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Editar"
+                      (click)="startEdit(photo)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </span>
+          </figcaption>
+        </figure>
+      }
+    </div>
+
+    @if (rest().length > 0) {
+      <p class="pf-label">Galería</p>
+      <div class="pf-grid">
+        @for (photo of rest(); track photo.id) {
+          <figure class="pf-tile">
+            <img [src]="photo.url" [alt]="photo.caption ?? ''" />
+            <figcaption class="pf-tile__bar">
+              <span class="pf-tile__text">{{ photo.caption || serviceName(photo) }}</span>
+              <span class="pf-tile__actions">
+                <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Subir"
+                        (click)="move(photo, -1)">
+                  <span class="material-symbols-rounded">arrow_back</span>
+                </button>
+                <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Editar"
+                        (click)="startEdit(photo)">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+              </span>
+            </figcaption>
+          </figure>
+        }
+      </div>
+    }
+  }
+</main>
+
+@if (adding()) {
+  <pn-dialog title="Añadir una foto" (closed)="cancelAdd()">
+    @if (draftUrl(); as url) {
+      <img class="pf-preview" [src]="url" alt="" />
+    }
+
+    <label class="pn-field">
+      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
+      <input class="pn-input" type="text" name="draftCaption" maxlength="300" [(ngModel)]="draftForm.caption"
+             placeholder="Ej. Corte degradado con perfilado" />
+    </label>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Servicio (opcional)</span>
+      <select class="pn-select" name="draftServiceId" [(ngModel)]="draftForm.serviceId">
+        <option [ngValue]="null">Ninguno</option>
+        @for (service of services.all(); track service.id) {
+          <option [ngValue]="service.id">{{ service.name }}</option>
+        }
+      </select>
+      <span class="pn-field__hint">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</span>
+    </label>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="cancelAdd()">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="uploading()" (click)="add()">
+        @if (uploading()) { <span class="pn-spinner"></span> } @else { Subir }
+      </button>
+    </ng-container>
+  </pn-dialog>
+}
+
+@if (importing()) {
+  <pn-dialog title="Elegir fotos" [wide]="true" (closed)="importing.set(false)">
+    <p class="pn-muted">Marca las fotos que quieras añadir a tu portfolio.</p>
+
+    @if (igBusy() && media().length === 0) {
+      <p class="pn-muted">Cargando tus fotos…</p>
+    } @else if (media().length === 0) {
+      <p class="pn-muted">No hemos encontrado fotos en tu Instagram.</p>
+    } @else {
+      <div class="pf-ig-grid">
+        @for (item of media(); track item.id) {
+          <button
+            type="button"
+            class="pf-ig-tile"
+            [class.pf-ig-tile--on]="picked().has(item.id)"
+            [attr.aria-pressed]="picked().has(item.id)"
+            (click)="togglePick(item.id)"
+          >
+            <img [src]="item.thumbnailUrl || item.mediaUrl" [alt]="item.caption ?? ''" />
+            @if (picked().has(item.id)) {
+              <span class="material-symbols-rounded pf-ig-tile__check">check</span>
+            }
+          </button>
+        }
+      </div>
+    }
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="importing.set(false)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="picked().size === 0 || igBusy()"
+              (click)="importPicked()">
+        @if (igBusy()) { <span class="pn-spinner"></span> } @else { Importar {{ picked().size }} }
+      </button>
+    </ng-container>
+  </pn-dialog>
+}
+
+@if (editing(); as photo) {
+  <pn-dialog title="Editar la foto" (closed)="editing.set(null)">
+    <img class="pf-preview" [src]="photo.url" alt="" />
+
+    <label class="pn-field">
+      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
+      <input class="pn-input" type="text" name="caption" maxlength="300" [(ngModel)]="form.caption"
+             placeholder="Degradado con barba perfilada" />
+    </label>
+
+    <label class="pn-field">
+      <span class="pn-field__label">Servicio</span>
+      <select class="pn-select" name="serviceId" [(ngModel)]="form.serviceId">
+        <option [ngValue]="null">Sin servicio</option>
+        @for (service of services.all(); track service.id) {
+          <option [ngValue]="service.id">{{ service.name }}</option>
+        }
+      </select>
+      <span class="pn-field__hint">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</span>
+    </label>
+
+    <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="remove(photo)">
+      Quitar esta foto
+    </button>
+
+    <ng-container dialogActions>
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="editing.set(null)">Cancelar</button>
+      <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="saveEdit()">
+        Guardar
+      </button>
+    </ng-container>
+  </pn-dialog>
+}

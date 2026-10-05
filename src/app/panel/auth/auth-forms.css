@@ -1,0 +1,251 @@
+/* Shared by the three access pages: login, sign-up and password recovery. */
+
+:host { display: block; }
+
+/* Estas pantallas van un punto por debajo del resto del panel.
+   No es capricho: el acceso ya no son dos campos y un botón —lleva Google,
+   Apple, recuperar, la entrada de trabajador y el pie—, y a la escala del
+   panel eso no cabía de una vez en un portátil. Se baja el conjunto (título,
+   campos, botones) en vez de recortar sólo los márgenes, que a partir de
+   cierto punto deja la columna apelmazada. */
+.auth-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.08;
+}
+
+.auth-lead {
+  margin-top: 8px;
+  margin-bottom: 22px;
+  font-size: 0.9375rem;
+  color: var(--clr-text-2);
+  line-height: 1.5;
+}
+
+.auth-notice { margin-bottom: 16px; }
+.auth-error { margin: -4px 0 14px; }
+
+/* La escala propia del acceso. Sólo afecta a estas páginas: la hoja está
+   encapsulada en el componente. */
+.pn-field { margin-bottom: 14px; }
+.pn-field__label { margin-bottom: 7px; font-size: 0.78125rem; }
+.pn-input,
+.pn-select { padding: 12px 16px; font-size: 0.9375rem; }
+.pn-btn--lg { height: 48px; font-size: 0.9375rem; }
+
+.auth-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--clr-text-2);
+  text-decoration: none;
+}
+.auth-link:hover { color: var(--clr-text); text-decoration: underline; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--clr-text-3);
+  font-size: 0.8125rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--clr-border);
+}
+
+/* Google y Apple, uno debajo del otro: son dos formas de empezar lo mismo y se
+   leen como un bloque. */
+.auth-social { display: flex; flex-direction: column; gap: 10px; }
+
+.auth-google-note { margin-top: 8px; text-align: center; font-size: 0.75rem; color: var(--clr-text-3); }
+
+/* Botones de marca ajena: blanco con texto oscuro para Google y negro con
+   texto blanco para Apple, sin teñirlos con el color de Bipsy. Los dos lo
+   exigen en sus guías, y es lo mismo que pinta `SocialAuthButton` en las
+   apps. */
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: var(--pn-radius-row, 14px);
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, transform 0.12s ease;
+}
+
+.social-btn:active:not(:disabled) { transform: scale(0.985); }
+.social-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.social-btn--google { background: #fff; color: #1f1f1f; border-color: #dadce0; }
+.social-btn--google:hover:not(:disabled) { background: #f1f3f4; }
+/* El aro de `.pn-spinner` es blanco translúcido —pensado para los botones
+   oscuros del panel— y sobre blanco no se ve nada. */
+.social-btn--google .pn-spinner { border-color: rgba(0, 0, 0, 0.18); border-top-color: currentColor; }
+
+.social-btn--apple { background: #000; color: #fff; border-color: rgba(255, 255, 255, 0.18); }
+.social-btn--apple:hover:not(:disabled) { background: #1c1c1e; }
+
+.social-btn__logo { width: 18px; height: 18px; flex-shrink: 0; }
+/* El logotipo de Apple pesa menos a igual tamaño: a 18 px los dos botones se
+   veían desparejos. */
+.social-btn__logo--apple { width: 20px; height: 20px; }
+
+/* Worker entry: a quiet row, not a second primary button. */
+.auth-invite {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 13px 16px;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-field);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) ease;
+}
+.auth-invite:hover { background: var(--pn-field-strong); }
+.auth-invite > .material-symbols-rounded { font-size: 22px; color: var(--clr-text-2); }
+.auth-invite strong { display: block; font-size: 0.9375rem; }
+.auth-invite span span { display: block; margin-top: 2px; font-size: 0.8125rem; color: var(--clr-text-3); }
+.auth-invite__go { margin-left: auto; font-size: 19px; color: var(--clr-text-3); transition: translate var(--dur-fast) ease; }
+.auth-invite:hover .auth-invite__go { translate: 3px 0; }
+
+.auth-foot {
+  margin-top: 20px;
+  font-size: 0.875rem;
+  color: var(--clr-text-2);
+}
+.auth-foot a { color: var(--clr-text); font-weight: 700; }
+
+.auth-hint {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--clr-hairline);
+  font-size: 0.8125rem;
+  color: var(--clr-text-3);
+  line-height: 1.5;
+}
+
+/* En un portátil no cabía todo desde que el acceso suma Google y Apple: se
+   junta el aire entre bloques, que es lo que menos se nota. El tamaño de letra
+   no se toca — encoger el texto para ganar dos líneas canta mucho más. */
+@media (min-width: 901px) and (max-height: 820px) {
+  .auth-lead { margin-bottom: 16px; }
+  .auth-divider { margin: 14px 0; }
+  .auth-social { gap: 8px; }
+  .social-btn { height: 44px; }
+  .pn-field { margin-bottom: 11px; }
+  .pn-btn--lg { height: 46px; }
+  .auth-invite { margin-top: 14px; padding: 11px 14px; }
+  .auth-foot { margin-top: 14px; }
+  .auth-hint { margin-top: 14px; padding-top: 12px; }
+  .auth-steps { margin-bottom: 18px; }
+}
+
+/* ----- STEPPED SIGN-UP ------------------------------------------------ */
+
+/* The progress bar IS the separator, like `GipsiFlowHeader`. */
+.auth-steps { margin-bottom: 28px; }
+.auth-steps__count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--clr-text-3);
+}
+.auth-steps__bar { height: 2px; background: var(--pn-separator); border-radius: 2px; overflow: hidden; }
+.auth-steps__fill {
+  height: 100%;
+  background: var(--pn-accent);
+  border-radius: inherit;
+  transition: width var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.auth-actions { display: flex; gap: 10px; margin-top: 24px; }
+.auth-actions .pn-btn { flex: 1; }
+
+/* The six-digit code: one box, big and tabular, not six inputs to tab across. */
+.auth-code {
+  width: 100%;
+  padding: 18px 20px;
+  border: 0;
+  border-radius: var(--pn-radius-field);
+  background: var(--pn-field);
+  color: var(--clr-text);
+  font: inherit;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.auth-code:focus { outline: none; background: var(--pn-field-strong); }
+
+.auth-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 18px;
+  margin-bottom: 10px;
+  border: 0;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-field);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease;
+}
+.auth-choice:hover { background: var(--pn-field-strong); }
+.auth-choice[aria-pressed='true'] { background: var(--pn-accent); color: var(--pn-on-accent); }
+.auth-choice__icon { font-size: 24px; }
+.auth-choice__title { font-size: 0.9375rem; font-weight: 700; }
+.auth-choice__sub { margin-top: 2px; font-size: 0.8125rem; opacity: 0.75; }
+
+.auth-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 0.8125rem;
+  color: var(--clr-text-2);
+  line-height: 1.5;
+  cursor: pointer;
+}
+.auth-check input { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--pn-accent); }
+.auth-check a { color: var(--clr-text); }
+
+.auth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+@media (max-width: 560px) { .auth-grid { grid-template-columns: 1fr; } }
+
+/* Password strength, same five steps as the meter in step 2 of the app. */
+.auth-strength { display: flex; gap: 4px; margin-top: 8px; }
+.auth-strength span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pn-subtle);
+  transition: background-color var(--dur-fast) ease;
+}
+.auth-strength span.on { background: var(--clr-warn); }
+.auth-strength.good span.on { background: var(--clr-success); }

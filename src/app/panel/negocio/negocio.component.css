@@ -1,0 +1,160 @@
+:host { display: block; }
+
+/* ----- LA FICHA ------------------------------------------------------- */
+
+.ficha { overflow: visible; }
+
+/* La portada es lo único que recorta. El avatar vive fuera, así que puede
+   montarse encima sin que le corten media cabeza.
+
+   Altura fija y NO `aspect-ratio` con `max-height`: combinando los dos, el
+   navegador mantiene la proporción encogiendo el ancho, y la portada se
+   quedaba corta por la derecha. */
+.ficha__cover {
+  position: relative;
+  height: clamp(150px, 20vw, 230px);
+  border-radius: var(--pn-radius-card) var(--pn-radius-card) 0 0;
+  background: var(--pn-field);
+  overflow: hidden;
+}
+.ficha__cover img { width: 100%; height: 100%; object-fit: cover; }
+
+.ficha__cover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  text-align: center;
+  padding: 0 24px;
+}
+.ficha__cover-empty .material-symbols-rounded { font-size: 34px; color: var(--clr-text-3); }
+.ficha__cover-text { font-size: 0.9375rem; font-weight: 700; color: var(--clr-text-2); }
+.ficha__cover-hint { font-size: 0.8125rem; color: var(--clr-text-3); }
+
+/* Solo el avatar se monta sobre la portada. Antes subía la fila entera y el
+   nombre del negocio se metía dentro de la foto. */
+.ficha__id {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 14px 28px 0;
+}
+
+.ficha__avatar {
+  margin-top: -62px;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--pn-accent);
+  color: var(--pn-on-accent);
+  font-family: var(--ff-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  /* El aro del color de la tarjeta es lo que lo despega de la portada. */
+  box-shadow: 0 0 0 5px var(--pn-card);
+  overflow: hidden;
+}
+.ficha__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.ficha__id-text { padding-bottom: 6px; min-width: 0; }
+.ficha__id-text h2 {
+  font-family: var(--ff-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.9px;
+  line-height: 1.1;
+}
+.ficha__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 0.9375rem;
+  color: var(--clr-text-2);
+}
+.ficha__stars { display: inline-flex; align-items: center; gap: 4px; color: var(--clr-star); font-weight: 800; }
+.ficha__stars .material-symbols-rounded { font-size: 18px; }
+.ficha__dot { color: var(--clr-text-3); }
+
+.ficha__body { padding: 22px 28px 28px; }
+
+.ficha__desc { font-size: 1rem; line-height: 1.6; }
+.ficha__desc--empty { color: var(--clr-text-3); }
+
+.ficha__photos-head { margin-top: 26px; padding-left: 0; }
+.ficha__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ficha__remove { margin-top: 6px; margin-left: -12px; }
+
+/* ----- QUALITY -------------------------------------------------------- */
+
+.ng-quality { text-align: center; padding: 28px 24px; }
+.ng-quality .material-symbols-rounded { font-size: 32px; color: var(--clr-mint); }
+.ng-quality h3 {
+  margin-top: 12px;
+  font-family: var(--ff-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.ng-quality p { margin: 10px 0 20px; font-size: 0.9375rem; color: var(--clr-text-2); line-height: 1.55; }
+
+/* ----- EDITAR · DÓNDE ATIENDES ---------------------------------------- */
+
+.ng-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+.ng-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-field);
+  color: var(--clr-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease;
+}
+.ng-mode:hover { background: var(--pn-field-strong); }
+.ng-mode[aria-checked='true'] { background: var(--pn-accent); color: var(--pn-on-accent); }
+.ng-mode .material-symbols-rounded { font-size: 22px; }
+.ng-mode__title { font-size: 0.9375rem; font-weight: 700; }
+.ng-mode__sub { font-size: 0.75rem; line-height: 1.4; opacity: 0.75; }
+
+.ng-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ----- EDITAR · ZONA DE DESPLAZAMIENTO -------------------------------- */
+
+.ng-area { margin-bottom: 18px; }
+/* A slider is not a row: without its own padding it bleeds to both edges. */
+.ng-area__radius { display: flex; flex-direction: column; gap: 8px; padding: 4px 20px 16px; }
+.ng-area__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.ng-area__value { font-weight: 800; }
+.ng-area__slider { width: 100%; accent-color: var(--pn-accent); }
+.ng-area__slider:disabled { opacity: 0.45; }
+
+@media (max-width: 640px) {
+  .ng-modes, .ng-two { grid-template-columns: 1fr; }
+  .ficha__photos { grid-template-columns: 1fr; }
+  .ficha__id { padding-inline: 20px; }
+  .ficha__body { padding: 20px; }
+  .ficha__avatar { width: 78px; height: 78px; font-size: 1.75rem; }
+}
+
+/* Las seis redes en dos columnas: caben de un vistazo y no alargan el
+   diálogo más que el bloque de la dirección. */
+.ng-social {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+@media (max-width: 720px) {
+  .ng-social { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,50 @@
+﻿:host { display: block; }
+
+.au-back { margin: 0 0 14px -12px; text-decoration: none; }
+
+.au { display: flex; align-items: center; gap: 20px; padding: 16px 4px; }
+.au + .au { border-top: 1px solid var(--clr-hairline); }
+.au__main { flex: 1; min-width: 0; }
+.au__who { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 600; }
+.au__type { margin-top: 4px; font-size: 0.875rem; color: var(--clr-text-2); }
+.au__range { margin-top: 2px; font-size: 0.875rem; color: var(--clr-text-3); }
+.au__reason { margin-top: 6px; font-size: 0.875rem; font-style: italic; color: var(--clr-text-2); }
+.au__conflicts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clr-warn-text);
+}
+.au__conflicts .material-symbols-rounded { font-size: 16px; }
+.au__actions { display: flex; gap: 8px; flex: none; }
+
+.au-help { font-size: 0.875rem; line-height: 1.6; margin-bottom: 16px; }
+
+.au-clear { display: flex; align-items: center; gap: 10px; padding: 20px 0; color: var(--clr-success); }
+.au-clear .material-symbols-rounded { font-size: 28px; }
+
+.au-cf { padding: 14px; margin-bottom: 10px; border-radius: var(--pn-radius-row); background: var(--pn-card); }
+.au-cf__head { margin-bottom: 10px; }
+.au-cf__when { display: block; font-size: 0.875rem; font-weight: 700; }
+.au-cf__who { display: block; margin-top: 2px; font-size: 0.875rem; color: var(--clr-text-2); }
+.au-cf__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.au-cf__label { font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
+
+.au-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.au-none {
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-field);
+  text-align: center;
+}
+.pn-notice + .au-cf { margin-top: 10px; }
+
+@media (max-width: 700px) {
+  .au { flex-direction: column; align-items: stretch; }
+  .au__actions { justify-content: flex-end; }
+}
+@media (max-width: 520px) { .au-dates { grid-template-columns: 1fr; } }
