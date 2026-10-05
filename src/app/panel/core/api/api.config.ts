@@ -14,7 +14,10 @@ declare global {
   }
 }
 
-const PROD_API = 'https://gipsi-api.onrender.com';
+// For now the backend is not deployed anywhere: it runs on the machine of
+// whoever opens the site, so the deployed build talks to localhost too. Swap
+// for the public URL the day it is hosted (or set `window.__BIPSY_API__`).
+const PROD_API = 'http://localhost:8080';
 const DEV_API = 'http://localhost:8080';
 
 /**
