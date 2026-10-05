@@ -1,0 +1,24 @@
+/* The password field with its eye. The rest of the form is `auth-forms.css`. */
+
+.pass { position: relative; }
+/* Room for the eye, so a long password does not run under it. */
+.pass .pn-input { padding-right: 52px; }
+
+.pass__eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--clr-text-3);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.pass__eye:hover { background: var(--pn-field-strong); color: var(--clr-text); }
+.pass__eye .material-symbols-rounded { font-size: 21px; }

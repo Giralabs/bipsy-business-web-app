@@ -1,8 +1,21 @@
-<app-site-header />
+@if (showMaintenance()) {
+  <app-maintenance-page />
+} @else {
+  @if (showSiteChrome()) {
+    <app-site-header />
+  }
 
-<!-- tabindex so "Saltar al contenido" can move the focus here. -->
-<main id="contenido" class="main" tabindex="-1">
-  <router-outlet />
-</main>
+  <!-- tabindex so "Saltar al contenido" can move the focus here. -->
+  <main id="contenido" class="main" tabindex="-1">
+    <router-outlet />
+  </main>
 
-<app-site-footer />
+  @if (showSiteChrome()) {
+    <app-site-footer />
+  }
+}
+
+<!-- The team, inside during maintenance: a reminder that the public is not. -->
+@if (maintenance.bypass()) {
+  <app-maintenance-badge />
+}

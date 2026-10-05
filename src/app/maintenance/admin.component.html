@@ -1,0 +1,48 @@
+@if (state.maintenance()) {
+  <app-auth-layout bip="MB-17" claim="Estamos poniendo la web a punto.">
+    <h1 class="auth-title">Acceso del equipo</h1>
+    <p class="auth-lead">
+      La web está en mantenimiento y cerrada al público. Con la contraseña del equipo puedes entrar mientras tanto.
+    </p>
+
+    <form (ngSubmit)="submit()">
+      <!-- A div and not a label around the field: the eye is a button, and a
+           button inside a label would be read as part of the field's name. -->
+      <div class="pn-field">
+        <label class="pn-field__label" for="admin-password">Contraseña</label>
+        <div class="pass">
+          <input
+            id="admin-password"
+            class="pn-input"
+            [type]="visible() ? 'text' : 'password'"
+            name="password"
+            autocomplete="current-password"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="••••••••"
+            [(ngModel)]="password"
+          />
+          <button type="button" class="pass__eye" [attr.aria-pressed]="visible()"
+                  [attr.aria-label]="visible() ? 'Ocultar la contraseña' : 'Mostrar la contraseña'"
+                  (click)="visible.set(!visible())">
+            <span class="material-symbols-rounded">{{ visible() ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+      </div>
+
+      @if (error(); as text) {
+        <p class="pn-field__error auth-error" role="alert">{{ text }}</p>
+      }
+
+      <button type="submit" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block" [disabled]="busy()">
+        @if (busy()) {
+          <span class="pn-spinner"></span>
+        } @else {
+          Entrar
+        }
+      </button>
+    </form>
+  </app-auth-layout>
+} @else {
+  <app-not-found />
+}

@@ -1,4 +1,9 @@
 import { Routes } from '@angular/router';
+import { adminTitle } from './maintenance/admin.title';
+import { maintenanceGate } from './maintenance/maintenance.guard';
+import { ErrorComponent, errorTitle } from './pages/error/error.component';
+import { NOT_FOUND_TITLE } from './pages/not-found/not-found.title';
+import { guestGuard } from './panel/core/auth/auth.guard';
 
 /**
  * Every page is lazy: whoever lands on the home page does not need to download
@@ -6,7 +11,7 @@ import { Routes } from '@angular/router';
  *
  * Pages with a `:slug` set their own title, because it depends on the data.
  */
-export const routes: Routes = [
+const siteRoutes: Routes = [
   {
     path: '',
     title: 'Bipsy Business · Agenda, reservas y gestión para tu negocio',
@@ -67,19 +72,74 @@ export const routes: Routes = [
     path: 'legal/:slug',
     loadComponent: () => import('./pages/legal/legal.component').then((m) => m.LegalComponent),
   },
-  // Sign-up and login are not built yet: the buttons already point here so
-  // nothing has to change in the header when they are.
+  // The way in. Everything from here on is the product, not the brochure, so
+  // it lives in `src/app/panel/` and loads only when someone signs in.
   {
     path: 'registro',
-    title: 'Probar gratis · Bipsy Business',
-    data: { kind: 'signup' },
-    loadComponent: () => import('./pages/soon/soon.component').then((m) => m.SoonComponent),
+    title: 'Crea tu negocio · Bipsy Business',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./panel/auth/signup.component').then((m) => m.SignupComponent),
   },
   {
     path: 'acceder',
     title: 'Iniciar sesión · Bipsy Business',
-    data: { kind: 'login' },
-    loadComponent: () => import('./pages/soon/soon.component').then((m) => m.SoonComponent),
+    canActivate: [guestGuard],
+    loadComponent: () => import('./panel/auth/login.component').then((m) => m.LoginComponent),
   },
-  { path: '**', redirectTo: '' },
+  // Los trabajadores entran con el código de 6 cifras que les da su negocio.
+  {
+    path: 'unirse',
+    title: 'Únete a tu equipo · Bipsy Business',
+    loadComponent: () => import('./panel/auth/join.component').then((m) => m.JoinComponent),
+  },
+  {
+    path: 'invitacion/:token',
+    title: 'Invitación · Bipsy Business',
+    loadComponent: () => import('./panel/auth/accept-invite.component').then((m) => m.AcceptInviteComponent),
+  },
+  {
+    path: 'recuperar-contrasena',
+    title: 'Recuperar contraseña · Bipsy Business',
+    loadComponent: () => import('./panel/auth/recover.component').then((m) => m.RecoverComponent),
+  },
+  {
+    path: 'panel',
+    loadChildren: () => import('./panel/panel.routes').then((m) => m.panelRoutes),
+  },
+  // The one page that is NOT lazy: it is where a lazy chunk that failed to
+  // load ends up (`shared/app-error-handler.ts`), so it cannot be one itself.
+  // `?tipo=conexion|version` picks what it says.
+  {
+    path: 'error',
+    title: errorTitle,
+    component: ErrorComponent,
+  },
+  // Anything else does not exist, and says so. It used to redirect to the home
+  // page, which hides a broken link from the person who followed it.
+  {
+    path: '**',
+    title: NOT_FOUND_TITLE,
+    loadComponent: () => import('./pages/not-found/not-found.component').then((m) => m.NotFoundComponent),
+  },
+];
+
+/**
+ * Two doors. `/admin` is the team's way in during maintenance, so it is the
+ * only route outside the gate; everything else hangs from one parent without a
+ * component whose guard holds navigation while the site is closed (see
+ * `maintenanceGate`). The parent changes no URL.
+ */
+export const routes: Routes = [
+  {
+    path: 'admin',
+    // «Acceso del equipo» in maintenance; the rest of the time, the same title
+    // and the same page as any unknown URL.
+    title: adminTitle,
+    loadComponent: () => import('./maintenance/admin.component').then((m) => m.AdminComponent),
+  },
+  {
+    path: '',
+    canActivateChild: [maintenanceGate],
+    children: siteRoutes,
+  },
 ];
