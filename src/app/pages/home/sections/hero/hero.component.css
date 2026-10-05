@@ -147,68 +147,16 @@
   animation: hero-stage-in 1200ms var(--ease-out) 300ms both;
 }
 
+/* Mr. Bip is a full-body render, and this one is 690×1639 — two and a half
+   times as tall as it is wide. Sized by height, not width: the widths below
+   are what put him at about 580px tall, the same as the 4:5 slot he replaced.
+   The stage keeps its own size for the Blender frames. */
+.hero__stage app-bip-rig { display: block; width: min(100%, 245px); margin-inline: auto; }
+
 @keyframes hero-stage-in {
   from { opacity: 0; transform: scale(0.9) translateY(30px); }
   to { opacity: 1; transform: none; }
 }
-
-/* Two orbits with a dot travelling each: the rhythm of the app's loaders. */
-.hero__orbit {
-  position: absolute;
-  width: min(118%, 600px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--clr-hairline);
-  animation: spin-slow 40s linear infinite;
-}
-.hero__orbit::before {
-  content: '';
-  position: absolute;
-  inset: 12%;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--clr-hairline);
-}
-.hero__orbit-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; }
-.hero__orbit-dot--1 { top: 50%; left: -5px; background: var(--clr-mint); box-shadow: 0 0 16px var(--clr-mint); }
-.hero__orbit-dot--2 { top: 12%; right: 16%; width: 8px; height: 8px; background: var(--clr-biz); box-shadow: 0 0 14px var(--clr-biz); }
-
-.hero__float {
-  position: absolute;
-  z-index: 2;
-  transform: translate3d(calc(var(--px) * var(--depth) * 1px), calc(var(--py) * var(--depth) * 1px), 0);
-  transition: transform 700ms var(--ease-out);
-}
-
-.hero__float .ph-float {
-  animation:
-    pop-in 700ms var(--ease-back) var(--delay) both,
-    float 7s ease-in-out calc(var(--delay) + 700ms) infinite;
-}
-
-.hero__float--booking { top: 10%; left: -6%; }
-.hero__float--paid { top: 34%; right: -4%; }
-.hero__float--paid .ph-float { animation-duration: 700ms, 6s; }
-.hero__float--review { bottom: 2%; left: -8%; }
-.hero__float--review .ph-float { animation-duration: 700ms, 8s; }
-.hero__float--wait { bottom: 7%; right: 2%; }
-.hero__float--team { top: -2%; right: 10%; }
-.hero__float--team .ph-float { animation-duration: 700ms, 9s; }
-
-.hero__avatars { display: flex; }
-.hero__avatars span {
-  width: 30px;
-  height: 30px;
-  margin-left: -8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--clr-surface-2);
-  box-shadow: 0 0 0 2px var(--clr-surface);
-  font-size: 0.625rem;
-  font-weight: 800;
-}
-.hero__avatars span:first-child { margin-left: 0; background: var(--clr-accent); color: var(--clr-on-accent); }
 
 /* ----- MARQUEE ---------------------------------------------------------- */
 .marquee {
@@ -242,11 +190,6 @@
 .marquee__chip:hover .material-symbols-rounded { color: inherit; }
 
 /* ----- RESPONSIVE ----------------------------------------------------- */
-@media (max-width: 1100px) {
-  .hero__float--review { left: -2%; }
-  .hero__float--booking { left: 0; }
-}
-
 @media (max-width: 960px) {
   .hero__inner { grid-template-columns: 1fr; min-height: 0; text-align: center; }
   .hero__copy { display: flex; flex-direction: column; align-items: center; }
@@ -254,14 +197,11 @@
   .hero__actions, .hero__trust, .hero__stores { justify-content: center; }
   .hero__visual { min-height: 480px; }
   .hero__stage { width: min(100%, 380px); }
+  .hero__stage app-bip-rig { width: min(100%, 216px); }
 }
 
 @media (max-width: 560px) {
   .hero__visual { min-height: 420px; }
-  .hero__float--team, .hero__float--wait { display: none; }
-  .hero__float .ph-float { transform-origin: center; scale: 0.82; }
-  .hero__float--booking { top: 4%; left: -4%; }
-  .hero__float--paid { top: 42%; right: -6%; }
-  .hero__float--review { bottom: 6%; left: -4%; }
+  .hero__stage app-bip-rig { width: min(100%, 188px); }
   .hero__actions .btn { width: 100%; }
 }

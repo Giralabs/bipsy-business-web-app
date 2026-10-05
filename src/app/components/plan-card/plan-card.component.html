@@ -31,10 +31,10 @@
       </span>
     </div>
 
-    <a routerLink="/registro" class="btn btn--lg btn--block plan__cta"
+    <a [routerLink]="session.signedIn() ? '/panel/ajustes/suscripcion' : '/registro'" class="btn btn--lg btn--block plan__cta"
        [class.btn--primary]="plan.recommended" [class.btn--shine]="plan.recommended"
        [class.btn--subtle]="!plan.recommended">
-      Empezar prueba gratis
+      {{ session.signedIn() ? 'Elegir en mi panel' : 'Empezar prueba gratis' }}
     </a>
 
     <p class="plan__desc">{{ plan.description }}</p>

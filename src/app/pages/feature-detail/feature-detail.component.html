@@ -8,8 +8,8 @@
       [split]="true"
       [crumbs]="[{ label: 'Funcionalidades', link: '/funcionalidades' }, { label: f.name }]">
       <ng-container ngProjectAs="[actions]">
-        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">
-          Probar gratis
+        <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg btn--shine">
+          {{ session.signedIn() ? 'Ir a tu panel' : 'Probar gratis' }}
           <span class="material-symbols-rounded">arrow_forward</span>
         </a>
         @if (f.quality) {

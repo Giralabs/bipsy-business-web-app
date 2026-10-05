@@ -1,0 +1,11 @@
+<div class="rig" [class]="'rig--' + def.name" [style.aspect-ratio]="def.aspect"
+     role="img" [attr.aria-label]="label || def.label">
+  <div class="rig__breath">
+    @for (layer of def.layers; track layer.file; let i = $index) {
+      <img class="rig__layer" [class]="'rig__' + layer.file" [src]="src(layer.file)"
+           [style.transform-origin]="layer.origin" [style.z-index]="i + 1"
+           alt="" aria-hidden="true" [width]="def.width" [height]="def.height"
+           decoding="async" [attr.fetchpriority]="priority" />
+    }
+  </div>
+</div>

@@ -124,11 +124,11 @@ export const HELP_FAQ: FaqGroup[] = [
     items: [
       {
         q: '¿Cómo se paga la suscripción?',
-        a: 'A través de Google Play o App Store, con la cuenta de tu móvil. La tienda te enseña el precio final con impuestos antes de confirmar.',
+        a: 'Como prefieras: con tarjeta desde el panel web (el pago lo procesa Stripe) o desde la app del móvil, con tu cuenta de Google Play o App Store. En los dos casos ves el precio final antes de confirmar.',
       },
       {
         q: '¿Cómo cancelo?',
-        a: 'Desde la sección de suscripciones de Google Play o App Store; en la app, Mi plan te lleva directo. Mantienes el acceso hasta el final del periodo pagado.',
+        a: 'Si pagas con tarjeta, desde Mi plan en el panel web, con un clic. Si lo contrataste en el móvil, desde las suscripciones de Google Play o App Store; en la app, Mi plan te lleva directo. En los dos casos mantienes el acceso hasta el final del periodo pagado.',
       },
       {
         q: '¿Qué pasa si dejo de pagar?',

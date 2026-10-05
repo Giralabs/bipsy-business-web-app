@@ -5,7 +5,7 @@
       <h2 class="display steps__title">De cero a tu primera reserva <span class="mark">en una tarde</span></h2>
       <p class="lead steps__lead">Sin instalaciones, sin formación y sin llamar a nadie. Todo desde tu móvil.</p>
       <div class="steps__art">
-        <app-bip-slot code="MB-03" pose="Tachando una lista de tareas con un lápiz, satisfecho" ratio="1 / 1" />
+        <app-bip-rig rig="mb-03" label="Mr. Bip repasando una lista de tareas con un lápiz, satisfecho" />
       </div>
     </div>
 
@@ -24,8 +24,8 @@
         </li>
       }
       <li class="steps__cta" [style.--i]="4">
-        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">
-          Empezar ahora
+        <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg btn--shine">
+          {{ session.signedIn() ? 'Ir a tu panel' : 'Empezar ahora' }}
           <span class="material-symbols-rounded">arrow_forward</span>
         </a>
       </li>

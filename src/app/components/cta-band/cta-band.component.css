@@ -75,14 +75,12 @@
 
 .band__art { position: relative; max-width: 360px; justify-self: end; width: 100%; animation: float 7s ease-in-out infinite; }
 
-/* The slot is a surface of the current theme; on this dark band it needs the
-   dark one in both themes. */
-.band__art ::ng-deep .slot { background-color: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.1); }
-.band__art ::ng-deep .slot__pose,
-.band__art ::ng-deep .slot__code { color: #B5C3BE; }
-.band__art ::ng-deep .slot__code { background: rgba(255, 255, 255, 0.1); }
+/* A full-body render is nearly twice as tall as it is wide, so it gets a
+   narrower box than the 4:5 slot it replaces and the band keeps its height. */
+.band__art app-bip-rig { display: block; width: min(100%, 260px); margin-inline: auto; }
 
 @media (max-width: 860px) {
   .band { grid-template-columns: 1fr; }
   .band__art { justify-self: center; max-width: 280px; }
+  .band__art app-bip-rig { width: min(100%, 220px); }
 }

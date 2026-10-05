@@ -33,10 +33,17 @@
       </p>
 
       <div class="btn-row hero__actions hero__in" style="--d:5">
-        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine hero__cta">
-          Probar {{ trialDays }} días gratis
-          <span class="material-symbols-rounded">arrow_forward</span>
-        </a>
+        @if (session.signedIn()) {
+          <a routerLink="/panel" class="btn btn--primary btn--lg btn--shine hero__cta">
+            Ir a tu panel
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        } @else {
+          <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine hero__cta">
+            Probar {{ trialDays }} días gratis
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        }
         <a routerLink="/funcionalidades" class="btn btn--secondary btn--lg">
           <span class="material-symbols-rounded">play_circle</span>
           Ver cómo funciona
@@ -57,52 +64,13 @@
 
     <!-- ----- VISUAL ----- -->
     <div class="hero__visual" #visual>
-      <div class="hero__orbit" aria-hidden="true">
-        <span class="hero__orbit-dot hero__orbit-dot--1"></span>
-        <span class="hero__orbit-dot hero__orbit-dot--2"></span>
-      </div>
-
       <div class="hero__stage">
         <!-- Mr. Bip's Blender animation. Frames + manifest.json go in
-             public/mr_bip/hero/ (npm run hero:manifest). Until then, the slot. -->
+             public/mr_bip/hero/ (npm run hero:manifest) and take over on their
+             own. Until then, the CSS rig cut out of MB-00 (scripts/build-bip-rig.mjs). -->
         <app-frame-sequence folder="mr_bip/hero" label="Mr. Bip, la mascota de Bipsy Business, dando la bienvenida">
-          <app-bip-slot code="MB-00" pose="Animación del hero: Mr. Bip saluda y presenta la app" ratio="4 / 5" />
+          <app-bip-rig rig="mb-00" priority="high" />
         </app-frame-sequence>
-      </div>
-
-      <div class="hero__float hero__float--booking" style="--depth:26; --delay:900ms">
-        <div class="ph-float">
-          <span class="ph-float__icon"><span class="material-symbols-rounded">event_available</span></span>
-          <span class="ph-float__text"><small>Nueva reserva · hoy 17:30</small><b>Laura S. · Corte + barba</b></span>
-        </div>
-      </div>
-
-      <div class="hero__float hero__float--paid" style="--depth:16; --delay:1200ms">
-        <div class="ph-float">
-          <span class="ph-float__icon ph-float__icon--success"><span class="material-symbols-rounded">euro</span></span>
-          <span class="ph-float__text"><small>Cobrado</small><b>22,00 €</b></span>
-        </div>
-      </div>
-
-      <div class="hero__float hero__float--review" style="--depth:34; --delay:1500ms">
-        <div class="ph-float">
-          <span class="ph-float__icon ph-float__icon--warn"><span class="material-symbols-rounded">star</span></span>
-          <span class="ph-float__text"><span class="ph-float__stars">★★★★★</span><b>«¡Como siempre, genial!»</b></span>
-        </div>
-      </div>
-
-      <div class="hero__float hero__float--wait" style="--depth:22; --delay:1800ms">
-        <div class="ph-float">
-          <span class="ph-float__icon ph-float__icon--biz"><span class="material-symbols-rounded">hourglass_top</span></span>
-          <span class="ph-float__text"><small>Lista de espera</small><b>Hueco de las 12:00 ocupado</b></span>
-        </div>
-      </div>
-
-      <div class="hero__float hero__float--team" style="--depth:12; --delay:2100ms">
-        <div class="ph-float">
-          <span class="hero__avatars"><span>MA</span><span>JR</span><span>LM</span></span>
-          <span class="ph-float__text"><small>Equipo</small><b>Javi ha fichado · 10:00</b></span>
-        </div>
       </div>
     </div>
   </div>

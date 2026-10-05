@@ -11,6 +11,9 @@
 
 .plans > div { height: 100%; }
 .plans__bip { display: flex; align-items: flex-end; }
+/* A full-body render is nearly twice as tall as it is wide, so it gets a
+   narrower box than the 3:4 slot it replaces and the row keeps its height. */
+.plans__bip app-bip-rig { width: min(100%, 210px); margin-inline: auto; }
 
 .notes {
   list-style: none;
@@ -32,12 +35,18 @@
   padding: clamp(24px, 4vw, 44px);
 }
 .free .body { margin-top: 8px; max-width: 60ch; }
+/* The gradient is clipped to the glyphs, so whatever falls outside the
+   element's own box is not painted at all: a line-height below 1 eats the top
+   and the bottom of the digits, and the negative tracking eats the right edge
+   of the €. Hence the roomy line and the padding that compensates it. */
 .free__num {
   font-family: var(--ff-display);
   font-size: clamp(4rem, 9vw, 7rem);
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 1.1;
   letter-spacing: -0.06em;
+  padding-inline-end: 0.08em;
+  white-space: nowrap;
   background: linear-gradient(135deg, var(--clr-mint), var(--clr-biz));
   -webkit-background-clip: text;
   background-clip: text;

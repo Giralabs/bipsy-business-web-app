@@ -15,10 +15,17 @@
         <p class="lead band__text">{{ text }}</p>
 
         <div class="btn-row band__actions">
-          <a routerLink="/registro" class="btn btn--lg band__cta btn--shine">
-            Probar gratis
-            <span class="material-symbols-rounded">arrow_forward</span>
-          </a>
+          @if (session.signedIn()) {
+            <a routerLink="/panel" class="btn btn--lg band__cta btn--shine">
+              Ir a tu panel
+              <span class="material-symbols-rounded">arrow_forward</span>
+            </a>
+          } @else {
+            <a routerLink="/registro" class="btn btn--lg band__cta btn--shine">
+              Probar gratis
+              <span class="material-symbols-rounded">arrow_forward</span>
+            </a>
+          }
           <a routerLink="/precios" class="btn btn--lg band__ghost">Ver precios</a>
         </div>
 
@@ -33,7 +40,7 @@
       </div>
 
       <div class="band__art">
-        <app-bip-slot code="MB-05" pose="Con los brazos abiertos, dando la bienvenida" ratio="4 / 5" />
+        <app-bip-rig rig="mb-05" />
       </div>
     </div>
   </div>

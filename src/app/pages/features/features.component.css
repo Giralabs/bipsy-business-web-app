@@ -52,13 +52,25 @@
 .group__items > .feat:only-child,
 .group__items > .feat:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
-.feat { display: flex; flex-direction: column; gap: 10px; min-height: 260px; }
+.feat { display: flex; flex-direction: column; gap: 10px; min-height: 260px; min-width: 0; }
 .feat__top { display: flex; align-items: center; gap: 10px; }
 .feat__go { margin-left: auto; color: var(--clr-text-3); transition: transform 500ms var(--ease-back), color var(--dur-fast) ease; }
 .feat:hover .feat__go { transform: translate(4px, -4px); color: var(--clr-text); }
 .feat__name { margin-top: 8px; }
 .feat__facts { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 12px; }
-.feat__facts .pill { background: var(--clr-field); color: var(--clr-text-2); font-weight: 700; }
+/* `.pill` never wraps, and the long facts («Búsqueda por nombre, teléfono o
+   email») ran out of the card. Here they may break onto a second line. */
+.feat__facts .pill {
+  max-width: 100%;
+  background: var(--clr-field);
+  color: var(--clr-text-2);
+  font-weight: 700;
+  white-space: normal;
+  line-height: 1.35;
+  /* A capsule looks odd on two lines; a soft rectangle doesn't. */
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
 
 @media (max-width: 960px) {
   .group__grid { grid-template-columns: 1fr; }

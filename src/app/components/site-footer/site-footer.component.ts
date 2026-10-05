@@ -4,12 +4,14 @@ import { LEGAL_COMPANY } from '../../data/legal/legal.models';
 import { LEGAL_INDEX } from '../../data/legal/legal.index';
 import { FEATURES } from '../../data/features.data';
 import { BUSINESS_TYPES, FEATURED_TYPE_SLUGS } from '../../data/business-types.data';
-import { SOCIAL_LINKS, STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
+import { HELP_URL, SOCIAL_LINKS, STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
 
 interface FooterLink {
   label: string;
   link: string;
   fragment?: string;
+  /** Set when the link leaves this site, so it renders an `<a href>`. */
+  external?: boolean;
 }
 
 interface FooterColumn {
@@ -83,7 +85,7 @@ export class SiteFooterComponent {
       title: 'Recursos',
       links: [
         { label: 'Blog', link: '/blog' },
-        { label: 'Centro de ayuda', link: '/ayuda' },
+        { label: 'Centro de ayuda', link: HELP_URL, external: true },
         { label: 'Quiénes somos', link: '/legal/quienes-somos' },
         { label: 'Contacto', link: '/legal/contacto' },
         { label: 'Seguridad', link: '/legal/seguridad' },

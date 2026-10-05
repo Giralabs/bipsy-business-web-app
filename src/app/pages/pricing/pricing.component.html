@@ -9,7 +9,7 @@
   <div class="container">
     <div class="plans">
       <div class="plans__bip" appReveal revealFrom="left">
-        <app-bip-slot code="MB-06" pose="Sosteniendo una hucha con una sonrisa de oreja a oreja" ratio="3 / 4" />
+        <app-bip-rig rig="mb-06" label="Mr. Bip sosteniendo una hucha con una sonrisa de oreja a oreja" />
       </div>
       @for (plan of plans; track plan.code; let i = $index) {
         <div appReveal [revealDelay]="i * 120 + 80">

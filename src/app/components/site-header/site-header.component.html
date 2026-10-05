@@ -1,7 +1,7 @@
 <button type="button" class="skip-link" (click)="skipToContent()">Saltar al contenido</button>
 
 <!-- ----- TRIAL STRIP ----- -->
-@if (!promoDismissed) {
+@if (!promoDismissed && !session.signedIn()) {
   <aside class="promo" aria-label="Oferta">
     <div class="promo__inner">
       <a routerLink="/registro" class="promo__link">
@@ -137,7 +137,10 @@
           <div class="drop" id="menu-resources">
             <div class="drop__panel">
               @for (r of resources; track r.link; let ri = $index) {
-                <a class="drop__item" [routerLink]="r.link" [style.--i]="ri">
+                <!-- The help centre is a site of its own, so it needs an href
+                     rather than a route. -->
+                <a class="drop__item" [style.--i]="ri"
+                   [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null">
                   <span class="drop__icon material-symbols-rounded fill">{{ r.icon }}</span>
                   <span>
                     <span class="drop__title">{{ r.title }}</span>
@@ -152,15 +155,37 @@
     </nav>
 
     <div class="nav__actions">
-      <a routerLink="/ayuda" routerLinkActive="nav__help--active" class="nav__help" aria-label="Ayuda">
+      <!-- The help centre is its own site (bipsy-help-app), so this leaves
+           the app rather than routing inside it. -->
+      <a [href]="helpUrl" class="nav__help" aria-label="Centro de ayuda">
         <span class="material-symbols-rounded">help</span>
         <span class="nav__help-label">Ayuda</span>
       </a>
-      <a routerLink="/acceder" class="btn btn--ghost btn--sm nav__login">Iniciar sesión</a>
-      <a routerLink="/registro" class="btn btn--primary nav__cta btn--shine">
-        Probar gratis
-        <span class="material-symbols-rounded nav__cta-arrow">arrow_forward</span>
-      </a>
+      @if (session.signedIn()) {
+        <!-- Ya dentro: una sola puerta, al panel, con quién eres. -->
+        <a routerLink="/panel" class="nav__panel" aria-label="Ir a tu panel">
+          <span class="nav__panel-avatar">
+            @if (session.photo(); as photo) {
+              <img [src]="photo" alt="" />
+            } @else {
+              {{ session.initials() }}
+            }
+          </span>
+          <span class="nav__panel-text">
+            <span class="nav__panel-kicker">Tu panel</span>
+            @if (session.name()) {
+              <span class="nav__panel-name">{{ session.name() }}</span>
+            }
+          </span>
+          <span class="material-symbols-rounded nav__panel-go">arrow_forward</span>
+        </a>
+      } @else {
+        <a routerLink="/acceder" class="btn btn--ghost btn--sm nav__login">Iniciar sesión</a>
+        <a routerLink="/registro" class="btn btn--primary nav__cta btn--shine">
+          Probar gratis
+          <span class="material-symbols-rounded nav__cta-arrow">arrow_forward</span>
+        </a>
+      }
       <button type="button" class="nav__burger" [class.nav__burger--open]="mobileOpen"
               (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-controls="menu-mobile"
               [attr.aria-label]="mobileOpen ? 'Cerrar menú' : 'Abrir menú'">
@@ -208,21 +233,29 @@
           <summary>Recursos <span class="material-symbols-rounded">expand_more</span></summary>
           <div class="mobile__sub">
             @for (r of resources; track r.link) {
-              <a [routerLink]="r.link" class="mobile__link">
+              <a class="mobile__link"
+                 [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null">
                 <span class="material-symbols-rounded">{{ r.icon }}</span>{{ r.title }}
               </a>
             }
           </div>
         </details>
 
-        <a routerLink="/ayuda" class="mobile__top">Ayuda</a>
+        <a [href]="helpUrl" class="mobile__top">Ayuda</a>
       </nav>
 
       <div class="mobile__actions">
-        <a routerLink="/registro" class="btn btn--primary btn--lg btn--block">
-          Probar {{ trialLabel }}
-        </a>
-        <a routerLink="/acceder" class="btn btn--secondary btn--lg btn--block">Iniciar sesión</a>
+        @if (session.signedIn()) {
+          <a routerLink="/panel" class="btn btn--primary btn--lg btn--block">
+            Ir a tu panel
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        } @else {
+          <a routerLink="/registro" class="btn btn--primary btn--lg btn--block">
+            Probar {{ trialLabel }}
+          </a>
+          <a routerLink="/acceder" class="btn btn--secondary btn--lg btn--block">Iniciar sesión</a>
+        }
       </div>
     </div>
   }

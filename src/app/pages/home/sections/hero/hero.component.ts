@@ -7,27 +7,30 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  inject,
 } from '@angular/core';
+import { SiteSession } from '../../../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { FrameSequenceComponent } from '../../../../components/frame-sequence/frame-sequence.component';
-import { BipSlotComponent } from '../../../../components/bip-slot/bip-slot.component';
+import { BipRigComponent } from '../../../../components/bip-rig/bip-rig.component';
 import { BUSINESS_TYPES } from '../../../../data/business-types.data';
 import { STORE_LINKS, TRIAL_DAYS } from '../../../../data/site.data';
 
 /**
  * The hero of the home page: the promise, the two buttons and, on the right,
- * Mr. Bip's Blender animation surrounded by the notifications a business gets
- * from the app, floating with a little parallax.
+ * Mr. Bip's Blender animation alone on the stage, with a little parallax.
  */
 @Component({
   selector: 'app-home-hero',
   standalone: true,
-  imports: [RouterLink, FrameSequenceComponent, BipSlotComponent],
+  imports: [RouterLink, FrameSequenceComponent, BipRigComponent],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroSectionComponent implements OnInit, OnDestroy {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   /** Short on purpose: the rotating line must fit the column at display size. */
   readonly words = ['tu barbería', 'tu peluquería', 'tu salón', 'tu estudio', 'tu clínica', 'tu negocio'];
   wordIndex = 0;
@@ -58,7 +61,7 @@ export class HeroSectionComponent implements OnInit, OnDestroy {
 
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
-    // Parallax of the floating cards. Outside Angular: it only writes two CSS
+    // Parallax of the stage. Outside Angular: it only writes two CSS
     // variables and must not run change detection on every pointer move.
     const el = this.visualRef.nativeElement;
     this.zone.runOutsideAngular(() => {

@@ -1,14 +1,19 @@
 /**
  * Site-wide facts: the trial, the store and social links, the contact.
  *
- * ⚠️ `TRIAL_DAYS` is what the web ANNOUNCES. Today it does not match the
- * backend (`plan.trial_days = 14`, `Business.WELCOME_TRIAL_DAYS = 5`) nor any
- * store offer. Before billing is switched on, the three must agree and the
- * introductory offer must exist in Play Console and App Store Connect — see
- * docs/RELEASE-STORES.md and docs/LEGAL-PENDIENTE.md §4. bipsy-web-app
- * announces the same number in `PromoBarComponent.trialLabel`.
+ * `TRIAL_DAYS` is what the web ANNOUNCES and it is the backend's plan trial
+ * (`plan.trial_days = 14` in V37, applied at checkout while
+ * `trialAvailable`). On top of it, finishing the sign-up gives
+ * `Business.WELCOME_TRIAL_DAYS = 5` courtesy days on the Bipsy plan
+ * (`WELCOME_DAYS` here) before the plan wall shows up. If either changes in
+ * the backend, change it here. The store offers (Play Console, App Store
+ * Connect) must match too — see docs/RELEASE-STORES.md and
+ * docs/LEGAL-PENDIENTE.md §4. bipsy-web-app announces the same number in
+ * `PromoBarComponent.trialLabel`.
  */
-export const TRIAL_DAYS = 30;
+export const TRIAL_DAYS = 14;
+/** Courtesy days after the sign-up, before choosing a plan (`Business.WELCOME_TRIAL_DAYS`). */
+export const WELCOME_DAYS = 5;
 export const TRIAL_LABEL = `${TRIAL_DAYS} días gratis`;
 
 /** Placeholder target for every external link that does not exist yet. */
@@ -52,6 +57,25 @@ export const SOCIAL_LINKS: SocialLink[] = [
 /** The customer-facing web (bipsy-web-app). */
 // TODO: replace with the production domain of bipsy-web-app when it is deployed.
 export const CLIENT_WEB_URL = PLACEHOLDER_URL;
+
+/**
+ * The help centre, which is its own site (bipsy-help-app, in Astro) on its
+ * own subdomain. Both this web and bipsy-web-app link to it, so the answers
+ * live in one place instead of two.
+ *
+ * Browsing locally it points at the Astro dev server instead, so following
+ * the link while developing does not throw you out to production. Any host
+ * that is not localhost is treated as the real thing — including a
+ * production build served locally, which is what you want when checking one.
+ */
+const HELP_PROD_URL = 'https://help.bipsy.es';
+/** Where `npm start` in bipsy-help-app serves it (see its astro.config.mjs). */
+const HELP_DEV_URL = 'http://localhost:4321';
+
+const onLocalhost = typeof location !== 'undefined'
+  && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+
+export const HELP_URL = onLocalhost ? HELP_DEV_URL : HELP_PROD_URL;
 
 /** Support answers tickets in 24–48 working hours (support_screen.dart). */
 export const SUPPORT_RESPONSE_TIME = '24-48 h laborables';

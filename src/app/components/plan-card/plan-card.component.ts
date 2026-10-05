@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { Plan } from '../../data/plans.data';
 import { TRIAL_DAYS } from '../../data/site.data';
@@ -20,6 +21,8 @@ import { TRIAL_DAYS } from '../../data/site.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlanCardComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   @Input({ required: true }) plan!: Plan;
 
   /** Shows the full feature list; the home teaser only needs the first few. */

@@ -8,8 +8,8 @@
       [split]="true"
       [crumbs]="[{ label: 'Negocios', link: '/negocios' }, { label: t.name }]">
       <ng-container ngProjectAs="[actions]">
-        <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">
-          Probar gratis en {{ t.yours }}
+        <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg btn--shine">
+          {{ session.signedIn() ? 'Ir a tu panel' : 'Probar gratis en ' + t.yours }}
         </a>
         <a routerLink="/precios" class="btn btn--secondary btn--lg">Ver precios</a>
       </ng-container>
@@ -97,5 +97,5 @@
     </section>
   }
 
-  <app-cta-band [title]="'Prueba Bipsy Business en ' + type.yours + ', 30 días gratis'" />
+  <app-cta-band [title]="'Prueba Bipsy Business en ' + type.yours + ', 14 días gratis'" />
 }

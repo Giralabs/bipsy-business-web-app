@@ -42,7 +42,7 @@ const SUBSCRIPTION: LegalDocument = {
       ],
       closingParagraphs: [
         'El precio es por negocio. Los trabajadores que el negocio añade con su código de invitación usan la aplicación sin coste adicional.',
-        'El importe final, con los impuestos que correspondan a tu país, es el que muestra Google Play o App Store antes de confirmar la compra, y es el que se cobra.',
+        'El importe final, con los impuestos que correspondan a tu país, es el que se muestra antes de confirmar la contratación —en el panel web si pagas con tarjeta, o en Google Play o App Store si contratas desde el móvil— y es el que se cobra.',
       ],
     },
     {
@@ -50,31 +50,31 @@ const SUBSCRIPTION: LegalDocument = {
       title: '3. Periodo de prueba',
       paragraphs: [
         `Cada negocio puede disfrutar de un único periodo de prueba gratuito de ${TRIAL_DAYS} días, sea cual sea el plan con el que empiece. Durante la prueba tienes acceso a todas las funciones del plan elegido.`,
-        'La tienda puede pedirte un método de pago al empezar la prueba. Si no cancelas antes de que termine, la suscripción pasa a ser de pago y se cobra el primer mes.',
+        'Al empezar la prueba se te pide un método de pago (la tarjeta, si contratas desde el panel web, o el de tu cuenta de la tienda, si lo haces desde el móvil), pero no se cobra nada durante la prueba. Si no cancelas antes de que termine, la suscripción pasa a ser de pago y se cobra el primer mes.',
       ],
     },
     {
       id: 'pago',
       title: '4. Pago y renovación automática',
       paragraphs: [
-        'La suscripción se contrata y se paga a través de Google Play (Android) o App Store (iPhone), con la cuenta de la tienda del dispositivo. La tienda procesa el pago y aplica sus propias condiciones. Bipsy no recibe ni guarda los datos de la tarjeta con la que pagas la suscripción.',
-        'La suscripción se renueva automáticamente cada mes por el mismo precio, salvo que la canceles antes del final del periodo en curso. Cada tienda fija el plazo mínimo para que la cancelación evite la siguiente renovación; en App Store es de al menos 24 horas antes.',
+        'La suscripción se puede contratar y pagar de dos maneras: con tarjeta desde el panel web de Bipsy Business, en cuyo caso el pago lo procesa Stripe Payments Europe, Ltd.; o desde la aplicación móvil, a través de Google Play (Android) o App Store (iPhone) con la cuenta de la tienda del dispositivo, en cuyo caso la tienda procesa el pago y aplica sus propias condiciones. En ninguno de los dos casos Bipsy recibe ni guarda los datos completos de la tarjeta con la que pagas la suscripción.',
+        'La suscripción se renueva automáticamente cada mes por el mismo precio, salvo que la canceles antes del final del periodo en curso. Si pagas con tarjeta, basta con cancelarla antes de esa fecha; si la contrataste en una tienda, cada tienda fija el plazo mínimo para que la cancelación evite la siguiente renovación (en App Store es de al menos 24 horas antes).',
       ],
     },
     {
       id: 'cambios-plan',
       title: '5. Cambiar de plan',
       paragraphs: [
-        'Puedes cambiar de Bipsy Business a Quality, o al revés, desde la sección Mi plan de la aplicación. El cambio se tramita en la tienda, que es quien calcula y muestra la diferencia de precio que corresponda antes de confirmarlo.',
+        'Puedes cambiar de Bipsy Business a Quality, o al revés, desde la sección Mi plan. Si pagas con tarjeta, el cambio se hace en el panel web y la diferencia se prorratea por los días que queden del periodo en curso; si contrataste en el móvil, el cambio se tramita en la tienda, que es quien calcula y muestra la diferencia de precio antes de confirmarlo.',
       ],
     },
     {
       id: 'cancelacion',
       title: '6. Cancelación y reembolsos',
       paragraphs: [
-        'Ninguna tienda permite que el vendedor cancele una suscripción en nombre del cliente. Para darte de baja, entra en las suscripciones de tu cuenta de Google Play o App Store; la aplicación te lleva hasta allí desde Mi plan.',
+        'Si pagas con tarjeta, puedes darte de baja en cualquier momento desde Mi plan en el panel web. Si contrataste en el móvil, ten en cuenta que ninguna tienda permite que el vendedor cancele una suscripción en nombre del cliente: entra en las suscripciones de tu cuenta de Google Play o App Store; la aplicación te lleva hasta allí desde Mi plan.',
         'Al cancelar mantienes el acceso hasta el final del periodo ya pagado. No hay permanencia ni penalización por cancelar.',
-        'Los reembolsos de cobros realizados por la tienda se rigen por la política de la tienda correspondiente y se solicitan a ella. Si crees que se te ha cobrado por error, escríbenos a ' +
+        'Los reembolsos de cobros realizados por una tienda se rigen por la política de esa tienda y se solicitan a ella; los de cobros con tarjeta se solicitan a Bipsy. Si crees que se te ha cobrado por error, escríbenos a ' +
           `${LEGAL_COMPANY.email} y te ayudaremos a tramitarlo.`,
       ],
     },

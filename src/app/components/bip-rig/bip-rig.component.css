@@ -1,0 +1,267 @@
+:host { display: block; width: 100%; }
+
+.rig {
+  position: relative;
+  width: 100%;
+  /* aspect-ratio comes from the rig, so the page reserves the right box
+     before the layers have loaded and nothing jumps. */
+}
+
+.rig__breath,
+.rig__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The layers are full-canvas cut-outs of one render: they only line up as long
+   as none of them is cropped or scaled on its own. Each one's transform-origin
+   is set from bip-rigs.data.ts — the joint it turns on. */
+.rig__layer { object-fit: fill; }
+
+.rig,
+.rig__breath { transform-origin: 50% 100%; }
+
+/* Only the layers that actually move get promoted. */
+.rig--mb-00 .rig__head, .rig--mb-00 .rig__torso,
+.rig--mb-00 .rig__arm-left, .rig--mb-00 .rig__arm-right,
+.rig--mb-03 .rig__head, .rig--mb-03 .rig__arm-pencil,
+.rig--mb-05 .rig__head,
+.rig--mb-05 .rig__arm-left, .rig--mb-05 .rig__arm-right,
+.rig--mb-06 .rig__head, .rig--mb-06 .rig__arms-piggy,
+.rig--mb-08 .rig__arm-gesture { will-change: transform; }
+
+/* Whole-body movement rides on the wrapper, so the head and the arms keep
+   their joints exactly where the body left them. */
+.rig--mb-00 .rig__breath { animation: bip-breath 5.3s ease-in-out infinite; }
+.rig--mb-03 .rig__breath { animation: bip-breath 4.6s ease-in-out infinite; }
+.rig--mb-05 .rig__breath { animation: bip-welcome-lean 5.9s ease-in-out infinite; }
+.rig--mb-06 .rig__breath { animation: bip-breath 5.1s ease-in-out infinite; }
+.rig--mb-08 .rig__breath { animation: bip-breath 4.9s ease-in-out infinite; }
+.rig--mb-15 .rig__breath { animation: bip-breath 6.2s ease-in-out infinite; }
+
+.rig--mb-00 { animation: bip-sway 11s ease-in-out infinite; }
+.rig--mb-03 { animation: bip-sway 9.4s ease-in-out infinite; }
+.rig--mb-05 { animation: bip-sway 12.5s ease-in-out infinite; }
+.rig--mb-06 { animation: bip-sway 10.3s ease-in-out infinite; }
+.rig--mb-08 { animation: bip-sway 8.7s ease-in-out infinite; }
+/* He is sitting down: the sway would read as the armchair rocking. */
+.rig--mb-15 { animation: none; }
+
+@keyframes bip-sway {
+  0%, 100% { transform: rotate(-0.16deg); }
+  50%      { transform: rotate(0.16deg); }
+}
+@keyframes bip-breath {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%      { transform: scaleY(1.005) scaleX(0.9985); }
+}
+
+/* ===== MB-00 · pulls the knot up to the collar ========================= */
+/* Six seconds, moving the whole way through: one pull up to the collar, then
+   three smaller ones that fade out as the loop comes round. No resting
+   stretch — every keyframe is on its way somewhere. Negative turns the right
+   fist upwards and positive the left one: each hand is on the far side of its
+   own shoulder. The knot belongs to the right arm's layer, because that is the
+   hand holding it, so it rides up with the fist and the tie shortens. */
+.rig--mb-00 .rig__torso     { animation: bip-tie-torso 6s infinite; }
+.rig--mb-00 .rig__arm-left  { animation: bip-tie-arm-left 6s infinite; }
+.rig--mb-00 .rig__arm-right { animation: bip-tie-arm-right 6s infinite; }
+/* A negative delay of almost a full cycle puts the head 0.15 s behind the
+   hands, which is what makes it read as a reaction to the pull. */
+.rig--mb-00 .rig__head      { animation: bip-tie-head 6s infinite; animation-delay: -5.85s; }
+
+@keyframes bip-tie-arm-right {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: translateY(0.06%) rotate(0.9deg);    animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: translateY(-0.35%) rotate(-5deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  45%  { transform: translateY(-0.16%) rotate(-2.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  57%  { transform: translateY(-0.3%) rotate(-4.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  69%  { transform: translateY(-0.12%) rotate(-1.8deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  80%  { transform: translateY(-0.24%) rotate(-3.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: translateY(-0.06%) rotate(-1deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes bip-tie-arm-left {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: translateY(0.05%) rotate(-0.8deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: translateY(-0.32%) rotate(4deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  45%  { transform: translateY(-0.26%) rotate(3.4deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  57%  { transform: translateY(-0.14%) rotate(2deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  69%  { transform: translateY(-0.22%) rotate(2.8deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  80%  { transform: translateY(-0.1%) rotate(1.4deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: translateY(-0.04%) rotate(0.6deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes bip-tie-torso {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: translateY(0.1%) rotate(0.02deg);    animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: translateY(-0.62%) rotate(-0.22deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  45%  { transform: translateY(-0.3%) rotate(-0.1deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  57%  { transform: translateY(-0.46%) rotate(-0.17deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  69%  { transform: translateY(-0.24%) rotate(-0.08deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  80%  { transform: translateY(-0.38%) rotate(-0.13deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: translateY(-0.12%) rotate(-0.04deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes bip-tie-head {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: translateY(0.15%) rotate(0.75deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: translateY(-0.5%) rotate(-2.3deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  45%  { transform: translateY(-0.22%) rotate(-1.05deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  57%  { transform: translateY(-0.38%) rotate(-1.75deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  69%  { transform: translateY(-0.18%) rotate(-0.85deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  80%  { transform: translateY(-0.31%) rotate(-1.45deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: translateY(-0.09%) rotate(-0.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* ===== MB-03 · works down the checklist ================================ */
+/* 5.4 s. Two quick ticks, a slower move up the page, two more, then back —
+   the strokes are short and snappy and the repositioning between them is
+   slow, which is what a pencil actually does. The arm turns on the shoulder,
+   so the pencil swings through an arc down the column of checkboxes. Kept
+   under about 2.2°: past that the pencil pulls away from the shadow it casts
+   on the paper, which stays with the sheet. */
+.rig--mb-03 .rig__arm-pencil { animation: bip-tick-arm 5.4s infinite; }
+.rig--mb-03 .rig__head       { animation: bip-tick-head 5.4s ease-in-out infinite; animation-delay: -5.28s; }
+
+@keyframes bip-tick-arm {
+  0%   { transform: rotate(0deg);      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1); }
+  9%   { transform: rotate(1.7deg);    animation-timing-function: cubic-bezier(0.35, 0, 0.3, 1); }
+  16%  { transform: rotate(0.1deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  25%  { transform: rotate(1.9deg);    animation-timing-function: cubic-bezier(0.35, 0, 0.3, 1); }
+  32%  { transform: rotate(0.3deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  46%  { transform: rotate(-1.6deg);   animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1); }
+  57%  { transform: rotate(-0.1deg);   animation-timing-function: cubic-bezier(0.35, 0, 0.3, 1); }
+  64%  { transform: rotate(-1.8deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  78%  { transform: rotate(-0.6deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: rotate(0.8deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes bip-tick-head {
+  0%   { transform: translateY(0) rotate(0deg); }
+  16%  { transform: translateY(0.08%) rotate(0.5deg); }
+  32%  { transform: translateY(0.05%) rotate(0.3deg); }
+  46%  { transform: translateY(-0.09%) rotate(-0.55deg); }
+  64%  { transform: translateY(-0.07%) rotate(-0.4deg); }
+  82%  { transform: translateY(0.03%) rotate(0.2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* ===== MB-05 · opens his arms in welcome =============================== */
+/* 5.6 s. He gathers a little, opens wide, and lets the arms drift back in
+   three decreasing steps — never still, and never the same height twice.
+   Positive turns the right hand up and negative the left one, so the two
+   keyframe sets are mirrors of each other. */
+.rig--mb-05 .rig__arm-right { animation: bip-welcome-arm-right 5.6s infinite; }
+.rig--mb-05 .rig__arm-left  { animation: bip-welcome-arm-left 5.6s infinite; }
+.rig--mb-05 .rig__head      { animation: bip-welcome-head 5.6s infinite; animation-delay: -5.44s; }
+
+@keyframes bip-welcome-arm-right {
+  0%   { transform: rotate(0deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: rotate(-1.6deg);  animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  34%  { transform: rotate(5.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  48%  { transform: rotate(2.6deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  62%  { transform: rotate(4.4deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  78%  { transform: rotate(1.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: rotate(2.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes bip-welcome-arm-left {
+  0%   { transform: rotate(0deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: rotate(1.6deg);   animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  34%  { transform: rotate(-5.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  48%  { transform: rotate(-2.6deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  62%  { transform: rotate(-4.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  78%  { transform: rotate(-1.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: rotate(-2.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+/* Turn only, no lift: see the note on this rig in bip-rigs.data.ts. */
+@keyframes bip-welcome-head {
+  0%   { transform: rotate(0deg);      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: rotate(0.5deg);    animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  34%  { transform: rotate(-1.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  48%  { transform: rotate(-0.4deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  62%  { transform: rotate(-1deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  78%  { transform: rotate(-0.2deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes bip-welcome-lean {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  34%      { transform: scaleY(1.006) translateY(-0.1%); }
+  70%      { transform: scaleY(1.002) translateY(-0.03%); }
+}
+
+/* ===== MB-06 · lifts the piggy bank =================================== */
+/* 5.2 s. He weighs it, lifts it to show it off, and lets it settle in two
+   smaller steps. Both arms and the bank turn together on a point in the
+   middle of the chest, so the shoulders barely move and the bank does. */
+.rig--mb-06 .rig__arms-piggy { animation: bip-piggy 5.2s infinite; }
+.rig--mb-06 .rig__head       { animation: bip-piggy-head 5.2s infinite; animation-delay: -5.08s; }
+
+@keyframes bip-piggy {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: translateY(0.12%) rotate(0.9deg);    animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: translateY(-0.55%) rotate(-1.6deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  46%  { transform: translateY(-0.26%) rotate(-0.7deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  60%  { transform: translateY(-0.42%) rotate(-1.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  76%  { transform: translateY(-0.12%) rotate(-0.3deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  88%  { transform: translateY(0.05%) rotate(0.4deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes bip-piggy-head {
+  0%   { transform: rotate(0deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  14%  { transform: rotate(0.6deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  32%  { transform: rotate(-1.1deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  46%  { transform: rotate(-0.5deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  60%  { transform: rotate(-0.8deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  76%  { transform: rotate(-0.2deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ===== MB-08 · the free hand offers help ============================== */
+/* 5.8 s. The open palm draws back a little and then reaches out, twice, each
+   time a bit less. The arm turns on the armpit, so only the arm moves. */
+.rig--mb-08 .rig__arm-gesture { animation: bip-offer 5.8s infinite; }
+
+@keyframes bip-offer {
+  0%   { transform: rotate(0deg);     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  15%  { transform: rotate(1.2deg);   animation-timing-function: cubic-bezier(0.5, 0, 0.28, 1); }
+  34%  { transform: rotate(-4.5deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  48%  { transform: rotate(-1.8deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  62%  { transform: rotate(-3.4deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  78%  { transform: rotate(-0.8deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  90%  { transform: rotate(-1.8deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ===== MB-15 · the newspaper rustles ================================== */
+/* 7.4 s, and deliberately small. The paper turns on a point low between his
+   hands, so the bottom stays in his lap and the top edge swings — which is
+   all a newspaper does while someone reads it. Both hands are part of this
+   layer, so they never let go of it. */
+.rig--mb-15 .rig__paper { animation: bip-rustle 7.4s infinite; will-change: transform; }
+
+@keyframes bip-rustle {
+  0%   { transform: translateY(0) rotate(0deg);          animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  18%  { transform: translateY(-0.1%) rotate(-0.45deg);  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  33%  { transform: translateY(-0.04%) rotate(-0.12deg); animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
+  48%  { transform: translateY(0.08%) rotate(0.38deg);   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  64%  { transform: translateY(0.02%) rotate(0.1deg);    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  80%  { transform: translateY(-0.06%) rotate(-0.26deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Off screen it is not worth a compositor frame. */
+:host(.rig--paused) .rig,
+:host(.rig--paused) .rig__breath,
+:host(.rig--paused) .rig__layer { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rig,
+  .rig__breath,
+  .rig__layer { animation: none; }
+}

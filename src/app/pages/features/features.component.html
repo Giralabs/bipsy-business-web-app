@@ -5,7 +5,9 @@
   lead="Agenda, clientes, cobros, equipo y escaparate. Todo incluido en el plan, en la misma app y sin coste por trabajador."
   [crumbs]="[{ label: 'Funcionalidades' }]">
   <ng-container ngProjectAs="[actions]">
-    <a routerLink="/registro" class="btn btn--primary btn--lg btn--shine">Probar 30 días gratis</a>
+    <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg btn--shine">
+      {{ session.signedIn() ? 'Ir a tu panel' : 'Probar 14 días gratis' }}
+    </a>
     <a routerLink="/precios" class="btn btn--secondary btn--lg">Ver precios</a>
   </ng-container>
 </app-page-hero>

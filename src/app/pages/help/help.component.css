@@ -1,6 +1,9 @@
 :host { display: block; }
 
 .art { width: 100%; max-width: 340px; }
+/* A full-body render is nearly twice as tall as it is wide, so it gets a
+   narrower box than the 4:5 slot it replaces. */
+.art app-bip-rig { display: block; width: min(100%, 250px); margin-inline: auto; }
 
 .search {
   display: flex;

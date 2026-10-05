@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { PlanCardComponent } from '../../components/plan-card/plan-card.component';
 import { FaqListComponent } from '../../components/faq-list/faq-list.component';
-import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
+import { BipRigComponent } from '../../components/bip-rig/bip-rig.component';
 import { CtaBandComponent } from '../../components/cta-band/cta-band.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { COMPARISON, PLANS, PRICING_NOTES } from '../../data/plans.data';
@@ -20,7 +20,7 @@ import { TRIAL_DAYS } from '../../data/site.data';
 @Component({
   selector: 'app-pricing',
   standalone: true,
-  imports: [RouterLink, PageHeroComponent, PlanCardComponent, FaqListComponent, BipSlotComponent, CtaBandComponent, RevealDirective],
+  imports: [RouterLink, PageHeroComponent, PlanCardComponent, FaqListComponent, BipRigComponent, CtaBandComponent, RevealDirective],
   templateUrl: './pricing.component.html',
   styleUrl: './pricing.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -43,7 +43,10 @@
           <nav class="footer__col" [attr.aria-label]="col.title">
             <h2 class="footer__title">{{ col.title }}</h2>
             @for (item of col.links; track item.label) {
-              @if (item.fragment) {
+              @if (item.external) {
+                <!-- The help centre is a site of its own. -->
+                <a [href]="item.link">{{ item.label }}</a>
+              } @else if (item.fragment) {
                 <a [routerLink]="item.link" [fragment]="item.fragment">{{ item.label }}</a>
               } @else {
                 <a [routerLink]="item.link">{{ item.label }}</a>
@@ -70,8 +73,9 @@
         <span class="material-symbols-rounded">autorenew</span>
         <p>
           <strong>Suscripción:</strong> {{ trialDays }} días de prueba gratis, una por negocio. Después se renueva
-          automáticamente cada mes a través de Google Play o App Store salvo que la canceles desde la tienda.
-          Sin permanencia. El precio final con impuestos lo muestra la tienda antes de pagar.
+          automáticamente cada mes, con tarjeta a través de Stripe desde el panel web o con Google Play o App
+          Store desde el móvil, salvo que la canceles. Sin permanencia. Ves el precio final con impuestos antes
+          de pagar.
           <a routerLink="/legal/condiciones-suscripcion">Condiciones de suscripción</a>.
         </p>
       </div>

@@ -7,10 +7,11 @@ import { TRIAL_DAYS } from './site.data';
  * (Quality features), V51__iap_subscriptions.sql (store products). The FREE
  * plan exists but is not sold (`selectable = FALSE`), so it is not shown.
  *
- * ⚠️ The price actually charged is the one configured in Google Play and App
- * Store Connect, which is also what the app shows at checkout. If the store
- * price changes, this page must change with it or the site will advertise one
- * number and the phone will charge another. See docs/RELEASE-STORES.md §3.
+ * ⚠️ Two places charge: Stripe (card, from the web panel — the backend's
+ * catalogue price) and Google Play / App Store Connect (from the phone). If any
+ * of them changes price, this page must change with it or the site will
+ * advertise one number and the checkout charge another. See
+ * docs/RELEASE-STORES.md §3.
  */
 
 export interface Plan {
@@ -134,8 +135,8 @@ export const COMPARISON: ComparisonGroup[] = [
 export const PRICING_NOTES: string[] = [
   `Los primeros ${TRIAL_DAYS} días son gratis. Si no cancelas antes, la suscripción se renueva cada mes.`,
   'Un solo precio por negocio: tus trabajadores usan la app gratis con tu código de invitación.',
-  'La suscripción se paga a través de Google Play o App Store, con la cuenta de tu móvil.',
-  'El precio final lo muestra la tienda antes de pagar, con los impuestos de tu país.',
-  'Sin permanencia: cancela cuando quieras desde la tienda y mantienes el acceso hasta el final del mes pagado.',
-  'Cambia de plan cuando quieras. La tienda calcula la diferencia.',
+  'Paga con tarjeta desde el panel web (procesado por Stripe) o desde la app del móvil con Google Play o App Store.',
+  'Antes de confirmar ves el precio final, con los impuestos de tu país.',
+  'Sin permanencia: cancela cuando quieras desde Mi plan (o desde la tienda, si contrataste en el móvil) y mantienes el acceso hasta el final del mes pagado.',
+  'Cambia de plan cuando quieras: la diferencia se prorratea.',
 ];

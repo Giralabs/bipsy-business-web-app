@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { FaqListComponent } from '../../components/faq-list/faq-list.component';
-import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
+import { BipRigComponent } from '../../components/bip-rig/bip-rig.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { FaqGroup, HELP_FAQ } from '../../data/faq.data';
 import { SUPPORT_RESPONSE_TIME } from '../../data/site.data';
@@ -16,7 +16,7 @@ import { LEGAL_COMPANY } from '../../data/legal/legal.models';
 @Component({
   selector: 'app-help',
   standalone: true,
-  imports: [RouterLink, PageHeroComponent, FaqListComponent, BipSlotComponent, RevealDirective],
+  imports: [RouterLink, PageHeroComponent, FaqListComponent, BipRigComponent, RevealDirective],
   templateUrl: './help.component.html',
   styleUrl: './help.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

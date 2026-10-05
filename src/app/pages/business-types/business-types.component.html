@@ -30,7 +30,9 @@
       <h2 class="headline">¿Tu negocio no está en la lista?</h2>
       <p class="body">Si tus clientes reservan una hora contigo, Bipsy Business te sirve. Al darte de alta eliges hasta cinco categorías, y existe «Otros» para lo que no encaje.</p>
     </div>
-    <a routerLink="/registro" class="btn btn--primary btn--lg">Probar gratis</a>
+    <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg">
+      {{ session.signedIn() ? 'Ir a tu panel' : 'Probar gratis' }}
+    </a>
   </div>
 </section>
 

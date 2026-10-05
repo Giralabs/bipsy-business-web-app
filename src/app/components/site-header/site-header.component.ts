@@ -9,13 +9,15 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  inject,
 } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { DOCUMENT } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 import { FEATURE_GROUPS, Feature, FeatureGroup, featuresOf } from '../../data/features.data';
 import { BUSINESS_TYPES } from '../../data/business-types.data';
-import { TRIAL_LABEL } from '../../data/site.data';
+import { HELP_URL, TRIAL_LABEL } from '../../data/site.data';
 
 type MenuId = 'features' | 'types' | 'resources';
 
@@ -24,11 +26,13 @@ interface ResourceLink {
   title: string;
   text: string;
   link: string;
+  /** Set when the link leaves this site, so the menu renders an `<a href>`. */
+  external?: boolean;
 }
 
 const RESOURCES: ResourceLink[] = [
   { icon: 'article', title: 'Blog', text: 'Guías para llenar la agenda y gestionar mejor', link: '/blog' },
-  { icon: 'help', title: 'Centro de ayuda', text: 'Respuestas a las dudas más frecuentes', link: '/ayuda' },
+  { icon: 'help', title: 'Centro de ayuda', text: 'Respuestas a las dudas más frecuentes', link: HELP_URL, external: true },
   { icon: 'phone_iphone', title: 'Bipsy para tus clientes', text: 'La app gratuita con la que te reservan', link: '/app-para-clientes' },
   { icon: 'diversity_3', title: 'Quiénes somos', text: 'Qué es Bipsy y quién está detrás', link: '/legal/quienes-somos' },
   { icon: 'mail', title: 'Contacto', text: 'Escríbenos, te respondemos', link: '/legal/contacto' },
@@ -61,6 +65,9 @@ export class SiteHeaderComponent implements OnInit, OnDestroy {
   readonly types = BUSINESS_TYPES;
   readonly resources = RESOURCES;
   readonly trialLabel = TRIAL_LABEL;
+  readonly helpUrl = HELP_URL;
+  /** Signed in: the header shows «Tu panel» instead of the guest buttons. */
+  readonly session = inject(SiteSession);
 
   openMenu: MenuId | null = null;
   mobileOpen = false;

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
@@ -16,5 +17,7 @@ import { BUSINESS_TYPES } from '../../data/business-types.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BusinessTypesComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   readonly types = BUSINESS_TYPES;
 }

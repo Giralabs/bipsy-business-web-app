@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
@@ -39,6 +40,8 @@ const DEMO_NAMES: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BusinessTypeComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   type?: BusinessType;
   features: Feature[] = [];
   others: BusinessType[] = [];

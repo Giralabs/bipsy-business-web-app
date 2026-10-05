@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
@@ -19,6 +20,8 @@ import { Feature, FeatureGroup, featureBySlug, featuresOf, groupOf } from '../..
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeatureDetailComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   feature?: Feature;
   group?: FeatureGroup;
   related: Feature[] = [];

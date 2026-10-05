@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { SiteSession } from '../../../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
-import { BipSlotComponent } from '../../../../components/bip-slot/bip-slot.component';
+import { BipRigComponent } from '../../../../components/bip-rig/bip-rig.component';
 import { RevealDirective } from '../../../../shared/reveal.directive';
 
 /**
@@ -10,12 +11,14 @@ import { RevealDirective } from '../../../../shared/reveal.directive';
 @Component({
   selector: 'app-home-steps',
   standalone: true,
-  imports: [RouterLink, BipSlotComponent, RevealDirective],
+  imports: [RouterLink, BipRigComponent, RevealDirective],
   templateUrl: './steps.component.html',
   styleUrl: './steps.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepsSectionComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   readonly steps = [
     {
       icon: 'person_add',

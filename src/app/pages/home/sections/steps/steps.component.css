@@ -11,6 +11,10 @@
 .steps__title { margin-top: 16px; }
 .steps__lead { margin-top: 18px; }
 .steps__art { margin-top: 32px; max-width: 360px; }
+/* Mr. Bip is a full-body render, nearly twice as tall as he is wide, so he
+   needs a narrower box than the square slot he replaces or he pushes the
+   sticky column past the viewport. */
+.steps__art app-bip-rig { display: block; width: min(100%, 240px); }
 
 .steps__list { position: relative; list-style: none; display: grid; gap: 16px; padding-left: 0; }
 
@@ -78,6 +82,7 @@
   .steps__grid { grid-template-columns: 1fr; }
   .steps__intro { position: static; }
   .steps__art { max-width: 260px; }
+  .steps__art app-bip-rig { width: min(100%, 200px); }
 }
 
 @media (max-width: 560px) {

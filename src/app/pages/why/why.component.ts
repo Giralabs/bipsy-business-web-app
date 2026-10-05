@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { SiteSession } from '../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../components/page-hero/page-hero.component';
 import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
@@ -21,6 +22,8 @@ import { TiltDirective } from '../../shared/tilt.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WhyComponent {
+  /** Signed in: the call to action goes to the panel, not to sign-up. */
+  readonly session = inject(SiteSession);
   readonly reasons = [
     { icon: 'apps', title: 'Todo en una sola app', text: 'Agenda, clientes, mensajes, equipo, fichaje y finanzas. Sin saltar entre cinco herramientas que no se hablan.' },
     { icon: 'travel_explore', title: 'Con clientes buscando', text: 'Tu negocio aparece en Bipsy, la app gratuita donde la gente busca y reserva cita cerca de casa.' },
