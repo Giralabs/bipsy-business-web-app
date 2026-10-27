@@ -126,25 +126,31 @@ export function reviewInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-/** `iconForCategory` of `gipsi_service_row.dart`, for a service with no photo. */
+/** `GipsiCategoryIcons.forCode` of `gipsi_shared_ui`, for a service with no photo. */
 export function categoryIcon(code: string | null | undefined): string {
   switch ((code ?? '').toUpperCase()) {
+    case 'BARBER': return 'face';
     case 'HAIRDRESSER': return 'content_cut';
-    case 'BARBER': return 'face_retouching_natural';
-    case 'ESTHETIC': return 'auto_awesome';
     case 'NAILS': return 'brush';
-    case 'MASSAGE': return 'self_improvement';
+    case 'ESTHETIC': return 'auto_awesome';
+    case 'EYEBROWS': return 'visibility';
     case 'TATTOO': return 'draw';
     case 'MAKEUP': return 'palette';
-    case 'EYEBROWS': return 'remove_red_eye';
-    case 'PHYSIO': return 'healing';
-    case 'PERSONAL_TRAINER': return 'fitness_center';
-    case 'TUTORING': return 'school';
+    case 'LASER': return 'bolt';
+    case 'MASSAGE': return 'massage';
+    case 'PERSONAL_TRAINER': return 'exercise';
+    case 'PHYSIO': return 'physical_therapy';
+    case 'PODIATRY': return 'footprint';
+    case 'DENTAL': return 'dentistry';
+    case 'NUTRITION': return 'grocery';
+    case 'PSYCHOLOGY': return 'psychology';
+    case 'PHOTOGRAPHY': return 'photo_camera';
+    case 'PET_GROOMING': return 'pet_supplies';
+    case 'OTHER': return 'grid_view';
+    // Deactivated in V119, but businesses that already had them still show them.
     case 'PILATES': return 'accessibility_new';
-    case 'LASER': return 'flash_on';
-    case 'NUTRITION': return 'eco';
-    case 'PHOTOGRAPHY': return 'camera_alt';
+    case 'TUTORING': return 'school';
     case 'COACHING': return 'track_changes';
-    default: return 'spa';
+    default: return 'storefront';
   }
 }
