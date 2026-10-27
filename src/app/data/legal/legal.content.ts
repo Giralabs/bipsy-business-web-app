@@ -49,9 +49,10 @@ const TERMS: LegalDocument = {
       title: '2. Objeto',
       paragraphs: [
         'Bipsy pone en contacto a quien busca un servicio con cita previa con los establecimientos y ' +
-          'profesionales que lo prestan: peluquería, barbería, estética, uñas, maquillaje, tatuaje, ' +
-          'depilación, masajes, fisioterapia, entrenamiento personal, yoga y pilates, nutrición, coaching, ' +
-          'fotografía y clases particulares, entre otros.',
+          'profesionales que lo prestan: peluquería, barbería, estética, uñas, cejas y pestañas, ' +
+          'maquillaje, tatuaje y piercing, depilación, masajes, fisioterapia, podología, odontología, ' +
+          'psicología, entrenamiento personal, yoga y pilates, nutrición, coaching, fotografía, ' +
+          'clases particulares y peluquería canina, entre otros.',
         'Bipsy es un intermediario tecnológico. El servicio contratado lo presta el negocio, no Bipsy, ' +
           'y es el negocio quien responde de su calidad, sus precios y su cumplimiento.',
         'Usar Bipsy como cliente es gratuito. Los negocios pueden contratar un plan de pago, que se ' +
