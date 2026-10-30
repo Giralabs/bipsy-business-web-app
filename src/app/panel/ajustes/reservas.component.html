@@ -126,36 +126,6 @@
             @if (ownerPerforms) {
               <div class="pn-row">
                 <span class="pn-row__main">
-                  <span class="pn-row__title">Tu foto</span>
-                  <span class="pn-row__sub">La que te representa como profesional, no la del negocio.</span>
-                </span>
-                <span class="owner-photo">
-                  @if (auth.profile()?.ownerImageUrl) {
-                    <img [src]="auth.profile()?.ownerImageUrl" alt="" />
-                  } @else {
-                    <span class="material-symbols-rounded">person</span>
-                  }
-                </span>
-              </div>
-              <div class="pn-row">
-                <span class="pn-row__main owner-picker">
-                  <pn-photo-picker
-                    label="Cambiar tu foto"
-                    hint="Cuadrada. Es la que ve el cliente al elegirte."
-                    [current]="auth.profile()?.ownerImageUrl ?? null"
-                    [busy]="uploading()"
-                    (picked)="uploadOwnerPhoto($event)"
-                  />
-                  @if (auth.profile()?.ownerImageUrl) {
-                    <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="removeOwnerPhoto()">
-                      Quitar tu foto
-                    </button>
-                  }
-                </span>
-              </div>
-
-              <div class="pn-row">
-                <span class="pn-row__main">
                   <span class="pn-row__title">Nombre personal</span>
                 </span>
                 <span class="field-row">

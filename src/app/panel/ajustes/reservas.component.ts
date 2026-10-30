@@ -5,7 +5,6 @@ import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
 import { ServicesStore } from '../core/data/services.store';
 import { PnSwitchComponent } from '../ui/controls';
-import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
 import { ToastService } from '../ui/toast.service';
 
 /**
@@ -19,7 +18,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-panel-reservas',
   standalone: true,
-  imports: [FormsModule, RouterLink, PnSwitchComponent, PnPhotoPickerComponent],
+  imports: [FormsModule, RouterLink, PnSwitchComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reservas.component.html',
   styles: [
@@ -30,18 +29,6 @@ import { ToastService } from '../ui/toast.service';
       .field-row input, .field-row select { width: 120px; }
       .field-row input[name='ownerName'] { width: 200px; }
       .unit { font-size: 0.875rem; color: var(--clr-text-3); }
-      .owner-photo {
-        display: grid;
-        place-items: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: var(--clr-surface-2, rgba(128, 128, 128, 0.12));
-        color: var(--clr-text-3);
-      }
-      .owner-photo img { width: 100%; height: 100%; object-fit: cover; }
-      .owner-picker { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
       .travel { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; }
       .travel__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
       .travel__value { font-weight: 800; }
@@ -57,7 +44,6 @@ export class ReservasComponent {
   readonly auth = inject(AuthService);
 
   readonly busy = signal(false);
-  readonly uploading = signal(false);
 
   /**
    * Does this business have a team at all? `teamEnabled` is what the app
@@ -150,35 +136,6 @@ export class ReservasComponent {
 
   get limitSummary(): string {
     return `Cada cliente podrá tener ${this.limit} citas sin pasar. Las canceladas y las ya pasadas no cuentan.`;
-  }
-
-  /**
-   * The owner's own photo as a professional
-   * (`POST|DELETE /businesses/me/images/owner`). It saves on its own, not with
-   * the form's button, exactly like the business photos: a picked file is
-   * already a decision.
-   */
-  async uploadOwnerPhoto(file: File): Promise<void> {
-    this.uploading.set(true);
-    try {
-      await this.api.upload('/businesses/me/images/owner', file);
-      await this.auth.refreshMe();
-      this.toasts.show('Foto actualizada');
-    } catch {
-      this.toasts.error('No se ha podido subir. Vuelve a intentarlo en un momento.');
-    } finally {
-      this.uploading.set(false);
-    }
-  }
-
-  async removeOwnerPhoto(): Promise<void> {
-    try {
-      await this.api.delete('/businesses/me/images/owner');
-      await this.auth.refreshMe();
-      this.toasts.show('Foto quitada');
-    } catch {
-      this.toasts.error('La foto sigue puesta. Vuelve a intentarlo en un momento.');
-    }
   }
 
   async save(): Promise<void> {
