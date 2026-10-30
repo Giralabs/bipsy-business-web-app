@@ -46,7 +46,7 @@
 .group__intro { position: sticky; top: 140px; }
 .group__title { margin-top: 16px; }
 .group__intro .lead { margin-top: 14px; }
-.group__art { margin-top: 28px; max-width: 320px; }
+.group__art { margin-top: 28px; max-width: 460px; }
 
 .group__items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .group__items > .feat:only-child,
@@ -76,7 +76,7 @@
   .group__grid { grid-template-columns: 1fr; }
   .group__grid--flip .group__intro { order: 0; }
   .group__intro { position: static; }
-  .group__art { max-width: 240px; }
+  .group__art { max-width: 360px; }
 }
 
 @media (max-width: 620px) {
