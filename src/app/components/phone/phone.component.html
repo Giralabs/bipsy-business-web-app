@@ -1,5 +1,8 @@
 <div class="ph" aria-hidden="true">
   <div class="ph__screen">
+    @if (shot; as src) {
+      <img class="ph__shot" [src]="src" alt="" loading="lazy" decoding="async" />
+    } @else {
     <span class="ph__island"></span>
     <div class="ph__status">
       <span>9:41</span>
@@ -318,6 +321,7 @@
         <span class="material-symbols-rounded" [class.ph-tabs__on]="tabIndex === 3">contacts</span>
         @if (tabIndex !== 2) { <span class="ph-badge">2</span> }
       </div>
+    }
     }
   </div>
 </div>

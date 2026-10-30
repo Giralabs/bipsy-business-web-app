@@ -12,7 +12,7 @@
 
 export type FeatureGroupId = 'agenda' | 'clientes' | 'cobros' | 'equipo' | 'escaparate';
 
-/** Which mock screen of the app illustrates the feature (see AppScreenComponent). */
+/** Which screen of the app illustrates the feature (see PhoneComponent). */
 export type ScreenId =
   | 'agenda'
   | 'clientes'
@@ -22,7 +22,10 @@ export type ScreenId =
   | 'espera'
   | 'chat'
   | 'reserva'
-  | 'quality';
+  | 'quality'
+  | 'hora'
+  | 'resenas'
+  | 'fichajes';
 
 export interface FeatureGroup {
   id: FeatureGroupId;
@@ -206,7 +209,7 @@ export const FEATURES: Feature[] = [
       { icon: 'trending_up', title: 'Suben tu posición', text: 'Una buena nota ayuda a aparecer en Destacados dentro de la app de Bipsy.' },
     ],
     facts: ['Ligadas a una cita real', 'Respuesta pública', 'Aviso de cada reseña nueva'],
-    screen: 'ficha',
+    screen: 'resenas',
   },
 
   // ----- COBROS -----------------------------------------------------------
@@ -285,7 +288,7 @@ export const FEATURES: Feature[] = [
       { icon: 'home', title: 'Personal de hoy en la agenda', text: 'Desde el inicio ves cuántas personas han fichado sin salir de las citas.' },
     ],
     facts: ['Incluido en todos los planes', 'Recordatorio 10 min antes', 'Resumen mensual'],
-    screen: 'equipo',
+    screen: 'fichajes',
   },
   {
     slug: 'ausencias-y-vacaciones',

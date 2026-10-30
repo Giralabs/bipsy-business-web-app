@@ -35,13 +35,27 @@ const DEFAULT_SERVICES: SampleService[] = [
 ];
 
 /**
- * A phone showing a screen of Bipsy Business, drawn in HTML with the app's own
- * layout and tokens (see `src/styles/app-mockup.css`).
+ * Real screenshots of the current design (`public/app_shots`, written by
+ * `scripts/build-bip-phones.mjs`). A screen that is not here is still drawn.
+ */
+const SHOTS: Partial<Record<ScreenId, string>> = {
+  agenda: 'business-agenda-hoy',
+  clientes: 'business-cliente-detail',
+  equipo: 'business-equipo',
+  chat: 'business-chat',
+  hora: 'cliente-reserva-hora',
+  resenas: 'business-resenas',
+  fichajes: 'business-registro-fichajes',
+};
+
+/**
+ * A phone showing a screen of Bipsy Business: the real screenshot when there is
+ * one, and otherwise drawn in HTML with the app's own layout and tokens (see
+ * `src/styles/app-mockup.css`).
  *
- * Built instead of using screenshots so it follows the visitor's light/dark
- * theme like the app does, stays sharp at any size and can animate: bookings
- * arrive, a pending one gets confirmed, the chart grows. Everything shown is a
- * real screen of the app with demo data.
+ * The drawn version stays for the screens without a screenshot and for the
+ * pages that fill it with the services of a trade: a screenshot only knows the
+ * demo business it was taken on.
  */
 @Component({
   selector: 'app-phone',
@@ -107,6 +121,12 @@ export class PhoneComponent implements OnChanges {
       { time: '12:30', minutes: s[3].minutes, customer: 'Andrés Gil', service: s[3].name, worker: 'Lucía', state: 'confirmada', note: true },
       { time: '13:15', minutes: s[0].minutes, customer: 'Sofía Navarro', service: s[0].name, worker: 'Javi', state: 'confirmada' },
     ];
+  }
+
+  /** The screenshot to show instead of the drawing, if any. */
+  get shot(): string | null {
+    const name = this.services?.length ? undefined : SHOTS[this.screen];
+    return name ? `app_shots/${name}.webp` : null;
   }
 
   /** Which tab of the bottom bar is lit; null for pushed screens without bar. */
