@@ -12,7 +12,7 @@
 
 export type FeatureGroupId = 'agenda' | 'clientes' | 'cobros' | 'equipo' | 'escaparate';
 
-/** Which mock screen of the app illustrates the feature (see AppScreenComponent). */
+/** Which screen of the app illustrates the feature (see PhoneComponent). */
 export type ScreenId =
   | 'agenda'
   | 'clientes'
@@ -22,7 +22,10 @@ export type ScreenId =
   | 'espera'
   | 'chat'
   | 'reserva'
-  | 'quality';
+  | 'quality'
+  | 'hora'
+  | 'resenas'
+  | 'fichajes';
 
 export interface FeatureGroup {
   id: FeatureGroupId;
@@ -62,35 +65,35 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     label: 'Agenda y reservas',
     icon: 'calendar_month',
     blurb: 'Reservas online a cualquier hora y una agenda que se ordena sola.',
-    bip: { code: 'MB-10', pose: 'Enseña el móvil con la agenda del día llena', screen: 'Agenda › Hoy' },
+    bip: { code: 'MB-10', pose: 'enseña el móvil con la agenda del día llena', screen: 'Agenda › Hoy' },
   },
   {
     id: 'clientes',
     label: 'Clientes',
     icon: 'contacts',
     blurb: 'Tu cartera de clientes, sus citas y la conversación, en el mismo sitio.',
-    bip: { code: 'MB-11', pose: 'Saluda mientras enseña la ficha de un cliente', screen: 'Clientes › Ficha' },
+    bip: { code: 'MB-11', pose: 'saluda mientras enseña la ficha de un cliente', screen: 'Clientes › Ficha' },
   },
   {
     id: 'cobros',
     label: 'Cobros y finanzas',
     icon: 'payments',
     blurb: 'Caja, gastos, comisiones y protección frente a los plantones.',
-    bip: { code: 'MB-12', pose: 'Sonríe con el móvil en el panel de Finanzas', screen: 'Finanzas › Panel' },
+    bip: { code: 'MB-12', pose: 'sonríe con el pulgar arriba junto al panel de Finanzas', screen: 'Finanzas › Panel' },
   },
   {
     id: 'equipo',
     label: 'Equipo',
     icon: 'groups',
     blurb: 'Horarios, permisos, ausencias y fichaje de todo el equipo.',
-    bip: { code: 'MB-13', pose: 'Mira un reloj de pulsera, con el móvil en la otra mano', screen: 'Registro de fichajes' },
+    bip: { code: 'MB-13', pose: 'mira su reloj y señala el móvil con el registro de fichajes', screen: 'Registro de fichajes' },
   },
   {
     id: 'escaparate',
     label: 'Escaparate y marca',
     icon: 'auto_awesome',
     blurb: 'Tu ficha en Bipsy, tu portfolio y un aspecto que no pasa desapercibido.',
-    bip: { code: 'MB-14', pose: 'Presenta orgulloso el móvil con su ficha pública', screen: 'Ficha pública del negocio' },
+    bip: { code: 'MB-14', pose: 'presenta orgulloso el móvil con el portfolio del negocio', screen: 'Portfolio' },
   },
 ];
 
@@ -206,7 +209,7 @@ export const FEATURES: Feature[] = [
       { icon: 'trending_up', title: 'Suben tu posición', text: 'Una buena nota ayuda a aparecer en Destacados dentro de la app de Bipsy.' },
     ],
     facts: ['Ligadas a una cita real', 'Respuesta pública', 'Aviso de cada reseña nueva'],
-    screen: 'ficha',
+    screen: 'resenas',
   },
 
   // ----- COBROS -----------------------------------------------------------
@@ -285,7 +288,7 @@ export const FEATURES: Feature[] = [
       { icon: 'home', title: 'Personal de hoy en la agenda', text: 'Desde el inicio ves cuántas personas han fichado sin salir de las citas.' },
     ],
     facts: ['Incluido en todos los planes', 'Recordatorio 10 min antes', 'Resumen mensual'],
-    screen: 'equipo',
+    screen: 'fichajes',
   },
   {
     slug: 'ausencias-y-vacaciones',

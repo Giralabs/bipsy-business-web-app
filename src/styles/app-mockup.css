@@ -41,6 +41,14 @@
   isolation: isolate;
 }
 
+.ph__shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
 .ph__island {
   position: absolute;
   top: 9px;

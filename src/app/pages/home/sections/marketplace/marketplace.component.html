@@ -15,7 +15,7 @@
         </header>
         <div class="duo__art">
           <app-bip-slot code="BIP-01" mascot="client" variant="phone" screen="App Bipsy › Elegir hora"
-                        pose="Bip (sudadera) reservando cita desde su móvil, contento" ratio="1 / 1" />
+                        pose="señala contento su móvil, con las horas libres para reservar" ratio="1 / 1" />
         </div>
         <ul class="check-list">
           @for (p of clientPoints; track p) {
@@ -26,9 +26,8 @@
 
       <div class="duo__bridge" aria-hidden="true">
         <span class="duo__line"></span>
-        <span class="duo__packet duo__packet--1"><span class="material-symbols-rounded fill">event_available</span></span>
-        <span class="duo__packet duo__packet--2"><span class="material-symbols-rounded fill">notifications</span></span>
-        <span class="duo__packet duo__packet--3"><span class="material-symbols-rounded fill">star</span></span>
+        <span class="duo__spark"></span>
+        <span class="duo__node"><span class="material-symbols-rounded fill">event_available</span></span>
       </div>
 
       <article class="duo__card duo__card--business" appReveal revealFrom="right">
@@ -38,8 +37,8 @@
           <span class="pill pill--biz">Para tu negocio</span>
         </header>
         <div class="duo__art">
-          <app-bip-slot code="MB-02" variant="phone" screen="Agenda con la notificación «Nueva reserva»"
-                        pose="Mr. Bip recibe la reserva en su móvil y la señala con el dedo" ratio="1 / 1" />
+          <app-bip-slot code="MB-02" variant="phone" screen="Agenda con la notificación «Nueva cita»"
+                        pose="recibe la cita en su móvil y la señala con el dedo" ratio="1 / 1" />
         </div>
         <ul class="check-list">
           @for (p of businessPoints; track p) {
