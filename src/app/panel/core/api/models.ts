@@ -59,7 +59,6 @@ export interface BusinessProfile {
   ownerPerforms?: boolean;
   /** How the owner is named as a professional; falls back to `name`. */
   ownerDisplayName?: string | null;
-  ownerImageUrl?: string | null;
   clockInEnabled: boolean;
   autoAccept: boolean;
   allowOvertime: boolean;
@@ -1082,7 +1081,6 @@ export interface BusinessDetail {
   teamEnabled?: boolean;
   ownerPerforms?: boolean;
   ownerDisplayName?: string | null;
-  ownerImageUrl?: string | null;
   serviceAreaLatitude?: number | null;
   serviceAreaLongitude?: number | null;
   serviceRadiusKm?: number | null;
