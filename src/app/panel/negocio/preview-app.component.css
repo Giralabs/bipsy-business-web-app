@@ -121,7 +121,8 @@
 .vpa-dev--android .vpa-status.ph__status .material-symbols-rounded { font-size: 14px; }
 
 /* En cuanto la portada sale por arriba, el reloj vuelve al color del tema. */
-.vpa-status--dark { color: var(--vpa-ink); }
+.vpa-status.ph__status.vpa-status--dark { color: var(--vpa-ink); }
+.vpa-status.ph__status.vpa-status--on-accent { color: var(--clr-on-accent, #1E2328); }
 
 /* ----- BOTONES FLOTANTES (GipsiCoverIconButton) ---------------------- */
 .vpa-top {
@@ -171,6 +172,17 @@
   background: #44544B;
 }
 .vpa-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* GipsiImagePlaceholder: `primary` de fondo y `onPrimary` en el icono, que
+   mide el 32 % del lado menor entre 20 y 72. */
+.vpa-cover__none {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background: var(--vpa-primary);
+  color: var(--clr-on-accent, #1E2328);
+}
+.vpa-cover__none .material-symbols-rounded { font-size: clamp(20px, calc(var(--vpa-cover-h) * 0.32), 72px); }
 
 /* ----- CABECERA ------------------------------------------------------ */
 /* Padding.fromLTRB(20, 20, 20, 12) */
@@ -245,6 +257,30 @@
   cursor: pointer;
 }
 .vpa-action .material-symbols-rounded { font-size: 22px; }
+
+/* _SocialRow: un Wrap centrado de botones de 40, separados 8, a 16 de las
+   acciones. Los logotipos van todos del acento, no del color de cada marca. */
+.vpa-social { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+
+.vpa-social__btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--vpa-card);
+  color: var(--vpa-primary);
+  text-decoration: none;
+}
+.vpa-social__btn .material-symbols-rounded { font-size: 20px; }
+
+.vpa-social__mark {
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--vpa-mark) center / contain no-repeat;
+  mask: var(--vpa-mark) center / contain no-repeat;
+}
 
 /* ----- DIVISORES ----------------------------------------------------- */
 .vpa-divider { height: 0.5px; margin: 16px 20px; background: var(--vpa-line); }
@@ -346,16 +382,28 @@
   padding: 12px;
 }
 
-/* titleSmall: Jakarta 14 / w600 / 1.4, dos líneas como mucho. */
+/* titleSmall: Jakarta 14 / w600 / 1.4, en UNA línea: con dos, un nombre
+   largo desbordaba la fila de alto fijo en cuanto salía la nota del sitio. */
 .vpa-service__name {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--vpa-ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* La nota de dónde se presta, en su propia línea: bodySmall con un coche. */
+.vpa-service__place { display: flex; align-items: center; gap: 4px; margin-top: 2px; min-width: 0; color: var(--vpa-ink-2); }
+.vpa-service__place .material-symbols-rounded { font-size: 12px; flex: none; }
+.vpa-service__place-text {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .vpa-service__meta { display: flex; align-items: center; margin-top: 8px; min-width: 0; }

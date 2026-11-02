@@ -9,8 +9,10 @@
       <span class="material-symbols-rounded">close</span>
     </button>
     <span class="appbanner__icon" aria-hidden="true">
-      <img src="assets_bipsy/Resized/256px/Brand Marks/mint_symbol_nobackground.webp" alt="" class="theme-dark-only" />
-      <img src="assets_bipsy/Resized/256px/Brand Marks/carbon_symbol_nobackground.webp" alt="" class="theme-light-only" />
+      <!-- La web de cliente lo pide de `Resized/256px`; este proyecto solo
+           trae el tamaño original. -->
+      <img src="assets_bipsy/Brand Marks/mint_symbol_nobackground.webp" alt="" class="theme-dark-only" />
+      <img src="assets_bipsy/Brand Marks/carbon_symbol_nobackground.webp" alt="" class="theme-light-only" />
     </span>
     <span class="appbanner__text">
       <strong>Bipsy</strong>
@@ -84,7 +86,12 @@
         </div>
 
         <div class="cover__info">
-          <h1 class="cover__title">{{ vm.business.name }}</h1>
+          <h1 class="cover__title">
+            {{ vm.business.name }}
+            @if (vm.business.verified) {
+              <pn-verified-badge [size]="28" [onDark]="true" />
+            }
+          </h1>
           <div class="cover__meta">
             @if (vm.locationDisplay) {
               <span class="badge badge--photo">
