@@ -30,7 +30,29 @@
   background: var(--clr-surface);
   color: var(--clr-text);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  visibility: hidden;
+}
+.coach__card.is-placed {
+  visibility: visible;
   animation: coach-in var(--dur-medium) cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+
+/* Half a Mr. Bip rising from the edge: the renders are never shown as a thumbnail. */
+.coach__art {
+  display: flex;
+  justify-content: center;
+  height: 188px;
+  margin: -22px -22px 18px;
+  overflow: hidden;
+  border-radius: var(--pn-radius-card) var(--pn-radius-card) 0 0;
+  background: var(--pn-card-hi);
+}
+.coach__art img { width: 148px; height: auto; margin-top: 16px; align-self: flex-start; }
+
+/* On a phone the card is a full-width block: the sums in `place()` read the
+   layout viewport, which a page wider than the screen stretches for a moment. */
+@media (max-width: 480px) {
+  .coach__card { left: 16px !important; width: auto; right: 16px; max-width: none; }
 }
 
 @keyframes coach-in {
@@ -65,20 +87,23 @@
   line-height: 1.55;
 }
 
-.coach__dots { display: flex; gap: 5px; margin-top: 18px; }
-.coach__dots span {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--r-pill);
-  background: var(--pn-subtle);
-  transition: width var(--dur-fast) ease, background-color var(--dur-fast) ease;
+.coach__progress { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.coach__count { flex: none; font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
+.coach__bar { flex: 1; height: 4px; overflow: hidden; border-radius: var(--r-pill); background: var(--pn-subtle); }
+.coach__bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pn-accent);
+  transition: width var(--dur-medium) ease;
 }
-.coach__dots span.on { width: 18px; background: var(--pn-accent); }
 
-.coach__actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.coach__actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
 .coach__actions--stack { flex-direction: column; align-items: stretch; }
+.coach__spacer { flex: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .coach__hole { transition-duration: 0s; }
-  .coach__card { animation-duration: 0s; }
+  .coach__card.is-placed { animation-duration: 0s; }
+  .coach__bar i { transition-duration: 0s; }
 }

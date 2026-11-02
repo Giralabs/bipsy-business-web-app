@@ -129,7 +129,8 @@ export function reviewInitials(name: string): string {
 /** `GipsiCategoryIcons.forCode` of `gipsi_shared_ui`, for a service with no photo. */
 export function categoryIcon(code: string | null | undefined): string {
   switch ((code ?? '').toUpperCase()) {
-    case 'BARBER': return 'face';
+    case 'BARBER':
+    case 'BARBERSHOP': return 'face';
     case 'HAIRDRESSER': return 'content_cut';
     case 'NAILS': return 'brush';
     case 'ESTHETIC': return 'auto_awesome';

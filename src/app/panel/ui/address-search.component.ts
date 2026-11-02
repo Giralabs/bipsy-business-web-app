@@ -20,10 +20,12 @@ const DEBOUNCE_MS = 350;
  * The web twin of `GipsiAddressSearchField` (`gipsi_shared_ui`).
  *
  * It talks to the backend proxy (`GET /places/autocomplete` and
- * `GET /places/details`), never to Google: the server key stays there. When
- * the backend has no key it answers 503; then the field stays a plain text
- * input and `available` emits `false` so the screen can show the manual
- * city/province inputs, like the app does.
+ * `GET /places/details`), never to Google: the server key stays there.
+ *
+ * A 503 (no key, or Google refusing it) does not leave the field dumb: it
+ * switches to Photon, straight from the browser, so suggestions keep coming
+ * while the server key is fixed. Only if Photon fails too does `available`
+ * emit `false` and the field become a plain input, with no error to read.
  *
  * The suggestions open inline under the field, not as a floating layer: it
  * is how the app does it and it needs no shadow to separate it.
@@ -64,12 +66,6 @@ const DEBOUNCE_MS = 350;
           <span class="pn-field__hint">{{ hint }}</span>
         }
       </label>
-
-      @if (notice(); as text) {
-        <p class="as__notice">
-          <span class="material-symbols-rounded">info</span>{{ text }}
-        </p>
-      }
 
       @if (suggestions().length > 0) {
         <ul class="as__list" role="listbox">
@@ -113,17 +109,6 @@ const DEBOUNCE_MS = 350;
       }
       .as__input { padding-left: 46px; padding-right: 46px; }
       .as__spin { position: absolute; right: 16px; top: 50%; translate: 0 -50%; }
-
-      .as__notice {
-        display: flex;
-        gap: 8px;
-        align-items: flex-start;
-        margin-top: 10px;
-        font-size: 0.8125rem;
-        line-height: 1.45;
-        color: var(--clr-text-2);
-      }
-      .as__notice .material-symbols-rounded { font-size: 17px; color: var(--clr-warn-text); }
 
       .as__list {
         margin: 10px 0 0;
@@ -174,13 +159,20 @@ export class PnAddressSearchComponent implements OnDestroy {
   readonly value = signal('');
   readonly suggestions = signal<PlaceSuggestion[]>([]);
   readonly loading = signal(false);
-  readonly notice = signal<string | null>(null);
   readonly active = signal(-1);
 
   private timer: ReturnType<typeof setTimeout> | null = null;
   /** Answers that arrive after a newer query are dropped. */
   private seq = 0;
   private disabledByServer = false;
+  /**
+   * The backend answered 503 (its Google key refused) and the field now asks
+   * Photon instead. Google stays first: the day the key works, nothing here
+   * is used.
+   */
+  private usingFallback = false;
+  /** What Photon said about each suggestion, to resolve it on pick with no second call. */
+  private fallbackHits = new Map<string, ResolvedAddress>();
   /**
    * Groups the search with the detail call so Google bills them as one
    * session. It changes after a pick, which is when the session ends.
@@ -202,7 +194,6 @@ export class PnAddressSearchComponent implements OnDestroy {
     const query = text.trim();
     if (query.length < 3) {
       this.suggestions.set([]);
-      this.notice.set(null);
       return;
     }
     this.timer = setTimeout(() => void this.search(query), DEBOUNCE_MS);
@@ -236,7 +227,10 @@ export class PnAddressSearchComponent implements OnDestroy {
   private async search(query: string): Promise<void> {
     const mine = ++this.seq;
     this.loading.set(true);
-    this.notice.set(null);
+    if (this.usingFallback) {
+      await this.searchFallback(query, mine);
+      return;
+    }
     try {
       const res = await this.api.get<{ suggestions: PlaceSuggestion[] }>('/places/autocomplete', {
         q: query,
@@ -249,7 +243,50 @@ export class PnAddressSearchComponent implements OnDestroy {
     } catch (cause) {
       if (mine !== this.seq) return;
       this.suggestions.set([]);
-      this.fail(cause, 'No hemos podido buscar direcciones. Escríbela a mano.');
+      if ((cause as { status?: number }).status === 503) {
+        // Google refused: the same query goes to Photon right away, so the
+        // user never sees an empty list for it.
+        this.usingFallback = true;
+        await this.searchFallback(query, mine);
+        return;
+      }
+      this.fail(cause);
+    } finally {
+      if (mine === this.seq) this.loading.set(false);
+    }
+  }
+
+  /**
+   * Photon (komoot, built on OpenStreetMap data): free, no key, CORS open and
+   * made for search-as-you-type. Limited to Spain, where Bipsy works.
+   */
+  private async searchFallback(query: string, mine: number): Promise<void> {
+    try {
+      const params = new URLSearchParams({ q: query, limit: '6', lat: '40.4', lon: '-3.7', bbox: SPAIN_BBOX });
+      for (const layer of this.citiesOnly ? ['city'] : ['house', 'street']) params.append('layer', layer);
+      const res = await fetch(`https://photon.komoot.io/api/?${params}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const body = (await res.json()) as { features?: PhotonFeature[] };
+      if (mine !== this.seq) return;
+      this.fallbackHits.clear();
+      const list: PlaceSuggestion[] = [];
+      for (const feature of body.features ?? []) {
+        const hit = fromPhoton(feature, this.citiesOnly);
+        // A long street comes as several OSM ways with the same name: one row.
+        const label = (s: PlaceSuggestion) => `${s.mainText}|${s.secondaryText ?? ''}`;
+        if (!hit || list.some((s) => label(s) === label(hit.suggestion))) continue;
+        this.fallbackHits.set(hit.suggestion.placeId, hit.address);
+        list.push(hit.suggestion);
+      }
+      this.suggestions.set(list);
+      this.active.set(-1);
+    } catch {
+      if (mine !== this.seq) return;
+      // Neither answers: the field stays a plain input and the screen offers
+      // the manual fields.
+      this.suggestions.set([]);
+      this.disabledByServer = true;
+      this.available.emit(false);
     } finally {
       if (mine === this.seq) this.loading.set(false);
     }
@@ -258,6 +295,14 @@ export class PnAddressSearchComponent implements OnDestroy {
   async choose(item: PlaceSuggestion): Promise<void> {
     const mine = ++this.seq;
     this.suggestions.set([]);
+    const known = this.fallbackHits.get(item.placeId);
+    if (known) {
+      const text = known.formatted ?? item.mainText;
+      this.value.set(text);
+      this.textChange.emit(text);
+      this.resolved.emit(known);
+      return;
+    }
     this.loading.set(true);
     try {
       const address = await this.api.get<ResolvedAddress>('/places/details', {
@@ -272,24 +317,95 @@ export class PnAddressSearchComponent implements OnDestroy {
       this.resolved.emit(address);
     } catch (cause) {
       if (mine !== this.seq) return;
-      this.fail(cause, 'No hemos podido obtener esa dirección.');
+      // What was typed stays, and the city is written by hand.
+      this.fail(cause);
     } finally {
       if (mine === this.seq) this.loading.set(false);
     }
   }
 
-  /** 503 = the backend has no Places key: stop asking and fall back to free text. */
-  private fail(cause: unknown, fallback: string): void {
-    const status = (cause as { status?: number }).status;
-    const detail = (cause as { error?: { message?: string } }).error?.message;
-    if (status === 503) {
-      this.disabledByServer = true;
-      this.available.emit(false);
-      this.notice.set('El buscador de direcciones no está disponible ahora mismo. Escríbela a mano.');
-      return;
-    }
-    this.notice.set(detail || fallback);
+  /** 503 = Google is not going to answer: stop spending calls on it. */
+  private fail(cause: unknown): void {
+    if ((cause as { status?: number }).status !== 503) return;
+    this.disabledByServer = true;
+    this.available.emit(false);
   }
+}
+
+/** Peninsula, Balearics, Canaries, Ceuta and Melilla: west, south, east, north. */
+const SPAIN_BBOX = '-18.2,27.6,4.4,43.9';
+
+interface PhotonFeature {
+  geometry?: { coordinates?: [number, number] };
+  properties?: {
+    osm_type?: string;
+    osm_id?: number;
+    type?: string;
+    name?: string;
+    street?: string;
+    housenumber?: string;
+    postcode?: string;
+    city?: string;
+    district?: string;
+    county?: string;
+    state?: string;
+    countrycode?: string;
+  };
+}
+
+/**
+ * The 52 provinces by the first two digits of the postal code, which in
+ * Spain IS the province. Photon's `county` is often the comarca and `state`
+ * the region, so neither can be trusted for it.
+ */
+const PROVINCES = [
+  'Álava', 'Albacete', 'Alicante', 'Almería', 'Ávila', 'Badajoz', 'Islas Baleares', 'Barcelona', 'Burgos',
+  'Cáceres', 'Cádiz', 'Castellón', 'Ciudad Real', 'Córdoba', 'A Coruña', 'Cuenca', 'Girona', 'Granada',
+  'Guadalajara', 'Gipuzkoa', 'Huelva', 'Huesca', 'Jaén', 'León', 'Lleida', 'La Rioja', 'Lugo', 'Madrid',
+  'Málaga', 'Murcia', 'Navarra', 'Ourense', 'Asturias', 'Palencia', 'Las Palmas', 'Pontevedra', 'Salamanca',
+  'Santa Cruz de Tenerife', 'Cantabria', 'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo',
+  'Valencia', 'Valladolid', 'Bizkaia', 'Zamora', 'Zaragoza', 'Ceuta', 'Melilla',
+];
+
+function provinceOf(postcode: string | undefined): string | null {
+  const n = Number((postcode ?? '').trim().slice(0, 2));
+  return /^\d{5}$/.test((postcode ?? '').trim()) && n >= 1 && n <= 52 ? PROVINCES[n - 1] : null;
+}
+
+/**
+ * A Photon hit as the same `ResolvedAddress` the backend gives for Google:
+ * `address` is street and number, the province comes from the postal code.
+ */
+function fromPhoton(
+  feature: PhotonFeature,
+  citiesOnly: boolean,
+): { suggestion: PlaceSuggestion; address: ResolvedAddress } | null {
+  const p = feature.properties;
+  const point = feature.geometry?.coordinates;
+  if (!p || p.countrycode !== 'ES' || !point) return null;
+  const city = p.city ?? (p.type === 'city' ? p.name : null) ?? p.district ?? null;
+  const streetName = p.street ?? (p.type === 'street' ? p.name : null);
+  if (citiesOnly ? !city : !streetName) return null;
+
+  const street = streetName ? [streetName, p.housenumber].filter(Boolean).join(' ') : null;
+  const province = provinceOf(p.postcode) ?? p.state ?? null;
+  const place = [p.postcode, city].filter(Boolean).join(' ');
+  const mainText = citiesOnly ? city! : street!;
+  const secondaryText = (citiesOnly ? province : [place, province].filter(Boolean).join(', ')) || null;
+  return {
+    suggestion: { placeId: `osm:${p.osm_type ?? ''}${p.osm_id ?? mainText}`, mainText, secondaryText },
+    address: {
+      address: street,
+      streetNumber: p.housenumber ?? null,
+      formatted: [mainText, secondaryText].filter(Boolean).join(', '),
+      city,
+      province,
+      postalCode: p.postcode ?? null,
+      latitude: point[1],
+      longitude: point[0],
+      placeId: null,
+    },
+  };
 }
 
 function newToken(): string {

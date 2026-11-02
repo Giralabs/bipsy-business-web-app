@@ -8,6 +8,10 @@ import {
   SimpleChanges,
   signal,
 } from '@angular/core';
+import { CropShape, PnImageCropperComponent } from './image-cropper.component';
+
+/** A photo about to be framed can be big: what travels is the cropped one. */
+const MAX_MB_BEFORE_CROP = 40;
 
 /**
  * Elegir una foto y subirla.
@@ -19,37 +23,80 @@ import {
  *
  * Solo imágenes y hasta 8 MB: más grande, el backend lo rechaza y el usuario
  * se queda sin saber por qué.
+ *
+ * Con `crop`, se encuadra antes de subir: redonda para un avatar y con la
+ * proporción de la portada para la portada (`pn-image-cropper`). Con
+ * `variant="row"` es una fila con su miniatura y qué foto es, y lo proyectado
+ * va a su derecha (el «Quitar»).
  */
 @Component({
   selector: 'pn-photo-picker',
   standalone: true,
+  imports: [PnImageCropperComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      class="pick"
-      [class.pick--over]="over()"
-      [class.pick--busy]="busy"
-      (dragover)="onDragOver($event)"
-      (dragleave)="over.set(false)"
-      (drop)="onDrop($event)"
-    >
-      @if (preview(); as url) {
-        <img class="pick__img" [src]="url" alt="" />
-      } @else if (current) {
-        <img class="pick__img" [src]="current" alt="" />
-      }
+    @if (variant === 'row') {
+      <div
+        class="prow"
+        [class.pick--over]="over()"
+        [class.pick--busy]="busy"
+        (dragover)="onDragOver($event)"
+        (dragleave)="over.set(false)"
+        (drop)="onDrop($event)"
+      >
+        <label class="prow__hit">
+          <input type="file" [accept]="accept" (change)="onPick($event)" [attr.aria-label]="label" />
+          <span class="prow__thumb" [class.prow__thumb--round]="crop === 'avatar'" [class.prow__thumb--cover]="crop === 'cover'">
+            @if (preview() ?? current; as url) {
+              <img [src]="url" alt="" />
+            } @else {
+              <span class="material-symbols-rounded">{{ crop === 'avatar' ? 'person' : 'storefront' }}</span>
+            }
+          </span>
+          <span class="pn-row__main">
+            <span class="pn-row__title">{{ busy ? 'Subiendo…' : label }}</span>
+            <span class="pn-row__sub">{{ hint }}</span>
+          </span>
+        </label>
+        <ng-content />
+      </div>
+    } @else {
+      <div
+        class="pick"
+        [class.pick--over]="over()"
+        [class.pick--busy]="busy"
+        (dragover)="onDragOver($event)"
+        (dragleave)="over.set(false)"
+        (drop)="onDrop($event)"
+      >
+        @if (preview(); as url) {
+          <img class="pick__img" [src]="url" alt="" />
+        } @else if (current) {
+          <img class="pick__img" [src]="current" alt="" />
+        }
 
-      <label class="pick__drop">
-        <input type="file" [accept]="accept" (change)="onPick($event)" [attr.aria-label]="label" />
-        <span class="material-symbols-rounded">{{ busy ? 'hourglass_top' : 'add_photo_alternate' }}</span>
-        <span class="pick__label">{{ busy ? 'Subiendo…' : label }}</span>
-        <span class="pick__hint">{{ hint }}</span>
-      </label>
+        <label class="pick__drop">
+          <input type="file" [accept]="accept" (change)="onPick($event)" [attr.aria-label]="label" />
+          <span class="material-symbols-rounded">{{ busy ? 'hourglass_top' : 'add_photo_alternate' }}</span>
+          <span class="pick__label">{{ busy ? 'Subiendo…' : label }}</span>
+          <span class="pick__hint">{{ hint }}</span>
+        </label>
+      </div>
+    }
 
-      @if (error(); as text) {
-        <p class="pick__error">{{ text }}</p>
-      }
-    </div>
+    @if (error(); as text) {
+      <p class="pick__error">{{ text }}</p>
+    }
+
+    @if (framing(); as file) {
+      <pn-image-cropper
+        [file]="file"
+        [shape]="crop!"
+        (cropped)="onCropped($event)"
+        (cancelled)="framing.set(null)"
+        (failed)="onCropFailed()"
+      />
+    }
   `,
   styles: [
     `
@@ -88,6 +135,52 @@ import {
       .pick__label { font-size: 0.9375rem; font-weight: 700; }
       .pick__hint { font-size: 0.8125rem; opacity: 0.75; }
 
+      .prow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-right: 8px;
+        border-radius: var(--pn-radius-row);
+        transition: background-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+      }
+      .prow:hover { background: var(--pn-field); }
+      .prow:focus-within { box-shadow: inset 0 0 0 2px var(--pn-accent); }
+      .prow__hit {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+        gap: 14px;
+        padding: 12px;
+        cursor: pointer;
+      }
+      .prow__hit input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+      /* Both thumbnails take the same width so the titles start on one column. */
+      .prow__thumb {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 64px;
+        height: 44px;
+        overflow: hidden;
+        color: var(--clr-text-2);
+      }
+      .prow__thumb img { width: 100%; height: 100%; object-fit: cover; }
+      .prow__thumb .material-symbols-rounded {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        background: var(--pn-field-strong);
+        font-size: 20px;
+      }
+      .prow__thumb--cover { height: 36px; border-radius: 6px; }
+      /* The circle is 44 wide and centred within the 64 of the column. */
+      .prow__thumb--round { padding-inline: 10px; }
+      .prow__thumb--round img,
+      .prow__thumb--round .material-symbols-rounded { border-radius: 50%; }
+
       .pick__error {
         position: relative;
         padding: 10px 16px;
@@ -112,11 +205,16 @@ export class PnPhotoPickerComponent implements OnChanges {
   @Input() maxMb = 5;
   /** Message when the file is not one of `accept`. */
   @Input() typeError = 'Usa una foto JPEG, PNG o WebP.';
+  /** Frames the photo before handing it over. Not for animated media: a canvas keeps one frame. */
+  @Input() crop: CropShape | null = null;
+  @Input() variant: 'tile' | 'row' = 'tile';
   @Output() picked = new EventEmitter<File>();
 
   readonly over = signal(false);
   readonly preview = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  /** The file being framed, before it counts as picked. */
+  readonly framing = signal<File | null>(null);
 
   /**
    * The local preview only lives while the upload runs: once it ends, what
@@ -143,7 +241,10 @@ export class PnPhotoPickerComponent implements OnChanges {
   }
 
   onPick(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    // Or choosing the same file after cancelling the crop would fire nothing.
+    input.value = '';
     if (file) this.take(file);
   }
 
@@ -158,11 +259,29 @@ export class PnPhotoPickerComponent implements OnChanges {
       this.error.set(this.typeError);
       return;
     }
-    if (file.size > this.maxMb * 1024 * 1024) {
-      this.error.set(`Pesa más de ${this.maxMb} MB. Hazla más pequeña e inténtalo otra vez.`);
+    const limit = this.crop ? MAX_MB_BEFORE_CROP : this.maxMb;
+    if (file.size > limit * 1024 * 1024) {
+      this.error.set(`Pesa más de ${limit} MB. Hazla más pequeña e inténtalo otra vez.`);
       return;
     }
+    if (this.crop) {
+      this.framing.set(file);
+      return;
+    }
+    this.emit(file);
+  }
+
+  onCropped(file: File): void {
+    this.framing.set(null);
+    this.emit(file);
+  }
+
+  onCropFailed(): void {
+    this.framing.set(null);
+    this.error.set('No se ha podido abrir esa imagen. Prueba con otra.');
+  }
+
+  private emit(file: File): void {
     this.preview.set(URL.createObjectURL(file));
     this.picked.emit(file);
-  }
-}
+  }}

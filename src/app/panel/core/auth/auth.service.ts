@@ -81,6 +81,13 @@ export class AuthService {
       ? profile.businessChatEnabled === true && profile.chatEnabled === true
       : profile.chatEnabled === true;
   });
+  /**
+   * `canSeeCustomersProvider`: the owner always; a worker with the front desk
+   * permission. Giving an appointment hangs from the same one.
+   */
+  readonly canSeeCustomers = computed(
+    () => this.isBusiness() || (this.isWorker() && this.profile()?.customersEnabled === true),
+  );
   readonly waitlistEnabled = computed(() => this.profile()?.waitlistEnabled === true);
   readonly clockInEnabled = computed(() => this.profile()?.clockInEnabled === true);
   readonly subscriptionBlocked = computed(() => this.profile()?.subscription?.blocked === true);
@@ -122,8 +129,8 @@ export class AuthService {
    * No crea cuentas, igual que en la app: el alta de un negocio pide
    * categoría, teléfono y aceptar los términos, que no salen de un token
    * social. Si no hay cuenta el backend responde 404, y la pantalla de acceso
-   * sigue con el alta llevándose la identidad. Solo vale para dueños: el
-   * backend rechaza a los trabajadores por esta puerta.
+   * sigue con el alta llevándose la identidad. Vale para dueños y trabajadores:
+   * el servidor resuelve la cuenta profesional, sea del rol que sea.
    *
    * `idToken` es el de **Firebase**, no el del proveedor: es lo que verifica
    * `FirebaseTokenVerifier` en el backend.

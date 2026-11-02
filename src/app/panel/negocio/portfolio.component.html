@@ -132,22 +132,21 @@
       <img class="pf-preview" [src]="url" alt="" />
     }
 
-    <label class="pn-field">
-      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
-      <input class="pn-input" type="text" name="draftCaption" maxlength="300" [(ngModel)]="draftForm.caption"
-             placeholder="Ej. Corte degradado con perfilado" />
-    </label>
-
-    <label class="pn-field">
-      <span class="pn-field__label">Servicio (opcional)</span>
-      <select class="pn-select" name="draftServiceId" [(ngModel)]="draftForm.serviceId">
-        <option [ngValue]="null">Ninguno</option>
-        @for (service of services.all(); track service.id) {
-          <option [ngValue]="service.id">{{ service.name }}</option>
-        }
-      </select>
-      <span class="pn-field__hint">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</span>
-    </label>
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Descripción<span class="pf-opt">opcional</span></span>
+          <input class="pn-fg__input" type="text" name="draftCaption" maxlength="300" [(ngModel)]="draftForm.caption"
+                 placeholder="Ej. Corte degradado con perfilado" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Servicio<span class="pf-opt">opcional</span></span>
+          <pn-select look="row" name="draftServiceId" label="Servicio" [options]="serviceOptions('Ninguno')"
+                     [(ngModel)]="draftForm.serviceId" />
+        </label>
+      </div>
+      <p class="pn-fg__foot">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</p>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--secondary" (click)="cancelAdd()">Cancelar</button>
@@ -199,26 +198,29 @@
   <pn-dialog title="Editar la foto" (closed)="editing.set(null)">
     <img class="pf-preview" [src]="photo.url" alt="" />
 
-    <label class="pn-field">
-      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
-      <input class="pn-input" type="text" name="caption" maxlength="300" [(ngModel)]="form.caption"
-             placeholder="Degradado con barba perfilada" />
-    </label>
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Descripción<span class="pf-opt">opcional</span></span>
+          <input class="pn-fg__input" type="text" name="caption" maxlength="300" [(ngModel)]="form.caption"
+                 placeholder="Degradado con barba perfilada" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Servicio</span>
+          <pn-select look="row" name="serviceId" label="Servicio" [options]="serviceOptions('Sin servicio')"
+                     [(ngModel)]="form.serviceId" />
+        </label>
+      </div>
+      <p class="pn-fg__foot">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</p>
+    </div>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Servicio</span>
-      <select class="pn-select" name="serviceId" [(ngModel)]="form.serviceId">
-        <option [ngValue]="null">Sin servicio</option>
-        @for (service of services.all(); track service.id) {
-          <option [ngValue]="service.id">{{ service.name }}</option>
-        }
-      </select>
-      <span class="pn-field__hint">Etiquetarla ayuda al cliente a ver cómo queda lo que va a reservar.</span>
-    </label>
-
-    <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="remove(photo)">
-      Quitar esta foto
-    </button>
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        <button type="button" class="pn-row pn-row--danger pf-remove" (click)="remove(photo)">
+          <span class="pn-row__main"><span class="pn-row__title">Quitar esta foto</span></span>
+        </button>
+      </div>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--secondary" (click)="editing.set(null)">Cancelar</button>

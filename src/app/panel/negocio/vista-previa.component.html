@@ -62,7 +62,7 @@
          [style.--vp-fh.px]="frameHeight()">
       <div class="vp-stage__fit">
 
-        @if (mode() === 'web') {
+        @if (mode() === 'web' && webSize() === 'escritorio') {
           <div class="vp-browser" [style.--vp-view-h.px]="webHeight()">
             <div class="vp-browser__bar">
               <span class="vp-browser__dots"><i></i><i></i><i></i></span>
@@ -75,6 +75,72 @@
               <app-preview-web [vm]="data" (act)="notify()" />
             </div>
           </div>
+        } @else if (mode() === 'web') {
+          <!-- Tablet y móvil: el aparato con su Safari, no una ventana de
+               escritorio estrecha. Safari va arriba en el iPad y abajo en el
+               iPhone, como lo trae cada uno de fábrica. -->
+          <figure class="vp-device" [class.vp-device--phone]="webSize() === 'movil'"
+                  [style.--vp-dw.px]="webWidth()"
+                  [style.--vp-dh.px]="webHeight()"
+                  [style.--vp-bezel.px]="device().bezel"
+                  [style.--vp-radius.px]="device().radius"
+                  [style.--vp-status.px]="device().status"
+                  [style.--vp-view-h.px]="device().view">
+            <div class="vp-device__body">
+              <div class="vp-device__screen">
+                <div class="vp-device__status">
+                  <span>9:41</span>
+                  @if (webSize() === 'movil') { <span class="vp-device__island"></span> }
+                  <span class="vp-device__icons">
+                    <span class="material-symbols-rounded">signal_cellular_alt</span>
+                    <span class="material-symbols-rounded">wifi</span>
+                    <span class="material-symbols-rounded">battery_full</span>
+                  </span>
+                </div>
+
+                @if (webSize() === 'tablet') {
+                  <div class="vp-safari vp-safari--top">
+                    <span class="vp-safari__tools">
+                      <span class="material-symbols-rounded">left_panel_open</span>
+                      <span class="material-symbols-rounded">arrow_back_ios_new</span>
+                      <span class="material-symbols-rounded vp-safari__off">arrow_forward_ios</span>
+                    </span>
+                    <span class="vp-safari__url">
+                      <span class="material-symbols-rounded">lock</span>{{ publicHost() }}
+                    </span>
+                    <span class="vp-safari__tools">
+                      <span class="material-symbols-rounded">ios_share</span>
+                      <span class="material-symbols-rounded">add</span>
+                      <span class="material-symbols-rounded">tab_group</span>
+                    </span>
+                  </div>
+                }
+
+                <div class="vp-browser__view vp-device__view">
+                  <app-preview-web [vm]="data" (act)="notify()" />
+                </div>
+
+                @if (webSize() === 'movil') {
+                  <div class="vp-safari vp-safari--bottom">
+                    <span class="vp-safari__url vp-safari__url--pill">
+                      <span class="vp-safari__aa">aA</span>
+                      <span class="vp-safari__host"><span class="material-symbols-rounded">lock</span>{{ publicHost() }}</span>
+                      <span class="material-symbols-rounded">refresh</span>
+                    </span>
+                    <span class="vp-safari__toolbar">
+                      <span class="material-symbols-rounded">arrow_back_ios_new</span>
+                      <span class="material-symbols-rounded vp-safari__off">arrow_forward_ios</span>
+                      <span class="material-symbols-rounded">ios_share</span>
+                      <span class="material-symbols-rounded">menu_book</span>
+                      <span class="material-symbols-rounded">tab_group</span>
+                    </span>
+                    <span class="vp-device__home"></span>
+                  </div>
+                }
+              </div>
+            </div>
+            <figcaption>{{ webSize() === 'movil' ? 'iPhone · Safari' : 'iPad · Safari' }} · {{ webWidth() }} × {{ webHeight() }}</figcaption>
+          </figure>
         } @else {
           <div class="vp-phones">
             <figure class="vp-phone">

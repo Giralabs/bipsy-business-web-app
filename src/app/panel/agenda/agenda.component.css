@@ -12,6 +12,9 @@
   margin-bottom: 20px;
 }
 
+.ag-unavailable { margin-bottom: 20px; }
+.ag-scope .material-symbols-rounded { font-size: 18px; }
+
 .ag-nav {
   display: flex;
   align-items: center;
@@ -115,19 +118,27 @@
 /* ----- LEYENDA --------------------------------------------------------- */
 
 /* Una línea y un cuadrito de color por estado: se mira de golpe, no se lee. */
-.lg { display: flex; align-items: center; gap: 14px; padding: 9px 0; }
-.lg + .lg { border-top: 1px solid var(--pn-line); }
+.lg-block { margin-bottom: 0; }
+.lg { position: relative; display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 8px 16px; }
+.lg + .lg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 60px;
+  right: 0;
+  height: 1px;
+  background: var(--pn-line);
+}
 .lg__stripe {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 11px;
+  border-radius: 8px;
 }
-.lg__stripe .material-symbols-rounded { font-size: 19px; color: #11150F; }
-.lg strong { font-size: 0.9375rem; font-weight: 700; }
-.lg__foot { margin-top: 18px; font-size: 0.8125rem; color: var(--clr-text-3); line-height: 1.55; }
+.lg__stripe .material-symbols-rounded { font-size: 18px; color: #11150F; }
+.lg__label { font-size: 0.9375rem; font-weight: 600; }
 
 @media (max-width: 860px) {
   .ag-bar { gap: 10px; }

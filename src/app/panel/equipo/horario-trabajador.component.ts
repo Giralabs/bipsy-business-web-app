@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TeamStore } from '../core/data/team.store';
-import { message } from '../core/data/resource';
+import { message, serverReason } from '../core/data/resource';
 import { ToastService } from '../ui/toast.service';
 import { Week, WeekEditorComponent, toEntries, toWeek } from '../negocio/week-editor.component';
 
@@ -121,9 +121,8 @@ export class HorarioTrabajadorComponent implements OnInit {
       this.toasts.show('Horario guardado');
     } catch (cause) {
       const status = (cause as { status?: number }).status;
-      const detail = (cause as { error?: { message?: string } }).error?.message;
       this.toasts.error(
-        status === 400 ? detail || 'Revisa los tramos: hay alguno que no vale.' : message(cause),
+        status === 400 ? serverReason(cause) || 'Revisa los tramos: hay alguno que no vale.' : message(cause),
       );
     } finally {
       this.busy.set(false);

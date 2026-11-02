@@ -45,18 +45,22 @@ export const BUSINESS_SECTIONS: Section[] = [
 ];
 
 /**
- * Lo que ve un trabajador: su día, su agenda, su fichaje y sus ausencias.
- * Nada de la ficha, los servicios, el equipo ni el dinero del negocio, igual
- * que en la app.
+ * Lo que ve un trabajador, en el orden de la app: Agenda · Clientes · Mensajes
+ * · Fichar · Ausencias. Primero lo que es atender y detrás lo de uno mismo; lo
+ * que no tiene por permiso no sale y el resto no cambia de sitio
+ * (`PanelShellComponent.sections`). Inicio, Mi horario y Reseñas la app los deja
+ * fuera de la barra porque no caben; aquí sí. Nada de la ficha, los servicios,
+ * el equipo ni el dinero del negocio.
  */
 export const WORKER_SECTIONS: Section[] = [
   { id: 'inicio', label: 'Inicio', blurb: 'Tu día de un vistazo', icon: 'space_dashboard', route: '/panel', group: 1 },
-  { id: 'agenda', label: 'Mi agenda', blurb: 'Tus citas, día a día', icon: 'calendar_month', route: '/panel/agenda', group: 1 },
+  { id: 'agenda', label: 'Agenda', blurb: 'Tus citas, día a día', icon: 'calendar_month', route: '/panel/agenda', group: 1 },
+  { id: 'clientes', label: 'Clientes', blurb: 'Su ficha y dar de alta a quien llega', icon: 'group', route: '/panel/clientes', group: 1 },
   { id: 'mensajes', label: 'Mensajes', blurb: 'Lo que te escriben', icon: 'forum', route: '/panel/mensajes', group: 1 },
-  { id: 'fichar', label: 'Fichar', blurb: 'Entrada, salida y tu registro', icon: 'timer', route: '/panel/fichar', group: 2 },
+  { id: 'fichar', label: 'Fichar', blurb: 'Entrada, salida y tu registro', icon: 'timer', route: '/panel/fichar', group: 1 },
+  { id: 'ausencias-mias', label: 'Ausencias', blurb: 'Vacaciones y días libres', icon: 'beach_access', route: '/panel/mis-ausencias', group: 1 },
   { id: 'horario-mio', label: 'Mi horario', blurb: 'Los días y las horas que trabajas', icon: 'schedule', route: '/panel/mi-horario', group: 2 },
-  { id: 'ausencias-mias', label: 'Ausencias', blurb: 'Vacaciones y días libres', icon: 'beach_access', route: '/panel/mis-ausencias', group: 2 },
-  { id: 'resenas', label: 'Reseñas', blurb: 'Lo que dicen del negocio', icon: 'star', route: '/panel/resenas', group: 3 },
+  { id: 'resenas', label: 'Reseñas', blurb: 'Lo que dicen del negocio', icon: 'star', route: '/panel/resenas', group: 2 },
 ];
 
 /** Un destino que el buscador sabe abrir aunque no esté en la barra. */
@@ -80,12 +84,15 @@ export const BUSINESS_DESTINATIONS: Destination[] = [
   { label: 'Portfolio', hint: 'Tu ficha', icon: 'photo_library', route: '/panel/negocio/portfolio', keywords: 'fotos trabajos galería' },
   { label: 'Normas y políticas', hint: 'Tu ficha', icon: 'gavel', route: '/panel/negocio/normas', keywords: 'cancelación reglas' },
   { label: 'Código de invitación', hint: 'Tu ficha', icon: 'card_giftcard', route: '/panel/negocio/codigo', keywords: 'referido regalo' },
+  { label: 'Mi enlace', hint: 'Tu ficha', icon: 'ios_share', route: '/panel/enlace', keywords: 'compartir link qr código url' },
+  { label: 'Cartel para imprimir', hint: 'Mi enlace', icon: 'qr_code_2', route: '/panel/enlace/cartel', keywords: 'qr pegatina póster imprimir pdf mostrador escaparate' },
+  { label: 'Verificación', hint: 'Tu ficha', icon: 'verified', route: '/panel/negocio/verificacion', keywords: 'sello verificado insignia bipsy' },
   { label: 'Ver como cliente', hint: 'Tu ficha', icon: 'visibility', route: '/panel/negocio/vista-previa', keywords: 'vista previa ficha pública cliente' },
   { label: 'Ajustes de reservas', hint: 'Ajustes', icon: 'event_available', route: '/panel/ajustes/reservas', keywords: 'antelación límite huecos' },
-  { label: 'Funcionalidades', hint: 'Ajustes', icon: 'toggle_on', route: '/panel/ajustes/funcionalidades', keywords: 'chat espera fichaje activar' },
+  { label: 'Funcionalidades', hint: 'Ajustes', icon: 'toggle_on', route: '/panel/ajustes/funcionalidades', keywords: 'chat espera fichaje activar marcar pagadas terminar' },
   { label: 'Cancelaciones', hint: 'Ajustes', icon: 'event_busy', route: '/panel/ajustes/cancelaciones', keywords: 'penalización tarifa plantón tarjeta plazo' },
-  { label: 'Cobros', hint: 'Ajustes', icon: 'payments', route: '/panel/ajustes/cobros', keywords: 'dinero pagos stripe iban' },
-  { label: 'Mi plan', hint: 'Ajustes', icon: 'workspace_premium', route: '/panel/ajustes/suscripcion', keywords: 'suscripción precio factura' },
+  { label: 'Cobros', hint: 'Ajustes', icon: 'payments', route: '/panel/ajustes/cobros', keywords: 'dinero pagos stripe iban tarjeta reservar confianza' },
+  { label: 'Mi plan', hint: 'Tu ficha', icon: 'workspace_premium', route: '/panel/ajustes/suscripcion', keywords: 'suscripción precio factura' },
   { label: 'Días de cierre', hint: 'Ajustes', icon: 'event_busy', route: '/panel/ajustes/cierres', keywords: 'festivos vacaciones cerrado cierre no abrimos local días libres' },
   { label: 'Notificaciones', hint: 'Ajustes', icon: 'notifications', route: '/panel/ajustes/notificaciones', keywords: 'avisos' },
   { label: 'Tu cuenta', hint: 'Ajustes', icon: 'lock', route: '/panel/ajustes/cuenta', keywords: 'contraseña sesiones seguridad' },
@@ -94,10 +101,12 @@ export const BUSINESS_DESTINATIONS: Destination[] = [
 ];
 
 export const WORKER_DESTINATIONS: Destination[] = [
-  { label: 'Pendientes de confirmar', hint: 'Mi agenda', icon: 'notifications_active', route: '/panel/agenda?vista=pendientes', keywords: 'confirmar citas reservas' },
+  { label: 'Pendientes de confirmar', hint: 'Agenda', icon: 'notifications_active', route: '/panel/agenda?vista=pendientes', keywords: 'confirmar citas reservas' },
   // Only works with the owner's `waitlistManageEnabled`; without it the agenda opens on its week.
-  { label: 'Lista de espera', hint: 'Mi agenda', icon: 'hourglass_top', route: '/panel/agenda?vista=espera', keywords: 'espera huecos' },
+  { label: 'Lista de espera', hint: 'Agenda', icon: 'hourglass_top', route: '/panel/agenda?vista=espera', keywords: 'espera huecos' },
   { label: 'Mi perfil', hint: 'Nombre, foto y disponibilidad', icon: 'account_circle', route: '/panel/mi-perfil', keywords: 'datos teléfono foto disponible aceptar automáticamente código' },
+  { label: 'Mi enlace', hint: 'El del negocio', icon: 'ios_share', route: '/panel/enlace', keywords: 'compartir link qr código url' },
+  { label: 'Cartel para imprimir', hint: 'Mi enlace', icon: 'qr_code_2', route: '/panel/enlace/cartel', keywords: 'qr pegatina póster imprimir pdf mostrador escaparate' },
   { label: 'Tu cuenta', hint: 'Contraseña y sesiones', icon: 'lock', route: '/panel/ajustes/cuenta', keywords: 'contraseña seguridad' },
   { label: 'Notificaciones', hint: 'Avisos en este ordenador', icon: 'notifications', route: '/panel/ajustes/notificaciones', keywords: 'avisos escritorio' },
   { label: 'Soporte', hint: 'Escríbenos', icon: 'support_agent', route: '/panel/soporte', keywords: 'ayuda ticket problema' },

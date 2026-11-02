@@ -22,11 +22,15 @@ import {
 } from '../core/api/models';
 import { AuthService } from '../core/auth/auth.service';
 import { AgendaStore } from '../core/data/agenda.store';
+import { serverReason } from '../core/data/resource';
+import { customerFormError } from '../core/data/customers.store';
 import { ServicesStore } from '../core/data/services.store';
 import { TeamStore } from '../core/data/team.store';
 import { addDays, dayKey, parseHhmm, startOfDay } from '../core/util/dates';
 import { PnAvatarComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnDateComponent } from '../ui/date.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { ToastService } from '../ui/toast.service';
 
 interface SlotGroup {
@@ -39,9 +43,14 @@ type Loading = 'idle' | 'loading' | 'ready' | 'failed';
 const CUSTOMERS = '/businesses/me/customers';
 
 /**
- * «Dar cita»: the owner gives an appointment from the agenda. Twin of
+ * «Dar cita»: an appointment given from the agenda. Twin of
  * `create_booking_screen.dart`, with its two pickers (`customer_picker_sheet`,
  * `slot_picker_sheet`) folded in.
+ *
+ * The owner, or a worker with the front desk permission, and then it is HIS: the
+ * server puts it in his name whatever is sent, so he is not asked (a question
+ * with one answer), and the free times shown are his own. With «anyone» he would
+ * be offered an hour he cannot attend.
  *
  * The app needs a whole screen because every field opens a sheet of its own.
  * On a desk the same fields fit in ONE dialog: the phone book is a search box
@@ -63,7 +72,7 @@ const CUSTOMERS = '/businesses/me/customers';
 @Component({
   selector: 'app-create-booking-dialog',
   standalone: true,
-  imports: [FormsModule, PnDialogComponent, PnAvatarComponent],
+  imports: [FormsModule, PnDialogComponent, PnAvatarComponent, PnSelectComponent, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './create-booking-dialog.component.html',
   styleUrl: './create-booking-dialog.component.css',
@@ -81,7 +90,7 @@ export class CreateBookingDialogComponent implements OnInit {
 
   private readonly api = inject(Api);
   private readonly agenda = inject(AgendaStore);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly toasts = inject(ToastService);
   readonly services = inject(ServicesStore);
   readonly team = inject(TeamStore);
@@ -134,9 +143,18 @@ export class CreateBookingDialogComponent implements OnInit {
   readonly maxDay = dayKey(addDays(new Date(), 365));
 
   /** Whatever can be given at the venue: only the at-home-only ones are left out. */
-  readonly givable = computed(() =>
-    this.services.all().filter((service) => service.active && service.serviceMode !== 'AT_CUSTOMER'),
-  );
+  readonly givable = computed(() => {
+    // A worker's appointment is his, so only what he performs.
+    const me = this.auth.isWorker() ? this.auth.profile()?.id : null;
+    return this.services
+      .all()
+      .filter(
+        (service) =>
+          service.active &&
+          service.serviceMode !== 'AT_CUSTOMER' &&
+          (me == null || service.workerIds.includes(me)),
+      );
+  });
 
   readonly noLocalServices = computed(
     () => this.services.all().length > 0 && this.givable().length === 0,
@@ -152,6 +170,14 @@ export class CreateBookingDialogComponent implements OnInit {
     const all = this.team.all();
     return service ? all.filter((worker) => service.workerIds.includes(worker.id)) : all;
   });
+
+  readonly serviceOptions = computed<PnOption<number>[]>(() =>
+    this.givable().map((item) => ({ value: item.id, label: this.serviceLabel(item) })),
+  );
+  readonly workerOptions = computed<PnOption<number | null>[]>(() => [
+    { value: null, label: 'Cualquiera disponible' },
+    ...this.professionals().map((worker) => ({ value: worker.id, label: this.workerLabel(worker) })),
+  ]);
 
   /** Morning, afternoon and evening: the way people think of a time. */
   readonly slotGroups = computed<SlotGroup[]>(() => {
@@ -202,7 +228,7 @@ export class CreateBookingDialogComponent implements OnInit {
     const past = asked < today;
     this.dayValue.set(dayKey(past ? today : asked));
     this.wantedTime = past ? null : this.time;
-    this.pickedWorkerId.set(this.workerId);
+    this.pickedWorkerId.set(this.auth.isWorker() ? (this.auth.profile()?.id ?? null) : this.workerId);
 
     void this.services.load();
     void this.loadCustomers();
@@ -257,8 +283,9 @@ export class CreateBookingDialogComponent implements OnInit {
    */
   async saveNewCustomer(): Promise<void> {
     const name = this.newCustomer.name.trim();
-    if (!name) {
-      this.customerError.set('Escribe al menos el nombre.');
+    const problem = customerFormError(this.newCustomer, true);
+    if (problem) {
+      this.customerError.set(problem);
       return;
     }
     if (this.savingCustomer()) return;
@@ -334,7 +361,8 @@ export class CreateBookingDialogComponent implements OnInit {
   setService(id: number | null): void {
     this.serviceId.set(id);
     this.error.set(null);
-    // Whoever was chosen may not perform this one.
+    // Whoever was chosen may not perform this one. A worker chooses nobody.
+    if (this.auth.isWorker()) return;
     const worker = this.pickedWorkerId();
     if (worker != null && !this.professionals().some((item) => item.id === worker)) {
       this.pickedWorkerId.set(null);
@@ -436,5 +464,5 @@ function plain(text: string): string {
 }
 
 function serverMessage(cause: unknown): string {
-  return (cause as { error?: { message?: string } }).error?.message ?? '';
+  return serverReason(cause) ?? '';
 }

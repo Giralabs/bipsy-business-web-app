@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
+import { AuthService } from '../core/auth/auth.service';
 import { CustomersStore } from '../core/data/customers.store';
+import { businessLink } from '../core/business-link';
+import { importedContactsMessage } from '../core/invite-messages';
 import { plural } from '../core/util/format';
 import { PnEmptyComponent } from '../ui/controls';
 import { ToastService } from '../ui/toast.service';
@@ -57,6 +60,7 @@ export class ImportarComponent {
 
   private readonly api = inject(Api);
   private readonly store = inject(CustomersStore);
+  private readonly auth = inject(AuthService);
   private readonly toasts = inject(ToastService);
 
   readonly accept = CONTACT_FILE_ACCEPT;
@@ -74,6 +78,7 @@ export class ImportarComponent {
   readonly over = signal(false);
   readonly busy = signal(false);
   readonly result = signal<ImportResult | null>(null);
+  readonly inviting = signal(false);
 
   readonly keeping = computed(() => this.rows().filter((row) => row.keep).length);
   readonly known = computed(() => this.rows().filter((row) => row.known).length);
@@ -83,6 +88,35 @@ export class ImportarComponent {
     // The duplicate flags need the agenda; it is cached, so this is free when
     // the list was already open.
     void this.store.load();
+  }
+
+  /**
+   * The invitation for those just imported. The phone's share sheet where there
+   * is one; on a desk, the clipboard, ready to paste into WhatsApp or an email.
+   */
+  async invite(): Promise<void> {
+    this.inviting.set(true);
+    try {
+      const profile = this.auth.profile();
+      const text = importedContactsMessage(
+        await this.store.referralCode(),
+        profile?.name,
+        profile ? businessLink(profile.id, profile.name) : null,
+      );
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        this.toasts.show('Invitación copiada');
+      }
+    } catch (cause) {
+      // Closing the share sheet is an answer, not a failure.
+      if ((cause as { name?: string }).name !== 'AbortError') {
+        this.toasts.error('No se ha podido preparar la invitación.');
+      }
+    } finally {
+      this.inviting.set(false);
+    }
   }
 
   count(n: number, one: string, many: string): string {

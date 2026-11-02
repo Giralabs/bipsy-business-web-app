@@ -60,8 +60,9 @@ export class WaitlistStore {
     }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.api.delete(`/businesses/me/waitlist/${id}`);
+  /** `reason` is a query parameter: without it the server answers 400. */
+  async remove(id: number, reason: string): Promise<void> {
+    await this.api.delete(`/businesses/me/waitlist/${id}?reason=${encodeURIComponent(reason)}`);
     await this.entries.reload();
   }
 

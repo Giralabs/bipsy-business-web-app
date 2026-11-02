@@ -5,10 +5,12 @@
       <h1>Clientes</h1>
     </div>
     <div class="pn-head__actions">
-      <a class="pn-btn pn-btn--secondary" routerLink="/panel/clientes/importar">
-        <span class="material-symbols-rounded">upload</span>
-        Importar
-      </a>
+      @if (auth.isBusiness()) {
+        <a class="pn-btn pn-btn--secondary" routerLink="/panel/clientes/importar">
+          <span class="material-symbols-rounded">upload</span>
+          Importar
+        </a>
+      }
       <button type="button" class="pn-btn pn-btn--primary" (click)="startCreate()">
         <span class="material-symbols-rounded">person_add</span>
         Nuevo cliente
@@ -22,7 +24,7 @@
       <input type="search" placeholder="Nombre, teléfono o email"
              [ngModel]="store.query()" (ngModelChange)="store.setQuery($event)" name="q" />
     </label>
-    <pn-segmented [options]="origins" [value]="originValue()" label="Filtros"
+    <pn-segmented [options]="origins" [value]="originValue()" label="De dónde vienen"
                   (valueChange)="setOrigin($event)" />
     <span class="pn-muted cl-count" [class.cl-count--busy]="store.searching()">
       {{ count(store.filtered().length, 'cliente', 'clientes') }}
@@ -108,24 +110,36 @@
 
 @if (creating()) {
   <pn-dialog title="Nuevo cliente" (closed)="creating.set(false)">
-    <label class="pn-field">
-      <span class="pn-field__label">Nombre</span>
-      <input class="pn-input" type="text" name="name" placeholder="Laura Sáez" [(ngModel)]="form.name" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Teléfono</span>
-      <input class="pn-input" type="tel" name="phone" placeholder="600 00 00 00" [(ngModel)]="form.phone" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Correo <span class="pn-muted">· opcional</span></span>
-      <input class="pn-input" type="email" name="email" placeholder="laura@correo.com" [(ngModel)]="form.email" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Notas</span>
-      <textarea class="pn-textarea" rows="3" name="notes"
-                placeholder="Alergias, cómo le gusta el corte, lo que sea." [(ngModel)]="form.notes"></textarea>
-      <span class="pn-field__hint">Estas notas solo las ves tú.</span>
-    </label>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Cliente</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Nombre</span>
+          <input class="pn-fg__input" type="text" name="name" placeholder="Laura Sáez" [(ngModel)]="form.name" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Teléfono</span>
+          <input class="pn-fg__input" type="tel" name="phone" placeholder="600 12 34 56" [(ngModel)]="form.phone" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Correo</span>
+          <input class="pn-fg__input" type="email" name="email" placeholder="laura@correo.com" required [(ngModel)]="form.email" />
+        </label>
+      </div>
+    </div>
+    <div class="pn-fg cl-notes">
+      <p class="pn-fg__head">Notas</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row pn-fg__row--stack">
+          <textarea class="pn-fg__input" rows="3" name="notes" aria-label="Notas"
+                    placeholder="Alergias, cómo le gusta el corte, lo que sea." [(ngModel)]="form.notes"></textarea>
+        </label>
+      </div>
+      <p class="pn-fg__foot">Estas notas solo las ves tú.</p>
+    </div>
+    @if (formError(); as problem) {
+      <p class="pn-field__error cl-error" role="alert">{{ problem }}</p>
+    }
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--secondary" (click)="creating.set(false)">Cancelar</button>

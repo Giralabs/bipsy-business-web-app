@@ -95,101 +95,119 @@
               (click)="removePhoto(editing()!)">Quitar la foto</button>
     }
 
-    <label class="pn-field">
-      <span class="pn-field__label">Nombre</span>
-      <input class="pn-input" type="text" name="name" placeholder="Corte de caballero" [(ngModel)]="form.name" />
-    </label>
-
-    <label class="pn-field">
-      <span class="pn-field__label">Descripción <span class="pn-muted">· opcional</span></span>
-      <textarea class="pn-textarea" name="description" rows="3"
-                placeholder="Lavado, corte a tijera y peinado." [(ngModel)]="form.description"></textarea>
-    </label>
-
-    <div class="sv-form-grid">
-      <label class="pn-field">
-        <span class="pn-field__label">Precio (€)</span>
-        <input class="pn-input" type="number" min="0" step="0.5" name="price" [(ngModel)]="form.price" />
-      </label>
-
-      <div class="pn-field">
-        <span class="pn-field__label">Duración</span>
-        <div class="sv-stepper">
-          <button type="button" class="pn-icon-btn" aria-label="Menos" (click)="bumpDuration(-1)">
-            <span class="material-symbols-rounded">remove</span>
-          </button>
-          <span class="sv-stepper__value pn-tabular">{{ durationText(form.duration) }}</span>
-          <button type="button" class="pn-icon-btn" aria-label="Más" (click)="bumpDuration(1)">
-            <span class="material-symbols-rounded">add</span>
-          </button>
-        </div>
-        <span class="pn-field__hint">Va de {{ step() }} en {{ step() }} minutos, como tus horas de reserva.</span>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Servicio</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Nombre</span>
+          <input class="pn-fg__input" type="text" name="name" placeholder="Corte de caballero" [(ngModel)]="form.name" />
+        </label>
+        <label class="pn-fg__row pn-fg__row--stack">
+          <span class="pn-fg__label">Descripción <span class="pn-muted">· opcional</span></span>
+          <textarea class="pn-fg__input sv-description" name="description" rows="3"
+                    placeholder="Lavado, corte a tijera y peinado." [(ngModel)]="form.description"></textarea>
+        </label>
       </div>
+    </div>
+
+    <div class="pn-fg">
+      <p class="pn-fg__head">Precio y duración</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Precio (€)</span>
+          <pn-number look="row" name="price" label="Precio en euros" [min]="0" [step]="0.5" placeholder="0" unit="€"
+                     [optional]="true" [(ngModel)]="form.price" />
+        </label>
+        <div class="pn-fg__row">
+          <span class="pn-fg__label">Duración</span>
+          <div class="sv-stepper">
+            <span class="sv-stepper__value pn-tabular">{{ durationText(form.duration) }}</span>
+            <button type="button" class="pn-icon-btn" aria-label="Menos" (click)="bumpDuration(-1)">
+              <span class="material-symbols-rounded">remove</span>
+            </button>
+            <button type="button" class="pn-icon-btn" aria-label="Más" (click)="bumpDuration(1)">
+              <span class="material-symbols-rounded">add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <p class="pn-fg__foot">Va de {{ step() }} en {{ step() }} minutos, como tus horas de reserva.</p>
     </div>
 
     <!-- Dónde se presta ESTE servicio (`_PlaceField`). En la app es una hoja
          con las tres opciones; aquí caben a la vista, como en «Tu ficha». Con
          un negocio que solo atiende de una forma no se esconde: se enseña
          apagado diciendo de dónde sale el valor. -->
-    <p class="pn-field__label">Dónde se presta</p>
-    @if (canChoosePlace()) {
-      <div class="sv-places" role="radiogroup" aria-label="Dónde se presta">
-        @for (place of places; track place.id) {
-          <button type="button" class="sv-place" role="radio" [attr.aria-checked]="form.serviceMode === place.id"
-                  (click)="setPlace(place.id)">
-            <span class="material-symbols-rounded">{{ place.icon }}</span>
-            <span class="sv-place__title">{{ place.title }}</span>
-            <span class="sv-place__sub">{{ place.sub }}</span>
-          </button>
-        }
-      </div>
-      <p class="pn-field__hint sv-places__hint">
-        Puedes ofrecer unos servicios solo en tu local y otros también a domicilio.
-      </p>
-    } @else {
-      <p class="sv-place-fixed">
-        <span class="material-symbols-rounded">{{ businessMode() === 'AT_BUSINESS' ? 'storefront' : 'directions_car' }}</span>
-        Como tu negocio: {{ modeShort[businessMode()] }}
-      </p>
-    }
+    <div class="pn-fg">
+      <p class="pn-fg__head">Dónde se presta</p>
+      @if (canChoosePlace()) {
+        <div class="pn-fg__body" role="radiogroup" aria-label="Dónde se presta">
+          @for (place of places; track place.id) {
+            <button type="button" class="pn-fg__choice" role="radio" [attr.aria-checked]="form.serviceMode === place.id"
+                    (click)="setPlace(place.id)">
+              <span class="material-symbols-rounded">{{ place.icon }}</span>
+              <span class="pn-fg__choice-main">
+                <span class="pn-fg__choice-title">{{ place.title }}</span>
+                <span class="pn-fg__choice-sub">{{ place.sub }}</span>
+              </span>
+              <span class="material-symbols-rounded pn-fg__tick">check</span>
+            </button>
+          }
+        </div>
+        <p class="pn-fg__foot">
+          Puedes ofrecer unos servicios solo en tu local y otros también a domicilio.
+        </p>
+      } @else {
+        <div class="pn-fg__body">
+          <p class="sv-place-fixed">
+            <span class="material-symbols-rounded">{{ businessMode() === 'AT_BUSINESS' ? 'storefront' : 'directions_car' }}</span>
+            Como tu negocio: {{ modeShort[businessMode()] }}
+          </p>
+        </div>
+      }
+    </div>
 
     <!-- Solo si este servicio se desplaza: en uno de local, un recargo es una
          pregunta sin respuesta posible. -->
     @if (travels) {
-      <label class="pn-field">
-        <span class="pn-field__label">Recargo a domicilio (€)</span>
-        <input class="pn-input" type="number" min="0" max="200" step="0.5" name="surcharge" placeholder="0"
-               [class.pn-input--invalid]="!!surchargeError()"
-               [(ngModel)]="form.surcharge" (ngModelChange)="surchargeError.set(null)" />
+      <div class="pn-fg">
+        <div class="pn-fg__body">
+          <label class="pn-fg__row sv-surcharge" [class.sv-row--invalid]="!!surchargeError()">
+            <span class="pn-fg__label">Recargo a domicilio (€)</span>
+            <pn-number look="row" name="surcharge" label="Recargo a domicilio en euros" [min]="0" [max]="200" [step]="0.5"
+                       placeholder="0" unit="€" [optional]="true" [invalid]="!!surchargeError()"
+                       [(ngModel)]="form.surcharge" (ngModelChange)="surchargeError.set(null)" />
+          </label>
+        </div>
         @if (surchargeError(); as text) {
-          <span class="pn-field__error" role="alert">{{ text }}</span>
+          <p class="pn-field__error sv-error" role="alert">{{ text }}</p>
         } @else {
-          <span class="pn-field__hint">
+          <p class="pn-fg__foot">
             Se suma al precio solo cuando la cita es a domicilio. Déjalo vacío si cuesta lo mismo.
-          </span>
+          </p>
         }
-      </label>
+      </div>
     }
 
     @if (!auth.isAutonomous() && team.all().length > 0) {
-      <div class="pn-group">
-        <p class="pn-group__head">Quién lo hace</p>
-        <div class="pn-group__body">
+      <div class="pn-fg">
+        <p class="pn-fg__head">Quién lo hace</p>
+        <div class="pn-fg__body" role="group" aria-label="Quién lo hace">
           @for (worker of team.all(); track worker.id) {
-            <button type="button" class="pn-row" (click)="toggleWorker(worker.id)">
-              <span class="material-symbols-rounded pn-row__icon">person</span>
-              <span class="pn-row__main"><span class="pn-row__title">{{ worker.name }}</span></span>
-              @if (form.workerIds.includes(worker.id)) {
-                <span class="material-symbols-rounded pn-row__icon">check</span>
-              }
+            <button type="button" class="pn-fg__choice" role="checkbox"
+                    [attr.aria-checked]="form.workerIds.includes(worker.id)" (click)="toggleWorker(worker.id)">
+              <span class="material-symbols-rounded">person</span>
+              <span class="pn-fg__choice-main"><span class="pn-fg__choice-title">{{ worker.name }}</span></span>
+              <span class="material-symbols-rounded pn-fg__tick">check</span>
             </button>
           }
         </div>
-        <p class="pn-group__foot">Sin nadie marcado, este servicio no se puede reservar.</p>
+        <p class="pn-fg__foot">Sin nadie marcado, este servicio no se puede reservar.</p>
       </div>
     }
 
     <pn-service-hours
+      class="sv-hours"
       [grid]="slotGrid()"
       [slotMinutes]="step()"
       [enabled]="form.onlySomeHours"
@@ -199,13 +217,17 @@
     />
 
     @if (hoursError(); as text) {
-      <p class="pn-field__error" role="alert">{{ text }}</p>
+      <p class="pn-field__error sv-error" role="alert">{{ text }}</p>
     }
 
     @if (editing(); as service) {
-      <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="remove(service)">
-        Eliminar servicio
-      </button>
+      <div class="pn-fg sv-danger">
+        <div class="pn-fg__body">
+          <button type="button" class="pn-fg__choice sv-danger__btn" (click)="remove(service)">
+            Eliminar servicio
+          </button>
+        </div>
+      </div>
     }
 
     <ng-container dialogActions>

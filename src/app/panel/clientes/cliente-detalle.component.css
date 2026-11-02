@@ -28,6 +28,8 @@
 .cd-notes { font-size: 0.9375rem; line-height: 1.6; white-space: pre-wrap; }
 
 .cd-danger { display: flex; gap: 8px; margin-top: 18px; }
+.cd-invite__text { line-height: 1.55; }
+.cd-invite__actions { display: flex; gap: 8px; margin-top: 14px; }
 
 .cd-sub {
   padding: 14px 4px 8px;
@@ -63,6 +65,10 @@
 .cd-rev__stars .material-symbols-rounded { font-size: 16px; }
 .cd-rev__text { margin-top: 6px; font-size: 0.9375rem; line-height: 1.55; }
 .cd-rev__meta { margin-top: 6px; font-size: 0.8125rem; color: var(--clr-text-3); }
+
+/* «Editar cliente»: the last block, its margin would only push the error away. */
+.cd-notes-fg { margin-bottom: 0; }
+.cd-error { margin: 12px 4px 0; }
 
 @media (max-width: 760px) {
   .cd-bk { flex-wrap: wrap; gap: 6px; }

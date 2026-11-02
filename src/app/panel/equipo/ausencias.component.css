@@ -33,18 +33,35 @@
 .au-cf__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .au-cf__label { font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
 
-.au-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 .au-none {
   padding: 14px;
-  margin-bottom: 18px;
-  border-radius: var(--pn-radius-row);
-  background: var(--pn-field);
+  margin-bottom: 22px;
+  border-radius: 14px;
+  background: var(--pn-card);
   text-align: center;
 }
 .pn-notice + .au-cf { margin-top: 10px; }
+
+/* A select inside a grouped row: no box of its own, only its arrow, at the
+   end of the row. */
+.pn-fg__input.au-select {
+  min-height: 46px;
+  padding: 0 28px 0 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A958F'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 20px;
+  box-shadow: none;
+}
+
+/* The last block of the form: the notice or the error come right after. */
+.au-last { margin-bottom: 0; }
+.au-warn { margin-top: 16px; }
+.au-last ~ .pn-field__error { margin: 12px 4px 0; }
 
 @media (max-width: 700px) {
   .au { flex-direction: column; align-items: stretch; }
   .au__actions { justify-content: flex-end; }
 }
-@media (max-width: 520px) { .au-dates { grid-template-columns: 1fr; } }

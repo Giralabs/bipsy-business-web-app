@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { PolicyGroup, ServiceResponse } from '../core/api/models';
 import { fromInstant } from '../core/util/dates';
+import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
 import { PreviewVm, longDuration, ratingValue, stars, webPrice } from './preview-model';
 
 /**
@@ -24,6 +25,7 @@ import { PreviewVm, longDuration, ratingValue, stars, webPrice } from './preview
 @Component({
   selector: 'app-preview-web',
   standalone: true,
+  imports: [PnVerifiedBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './preview-web.component.html',
   styleUrl: './preview-web.component.css',

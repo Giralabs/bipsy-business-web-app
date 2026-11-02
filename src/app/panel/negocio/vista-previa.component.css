@@ -107,6 +107,161 @@
 }
 .vp-browser__view::-webkit-scrollbar { display: none; }
 
+/* ----- TABLET Y MÓVIL: EL APARATO CON SU SAFARI ----------------------
+   El cristal mide lo que dice el conmutador (834 × 1112, 390 × 844); el
+   marco va por fuera. La página se queda con lo que dejan la barra de
+   estado y Safari, y rompe contra el ancho del cristal. */
+.vp-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.vp-device__body {
+  padding: var(--vp-bezel);
+  border-radius: calc(var(--vp-radius) + var(--vp-bezel));
+  background: #0E1012;
+  box-shadow:
+    0 0 0 1.5px #3A4148,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    var(--shadow-float);
+}
+
+.vp-device__screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--vp-dw);
+  height: var(--vp-dh);
+  border-radius: var(--vp-radius);
+  overflow: hidden;
+  background: var(--clr-base);
+  /* La barra y los controles de Safari, como en iOS: un gris translúcido
+     sobre la página, del tema del sistema. */
+  --vp-chrome: color-mix(in srgb, var(--pn-field-strong) 92%, var(--clr-base));
+  --vp-chrome-ink: var(--clr-text);
+  --vp-chrome-ink-2: var(--clr-text-2);
+}
+
+.vp-device__status {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--vp-status);
+  padding: 0 22px;
+  background: var(--vp-chrome);
+  color: var(--vp-chrome-ink);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.vp-device__icons { display: flex; gap: 4px; }
+.vp-device__icons .material-symbols-rounded { font-size: 15px; }
+
+.vp-device--phone .vp-device__status { padding: 6px 30px 0 36px; font-size: 15px; }
+.vp-device--phone .vp-device__icons .material-symbols-rounded { font-size: 17px; }
+
+.vp-device__island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  width: 122px;
+  height: 35px;
+  border-radius: 18px;
+  background: #000;
+  transform: translateX(-50%);
+}
+
+.vp-device__view.vp-browser__view { flex: none; height: var(--vp-view-h); }
+
+/* Safari del iPad: herramientas a los lados y la dirección en el centro. */
+.vp-safari {
+  flex: none;
+  background: var(--vp-chrome);
+  color: var(--vp-chrome-ink);
+}
+.vp-safari .material-symbols-rounded { font-size: 20px; }
+.vp-safari__off { opacity: 0.35; }
+
+.vp-safari--top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 50px;
+  padding: 0 16px 6px;
+  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.3);
+}
+.vp-safari__tools { display: flex; align-items: center; gap: 20px; color: var(--clr-accent); }
+
+.vp-safari__url {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--vp-chrome-ink) 9%, transparent);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.vp-safari__url .material-symbols-rounded { font-size: 14px; color: var(--vp-chrome-ink-2); }
+
+/* Safari del iPhone: la dirección abajo, en una píldora, y debajo la barra
+   de herramientas y el indicador de inicio. */
+.vp-safari--bottom {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 108px;
+  padding: 8px 14px 0;
+  box-shadow: 0 -0.5px 0 rgba(0, 0, 0, 0.3);
+}
+.vp-safari__url--pill {
+  flex: none;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+}
+.vp-safari__aa { font-size: 15px; font-weight: 700; }
+.vp-safari__host { display: inline-flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.vp-safari__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 0;
+  color: var(--clr-accent);
+}
+.vp-safari__toolbar .material-symbols-rounded { font-size: 22px; }
+
+.vp-device__home {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: 134px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--vp-chrome-ink);
+  transform: translateX(-50%);
+}
+
+.vp-device figcaption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--clr-text-3);
+}
+
 /* ----- LOS DOS TELÉFONOS --------------------------------------------- */
 .vp-phones {
   display: flex;

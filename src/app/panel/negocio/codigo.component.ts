@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { ReferralCode } from '../core/api/models';
 import { SetupStore } from '../core/data/setup.store';
+import { customerInviteMessage } from '../core/invite-messages';
+import { shareOrCopy } from '../core/util/share';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -37,9 +39,14 @@ import { ToastService } from '../ui/toast.service';
           @if (setup.referralSet()) {
             <p class="pn-dim intro">Este es tu código. Los clientes que lo usen cuentan como invitados por ti.</p>
             <p class="code">{{ setup.referral.value().code }}</p>
-            <button type="button" class="pn-btn pn-btn--secondary pn-btn--block" (click)="copy()">
-              <span class="material-symbols-rounded">content_copy</span>Copiar
-            </button>
+            <div class="code-actions">
+              <button type="button" class="pn-btn pn-btn--primary" (click)="share()">
+                <span class="material-symbols-rounded">ios_share</span>Compartir
+              </button>
+              <button type="button" class="pn-btn pn-btn--secondary" (click)="copy()">
+                <span class="material-symbols-rounded">content_copy</span>Copiar código
+              </button>
+            </div>
           } @else {
             <p class="pn-dim intro">
               Elige un código corto y fácil de decir en voz alta. Bipsy lo tiene en cuenta para ofertas y
@@ -90,6 +97,7 @@ import { ToastService } from '../ui/toast.service';
         letter-spacing: 4px;
         text-align: center;
       }
+      .code-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .code-input { text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
     `,
   ],
@@ -135,6 +143,18 @@ export class CodigoComponent {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  /**
+   * The code and, below it, the link that opens the customer sign-up with the
+   * code filled in. A bare code makes whoever gets it go looking for the app.
+   */
+  async share(): Promise<void> {
+    const code = this.setup.referral.value().code;
+    if (!code) return;
+    const outcome = await shareOrCopy(customerInviteMessage(code), 'Mi código de invitación de Bipsy');
+    if (outcome === 'copied') this.toasts.show('Mensaje copiado. Pégalo donde quieras.');
+    if (outcome === 'failed') this.toasts.error('No se ha podido abrir compartir');
   }
 
   async copy(): Promise<void> {

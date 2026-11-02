@@ -39,6 +39,14 @@ import { ToastService } from '../ui/toast.service';
         }
       </pn-desk-hero>
 
+      <!-- profile_screen.dart (_WorkerPhotoBanner): un solo paso, y se hace en su perfil. -->
+      @if (!auth.profile()?.profileImageUrl) {
+        <a class="pn-notice pn-notice--warn wk-photo" routerLink="/panel/mi-perfil">
+          <span class="material-symbols-rounded">add_a_photo</span>
+          <span>Recomendamos poner foto de perfil para mejorar la puntuación de tu negocio.</span>
+        </a>
+      }
+
       @if (auth.profile()?.available === false) {
         <div class="pn-notice pn-notice--warn wk-off">
           <span class="material-symbols-rounded">do_not_disturb_on</span>
@@ -160,10 +168,10 @@ import { ToastService } from '../ui/toast.service';
           <section class="pn-card wk-prefs">
             <div class="pn-row">
               <span class="pn-row__main">
-                <span class="pn-row__title">Disponible para reservas</span>
+                <span class="pn-row__title">Disponible para citas</span>
                 <span class="pn-row__sub">Si lo apagas, no te entran citas nuevas.</span>
               </span>
-              <pn-switch [checked]="auth.profile()?.available !== false" label="Disponible para reservas"
+              <pn-switch [checked]="auth.profile()?.available !== false" label="Disponible para citas"
                          (toggle)="setAvailable($event)" />
             </div>
             <a class="pn-row" routerLink="/panel/mis-ausencias">
@@ -195,6 +203,7 @@ import { ToastService } from '../ui/toast.service';
     `
       :host { display: block; }
       .wk-biz { background: var(--pn-field); color: var(--clr-text-2); cursor: default; }
+      .wk-photo { align-items: center; margin-bottom: var(--pn-gap); color: var(--clr-text); font-size: 0.875rem; }
       .wk-off { align-items: center; margin-bottom: var(--pn-gap); }
       .wk-off > div { flex: 1; }
 

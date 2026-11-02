@@ -3,12 +3,14 @@ import { Api } from '../api/api';
 import {
   AvailabilityResponse,
   BookingResponse,
+  CollectStatus,
   CreateBookingForCustomerRequest,
+  PaymentRequest,
   ScheduleEntry,
 } from '../api/models';
 import { scheduleFromApi } from '../api/schedule';
 import { AuthService } from '../auth/auth.service';
-import { stateOf } from '../agenda/booking-state';
+import { isDone, stateOf } from '../agenda/booking-state';
 import { dayKey, isSameDay, startOfDay, toDate } from '../util/dates';
 import { resource } from './resource';
 
@@ -48,11 +50,39 @@ export class AgendaStore {
 
   readonly all = this.bookings.value;
 
+  /**
+   * The agenda shows ONLY the owner's own appointments (`soloMisCitasProvider`).
+   * For the owner who attends and has staff. It reloads nothing and is not kept
+   * between sessions: a way of looking, not a setting.
+   */
+  readonly onlyMine = signal(false);
+
+  /**
+   * Whether that filter APPLIES. From the profile alone, without waiting for any
+   * list: a reload must not bring the whole agenda back for a moment.
+   */
+  private readonly onlyMineApplies = computed(() => {
+    const profile = this.auth.profile();
+    return (
+      this.onlyMine() && this.auth.isBusiness() && profile?.ownerPerforms === true && profile.teamEnabled !== false
+    );
+  });
+
+  /**
+   * What the day views paint. The owner travels with the BUSINESS id. Not applied
+   * to «Pendientes», like the app: answering them is the owner's in any case.
+   */
+  private scoped(list: BookingResponse[]): BookingResponse[] {
+    if (!this.onlyMineApplies()) return list;
+    const owner = this.auth.profile()?.id;
+    return list.filter((b) => b.workerId === owner);
+  }
+
   /** Cancelled ones are hidden everywhere except when looking at one day. */
   readonly today = computed(() =>
     this.all()
       .filter((b) => b.status !== 'CANCELED' && isSameDay(toDate(b.startDateTime), new Date()))
-      .sort(byStart),
+      .sort(doneLast),
   );
 
   /**
@@ -66,15 +96,15 @@ export class AgendaStore {
 
   readonly ofSelectedDay = computed(() => {
     const day = this.selectedDay();
-    return this.all()
+    return this.scoped(this.all())
       .filter((b) => isSameDay(toDate(b.startDateTime), day))
-      .sort(byStart);
+      .sort(doneLast);
   });
 
   /** Appointments of a day, ready for the grid. Cancelled included. */
   ofDay(day: Date): BookingResponse[] {
     const key = dayKey(day);
-    return this.all()
+    return this.scoped(this.all())
       .filter((b) => dayKey(toDate(b.startDateTime)) === key)
       .sort(byStart);
   }
@@ -114,6 +144,32 @@ export class AgendaStore {
     return this.api.get(`/bookings/${id}/available-workers`);
   }
 
+  // ----- cobrar ------------------------------------------------------------
+  // `/businesses/me/bookings/{id}/…` opens to workers too (V116): whoever serves
+  // an appointment collects it. Only what stamps a change reloads the agenda.
+
+  collectStatus(id: number): Promise<CollectStatus> {
+    return this.api.get<CollectStatus>(`/businesses/me/bookings/${id}/collect`);
+  }
+
+  /** Idempotent on the server: two clicks give the SAME request and one notice. */
+  requestPayment(id: number): Promise<PaymentRequest> {
+    return this.api.post<PaymentRequest>(`/businesses/me/bookings/${id}/payment-request`);
+  }
+
+  cancelPaymentRequest(id: number): Promise<CollectStatus> {
+    return this.api.delete<CollectStatus>(`/businesses/me/bookings/${id}/payment-request`);
+  }
+
+  /** Moves no money and creates no charge: a seal so nobody asks for it again. */
+  settleOffline(id: number): Promise<CollectStatus> {
+    return this.api.post<CollectStatus>(`/businesses/me/bookings/${id}/settle-offline`);
+  }
+
+  undoSettleOffline(id: number): Promise<CollectStatus> {
+    return this.api.delete<CollectStatus>(`/businesses/me/bookings/${id}/settle-offline`);
+  }
+
   // ----- dar cita ----------------------------------------------------------
 
   /**
@@ -130,8 +186,9 @@ export class AgendaStore {
   }
 
   /**
-   * Gives an appointment to someone of the phone book (owner only). With a
-   * Bipsy account it is born `AWAITING_CUSTOMER`, slot held and ten minutes
+   * Gives an appointment to someone of the phone book: the owner, or a worker
+   * with the front desk permission, whose appointment is his own whatever
+   * `workerId` says (`BusinessBookingService`). With a Bipsy account it is born `AWAITING_CUSTOMER`, slot held and ten minutes
    * running; with only an email it is born `CONFIRMED` and sent by email.
    */
   async createForCustomer(request: CreateBookingForCustomerRequest): Promise<BookingResponse> {
@@ -143,4 +200,14 @@ export class AgendaStore {
 
 function byStart(a: BookingResponse, b: BookingResponse): number {
   return a.startDateTime.localeCompare(b.startDateTime);
+}
+
+/**
+ * `cobradasAlFinal`: what happened and is collected goes to the bottom, the rest
+ * by time. A day's list is what is left to do. Only the lists: in a grid an
+ * appointment's place IS its time.
+ */
+function doneLast(a: BookingResponse, b: BookingResponse): number {
+  const aDone = isDone(a);
+  return aDone !== isDone(b) ? (aDone ? 1 : -1) : byStart(a, b);
 }

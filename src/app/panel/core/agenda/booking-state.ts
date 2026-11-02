@@ -2,12 +2,12 @@ import { AgendaState, BookingAddress, BookingResponse } from '../api/models';
 import { fromInstant, toDate } from '../util/dates';
 
 /**
- * The seven states of an appointment, ported from `BookingStateAction` in
- * `apps/gipsi_business/lib/features/home/widgets/booking_card.dart`.
+ * The states of an appointment in the AGENDA, ported from `BookingStateAction`
+ * in `apps/gipsi_business/lib/features/home/widgets/booking_card.dart`.
  *
  * They are not a field: they are derived, and the order of the checks is the
  * whole logic — cancelled beats no-show beats awaiting the customer beats paid
- * beats pending beats past. Change it and the colours start lying.
+ * beats pending beats payment pending. Change it and the colours start lying.
  */
 export function stateOf(booking: BookingResponse, now = new Date()): AgendaState {
   if (booking.status === 'CANCELED') return 'cancelada';
@@ -15,10 +15,55 @@ export function stateOf(booking: BookingResponse, now = new Date()): AgendaState
   // Before everything else: it is the only one with a deadline running, and
   // while it runs it can be neither paid nor pending on this side.
   if (booking.status === 'AWAITING_CUSTOMER') return 'esperandoCliente';
-  if (booking.prepaidCents > 0) return 'pagada';
+  if (isSettled(booking)) return 'pagada';
   if (booking.status === 'PENDING') return 'pendiente';
-  if (toDate(booking.endDateTime) < now) return 'pasada';
+  if (toDate(booking.endDateTime) < now) return 'pendienteDePago';
   return 'confirmada';
+}
+
+/**
+ * The state in a CUSTOMER'S FILE (`_BookingRow` in `customer_detail_screen.dart`).
+ *
+ * Apart from `stateOf` because the server only fills what was collected in the
+ * agenda endpoints: here a finished appointment is just «Pasada», and calling
+ * them all «Pendiente de pago» would lie about the ones already collected.
+ */
+export function customerFileStateOf(booking: BookingResponse, now = new Date()): AgendaState {
+  switch (booking.status) {
+    case 'CANCELED':
+      return 'cancelada';
+    case 'NO_SHOW':
+      return 'noVino';
+    case 'PENDING':
+      return 'pendiente';
+    case 'AWAITING_CUSTOMER':
+      return 'esperandoCliente';
+    default:
+      return toDate(booking.startDateTime) < now ? 'pasada' : 'confirmada';
+  }
+}
+
+/** Collected, by the app or by hand. What decides between offering to charge it and saying it is paid. */
+export function isSettled(booking: BookingResponse): boolean {
+  return booking.prepaidCents > 0 || booking.settledOffline === true;
+}
+
+/**
+ * Nothing left to do: it happened AND it is collected. Collected alone is not
+ * enough: whoever pays when booking leaves tomorrow's appointment settled, and
+ * it still has to be attended. And one past and unpaid stays up there on purpose.
+ */
+export function isDone(booking: BookingResponse, now = new Date()): boolean {
+  return toDate(booking.endDateTime) < now && isSettled(booking);
+}
+
+/**
+ * Whether «Cobrar» is offered (`_puedeCobrar` in `booking_list.dart`). It does
+ * not look at «Pago por app» on purpose: inside there is always «Ya cobrada»,
+ * which only writes down what happened and needs neither account nor switch.
+ */
+export function canCollect(booking: BookingResponse): boolean {
+  return booking.status === 'CONFIRMED' && !isSettled(booking);
 }
 
 export interface StateLook {
@@ -39,7 +84,12 @@ export const STATE_LOOK: Record<AgendaState, StateLook> = {
     color: 'var(--pn-state-await)',
   },
   confirmada: { label: 'Confirmada', icon: 'check', color: 'var(--clr-success)' },
-  pagada: { label: 'Pagada', icon: 'check_circle', color: 'var(--clr-success)' },
+  // The coin and not a tick: next to «Confirmada» a tick in a circle read as the same thing.
+  pagada: { label: 'Pagada', icon: 'paid', color: 'var(--clr-success)' },
+  // The same amber as «Pendiente» on purpose: both say something is missing,
+  // and the icon tells them apart. A colour of its own would be a fifth tone.
+  pendienteDePago: { label: 'Pendiente de pago', icon: 'euro', color: 'var(--clr-warn)' },
+  // Only a customer's file paints this one (`customerFileStateOf`).
   pasada: { label: 'Pasada', icon: 'history', color: 'var(--clr-grey-state)' },
   cancelada: { label: 'Cancelada', icon: 'close', color: 'var(--clr-danger)' },
   noVino: { label: 'No vino', icon: 'person_off', color: 'var(--clr-danger)' },
@@ -51,7 +101,7 @@ export const LEGEND: AgendaState[] = [
   'esperandoCliente',
   'confirmada',
   'pagada',
-  'pasada',
+  'pendienteDePago',
   'cancelada',
   'noVino',
 ];

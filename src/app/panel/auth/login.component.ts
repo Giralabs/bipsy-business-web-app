@@ -22,8 +22,11 @@ import { message } from '../core/data/resource';
  * un negocio pide categoría, teléfono y aceptar los términos, que no salen de
  * un token social. Pero no tener cuenta tampoco es un error: el servidor
  * responde 404 y se sigue al registro con la identidad ya en la mano
- * (`PendingSocial`), sin volver a pedir el correo ni una contraseña. El 409 es
- * otra cosa —ese correo es de un cliente— y ahí sí hay que pararle.
+ * (`PendingSocial`), sin volver a pedir el correo ni una contraseña.
+ *
+ * Entran los dos roles de esta puerta, dueño y trabajador: el servidor resuelve
+ * la cuenta por ámbito y es el rol devuelto lo que decide a dónde va (backend
+ * 4532ed4).
  */
 @Component({
   selector: 'app-login',
@@ -79,10 +82,10 @@ export class LoginComponent {
       }
       // 404: ese correo no tiene cuenta todavía. No es un fallo, es un alta
       // que empieza — y con el correo ya verificado por el proveedor.
-      if ((cause as { status?: number }).status === 404 && identity?.email) {
-        // El alta decide dónde empezar: con el correo oculto (relay de Apple)
-        // por el paso del correo, porque hay que pedirle uno suyo; con un
-        // correo normal, directo a los datos del negocio.
+      if ((cause as { status?: number }).status === 404 && identity) {
+        // El alta decide dónde empezar: con el correo oculto (relay de Apple) o
+        // sin ninguno, por el paso del correo, porque hay que pedirle uno suyo;
+        // con un correo normal, directo a los datos del negocio.
         this.pending.set(identity);
         await this.router.navigateByUrl('/registro');
         return;
@@ -112,7 +115,9 @@ export class LoginComponent {
           ? cause.message
           : status === 401 || status === 400
             ? 'Correo o contraseña incorrectos.'
-            : message(cause),
+            : status === 429
+              ? 'Demasiados intentos. Espera un momento.'
+              : message(cause),
       );
     } finally {
       this.busy.set(false);
@@ -125,7 +130,11 @@ export class LoginComponent {
    */
   private async goOn(): Promise<void> {
     const back = this.route.snapshot.queryParamMap.get('volver') ?? '';
-    const safe = back.startsWith('/panel') || back.startsWith('/invitacion/') || back.startsWith('/unirse');
+    const safe =
+      back.startsWith('/panel') ||
+      back.startsWith('/invitacion/') ||
+      back.startsWith('/equipo/') ||
+      back.startsWith('/unirse');
     await this.router.navigateByUrl(safe ? back : '/panel');
   }
 }

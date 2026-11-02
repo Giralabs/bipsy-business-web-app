@@ -93,6 +93,13 @@ const siteRoutes: Routes = [
     loadComponent: () => import('./panel/auth/join.component').then((m) => m.JoinComponent),
   },
   {
+    // The link a worker invitation carries (`GipsiLinks.teamInvite`): the same
+    // screen under the path the message uses, not a redirect, so a query survives.
+    path: 'equipo/:token',
+    title: 'Invitación · Bipsy Business',
+    loadComponent: () => import('./panel/auth/accept-invite.component').then((m) => m.AcceptInviteComponent),
+  },
+  {
     path: 'invitacion/:token',
     title: 'Invitación · Bipsy Business',
     loadComponent: () => import('./panel/auth/accept-invite.component').then((m) => m.AcceptInviteComponent),

@@ -4,7 +4,7 @@ import { ChatMessage, Conversation } from '../api/models';
 import { AuthService } from '../auth/auth.service';
 import { fromInstant } from '../util/dates';
 import { ChatSocketEvent, ChatSocketService } from './chat-socket.service';
-import { resource } from './resource';
+import { resource, serverReason } from './resource';
 
 /** How many messages a thread brings in one go (the backend caps it at 50). */
 const PAGE_SIZE = 50;
@@ -96,7 +96,9 @@ export class InboxStore {
   constructor() {
     this.socket.listen((event) => this.onEvent(event));
 
-    // The socket lives exactly as long as the right to use chat.
+    // The socket is the session's, not the chat's: the shell opens it, because
+    // booking changes arrive by it with the chat off too. Here only what the
+    // chat itself holds is let go.
     effect(
       () => {
         const allowed = this.auth.canUseChat();
@@ -104,7 +106,6 @@ export class InboxStore {
           if (allowed) {
             this.socket.connect();
           } else {
-            this.socket.disconnect();
             this.stopPolling();
             this.openId.set(null);
             this.messages.set([]);
@@ -237,8 +238,7 @@ export class InboxStore {
       return null;
     } catch (cause) {
       this.markFailed(clientId);
-      const detail = (cause as { error?: { message?: string } }).error?.message;
-      return detail ?? null;
+      return serverReason(cause) ?? null;
     }
   }
 
@@ -280,6 +280,9 @@ export class InboxStore {
   // === SOCKET EVENTS =========================================================
 
   private onEvent(event: ChatSocketEvent): void {
+    // With the chat off the socket stays open for the agenda, and the server
+    // answers 403 to anything of this store.
+    if (!this.auth.canUseChat()) return;
     switch (event.type) {
       case 'connected':
         this.stopPolling();

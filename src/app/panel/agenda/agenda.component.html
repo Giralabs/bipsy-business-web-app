@@ -6,18 +6,11 @@
     </div>
 
     <div class="pn-head__actions">
-      <!-- Without the figure, like the app: with it the pill changes width every
-           time an appointment comes in or is settled and the row shifts. The
-           number is on the «Pendientes» tab and in the label read aloud. -->
-      @if (agenda.pendingCount() > 0) {
-        <button type="button" class="pn-count pn-count--warn" (click)="setView('pendientes')"
-                [attr.aria-label]="count(agenda.pendingCount(), 'cita pendiente', 'citas pendientes') + ' de confirmar'">
-          <span class="material-symbols-rounded">notifications_active</span>
-          Pendiente
-        </button>
-      }
+      <!-- The pending ones carry their red balloon on their tab. This one stays a
+           pill, in amber, without the figure: with it the row shifts every time
+           someone joins or leaves the list. -->
       @if (waitlist.enabled() && waitlist.count() > 0) {
-        <button type="button" class="pn-count pn-count--info" (click)="setView('espera')"
+        <button type="button" class="pn-count pn-count--warn" (click)="setView('espera')"
                 [attr.aria-label]="count(waitlist.count(), 'persona esperando', 'personas esperando') + ' un hueco'">
           <span class="material-symbols-rounded">hourglass_top</span>
           En espera
@@ -27,7 +20,7 @@
               (click)="legendOpen.set(true)">
         <span class="material-symbols-rounded">info</span>
       </button>
-      @if (auth.isBusiness()) {
+      @if (canGive()) {
         <button type="button" class="pn-btn pn-btn--primary" (click)="give()">
           <span class="material-symbols-rounded">add</span>
           Dar cita
@@ -36,7 +29,36 @@
     </div>
   </div>
 
+  <!-- home_header.dart (UnavailableBanner). -->
+  @if (auth.isWorker() && auth.profile()?.available === false) {
+    <div class="pn-notice pn-notice--warn ag-unavailable">
+      <span class="material-symbols-rounded">do_not_disturb_on</span>
+      <div>
+        <strong>No disponible</strong>
+        <span class="pn-notice__body">
+          Los clientes no pueden reservarte hasta que lo actives en
+          <a routerLink="/panel/mi-perfil">tu perfil</a>.
+        </span>
+      </div>
+    </div>
+  }
+
   <div class="ag-bar">
+    <!-- Says where you are, not what a click will do: «Negocio» while looking at
+         the business. It fills with the accent like the other button of the
+         screen, because it changes the whole page. -->
+    @if (canScope()) {
+      <button type="button" class="pn-btn pn-btn--primary pn-btn--sm ag-scope" (click)="toggleScope()"
+              [attr.aria-pressed]="agenda.onlyMine()"
+              [attr.aria-label]="agenda.onlyMine()
+                ? 'Viendo tus citas. Pulsa para ver las de todo el negocio.'
+                : 'Viendo las citas de todo el negocio. Pulsa para ver solo las tuyas.'">
+        <span class="material-symbols-rounded">{{ agenda.onlyMine() ? 'person' : 'storefront' }}</span>
+        {{ agenda.onlyMine() ? 'Personal' : 'Negocio' }}
+        <span class="material-symbols-rounded">keyboard_arrow_down</span>
+      </button>
+    }
+
     <pn-segmented [options]="tabs()" [value]="view()" label="Vista de la agenda"
                   (valueChange)="setView($event)" />
 
@@ -72,14 +94,14 @@
 
   <!-- ----- SEMANA ----- -->
   @if (view() === 'semana') {
-    <app-agenda-grid [columns]="weekColumns()" [pickable]="auth.isBusiness()"
+    <app-agenda-grid [columns]="weekColumns()" [pickable]="canGive()"
                      [slotMinutes]="auth.profile()?.slotMinutes ?? 15"
                      (picked)="open($event)" (spotPicked)="giveAt($event)" />
   }
 
   <!-- ----- DÍA ----- -->
   @if (view() === 'dia') {
-    <app-agenda-grid [columns]="dayColumns()" [scale]="2" [pickable]="auth.isBusiness()"
+    <app-agenda-grid [columns]="dayColumns()" [scale]="2" [pickable]="canGive()"
                      [slotMinutes]="auth.profile()?.slotMinutes ?? 15"
                      (picked)="open($event)" (spotPicked)="giveAt($event)" />
   }
@@ -195,15 +217,19 @@
   <pn-dialog title="Qué significa cada color" (closed)="legendOpen.set(false)">
     <!-- Only the name, like the app since 2/10: seven explanations in a row
          are not read, and what is asked here is «what does this colour mean?». -->
-    @for (state of legend; track state) {
-      <div class="lg">
-        <span class="lg__stripe" [style.background]="look[state].color">
-          <span class="material-symbols-rounded">{{ look[state].icon }}</span>
-        </span>
-        <strong>{{ look[state].label }}</strong>
+    <div class="pn-fg lg-block">
+      <div class="pn-fg__body">
+        @for (state of legend; track state) {
+          <div class="lg">
+            <span class="lg__stripe" [style.background]="look[state].color">
+              <span class="material-symbols-rounded">{{ look[state].icon }}</span>
+            </span>
+            <span class="lg__label">{{ look[state].label }}</span>
+          </div>
+        }
       </div>
-    }
-    <p class="lg__foot">Abre una cita para ver qué puedes hacer con ella.</p>
+      <p class="pn-fg__foot">Abre una cita para ver qué puedes hacer con ella.</p>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--primary" (click)="legendOpen.set(false)">Entendido</button>

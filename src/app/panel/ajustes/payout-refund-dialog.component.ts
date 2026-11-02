@@ -68,22 +68,28 @@ import { PnDialogComponent } from '../ui/dialog.component';
           }
         </div>
 
-        <label class="pn-field">
-          <span class="pn-field__label">Importe a devolver</span>
-          <input class="pn-input pn-tabular" name="amount" inputmode="decimal" autocomplete="off"
-                 [placeholder]="plain(info()!.refundableCents)" [disabled]="busy()"
-                 [ngModel]="amountText()" (ngModelChange)="amountText.set($event)" />
-          <button type="button" class="pn-btn pn-btn--text pn-btn--sm all" [disabled]="busy()"
-                  (click)="amountText.set(plain(info()!.refundableCents))">
-            Todo: {{ money(info()!.refundableCents) }}
-          </button>
-        </label>
-
-        <label class="pn-field">
-          <span class="pn-field__label">Motivo (opcional)</span>
-          <textarea class="pn-textarea" rows="2" name="reason" maxlength="300" placeholder="Por qué se devuelve"
-                    [disabled]="busy()" [(ngModel)]="reason"></textarea>
-        </label>
+        <div class="pn-fg">
+          <p class="pn-fg__head">Devolución</p>
+          <div class="pn-fg__body">
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Importe a devolver</span>
+              <span class="amount">
+                <input class="pn-fg__input pn-tabular" name="amount" inputmode="decimal" autocomplete="off"
+                       [placeholder]="plain(info()!.refundableCents)" [disabled]="busy()"
+                       [ngModel]="amountText()" (ngModelChange)="amountText.set($event)" />
+                <button type="button" class="pn-btn pn-btn--text pn-btn--sm all" [disabled]="busy()"
+                        (click)="amountText.set(plain(info()!.refundableCents))">
+                  Todo: {{ money(info()!.refundableCents) }}
+                </button>
+              </span>
+            </label>
+            <label class="pn-fg__row pn-fg__row--stack">
+              <span class="pn-fg__label">Motivo (opcional)</span>
+              <textarea class="pn-fg__input reason" rows="2" name="reason" maxlength="300" placeholder="Por qué se devuelve"
+                        [disabled]="busy()" [(ngModel)]="reason"></textarea>
+            </label>
+          </div>
+        </div>
       }
 
       @if (history().length > 0) {
@@ -128,7 +134,11 @@ import { PnDialogComponent } from '../ui/dialog.component';
     `
       .subtitle { margin: -6px 0 16px; }
       .body { line-height: 1.55; }
-      .all { margin-top: 6px; align-self: flex-start; }
+      /* The amount, and next to it the shortcut to give back all that is left. */
+      .amount { display: flex; align-items: center; gap: 8px; min-width: 0; }
+      .amount .pn-fg__input { flex: 1; min-width: 0; }
+      .all { flex: none; margin-right: -10px; }
+      .reason { min-height: 60px; }
       .history { margin-bottom: 14px; }
     `,
   ],

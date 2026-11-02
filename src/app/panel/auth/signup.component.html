@@ -44,7 +44,7 @@
       <label class="pn-field">
         <span class="pn-field__label">Correo del negocio</span>
         <input class="pn-input" type="email" name="email" autocomplete="email" [readonly]="resumable()"
-               placeholder="hola@tunegocio.es" [(ngModel)]="email" (keydown.enter)="checkEmail()" />
+               placeholder="ejemplo@gmail.com" [(ngModel)]="email" (keydown.enter)="checkEmail()" />
       </label>
     }
 
@@ -128,6 +128,16 @@
       </div>
     }
 
+    <!-- step_role_screen.dart: quien no es un negocio no sigue este alta. -->
+    <button type="button" class="auth-invite" (click)="goToInvitation()">
+      <span class="material-symbols-rounded">badge</span>
+      <span>
+        <strong>Soy trabajador</strong>
+        <span>Únete al equipo de tu negocio</span>
+      </span>
+      <span class="material-symbols-rounded auth-invite__go">arrow_forward</span>
+    </button>
+
     <p class="auth-foot">¿Ya tienes cuenta? <a routerLink="/acceder">Inicia sesión</a></p>
   }
 
@@ -158,32 +168,47 @@
     <p class="auth-lead">Esto es lo que verán tus clientes cuando te encuentren.</p>
 
     @if (withProvider()) {
-      <div class="pn-notice pn-notice--info auth-notice">
-        <span class="material-symbols-rounded">verified</span>
-        <div>
-          <strong>Entrarás con {{ providerName() }}</strong>
-          <span class="pn-notice__body">
-            @if (needsTypedEmail()) {
-              <!-- El correo lo ha escrito él, así que hay que comprobarlo como
-                   cualquier otro: el alta pasa por el paso de verificación. -->
-              No hay contraseña que elegir. Te enviaremos un enlace para comprobar {{ email }}.
-            } @else {
-              {{ email }} ya está verificado, así que no hace falta contraseña ni comprobar el correo.
-            }
-          </span>
+      <!-- Una fila, como la del correo: solo el proveedor y la cuenta. -->
+      <div class="pn-group__body auth-notice">
+        <div class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon" style="color:var(--clr-success)">verified</span>
+          <span class="pn-row__main"><span class="pn-row__title">{{ providerName() }}</span></span>
+          <span class="pn-dim">{{ email }}</span>
         </div>
       </div>
+      @if (needsTypedEmail()) {
+        <!-- El correo lo ha escrito él, así que hay que comprobarlo como
+             cualquier otro: el alta pasa por el paso de verificación. -->
+        <p class="pn-field__hint auth-notice">Te enviaremos un enlace para comprobar {{ email }}.</p>
+      }
+
+      <button type="button" class="auth-invite" (click)="goToInvitation()">
+        <span class="material-symbols-rounded">badge</span>
+        <span>
+          <strong>Soy trabajador</strong>
+          <span>Únete al equipo de tu negocio</span>
+        </span>
+        <span class="material-symbols-rounded auth-invite__go">arrow_forward</span>
+      </button>
     }
+
+    <!-- Lo primero y vacío: es lo que el cliente lee en tu ficha. La app lo
+         rellena con el nombre de la cuenta de Google, pero ese es el de la
+         persona, no el del negocio, y se quedaba puesto sin que nadie lo
+         eligiera. -->
+    <label class="pn-field">
+      <span class="pn-field__label">¿Cómo se llama tu negocio?</span>
+      <input class="pn-input" type="text" name="businessName" maxlength="80" autocomplete="organization"
+             placeholder="Barbería Nómada" [(ngModel)]="businessName" (ngModelChange)="error.set(null)"
+             [class.pn-input--invalid]="error() === nameError" />
+      <span class="pn-field__hint">Es el nombre que verán tus clientes en tu ficha.</span>
+    </label>
 
     <label class="pn-field">
       <span class="pn-field__label">¿A qué te dedicas?</span>
-      <select class="pn-select" name="category" [(ngModel)]="categoryId" (ngModelChange)="error.set(null)"
-              [class.pn-input--invalid]="error() === 'Elige a qué se dedica tu negocio.'">
-        <option [ngValue]="null" disabled>Elige tu categoría</option>
-        @for (category of categories(); track category.id) {
-          <option [ngValue]="category.id">{{ category.name }}</option>
-        }
-      </select>
+      <pn-select name="category" label="¿A qué te dedicas?" placeholder="Elige tu categoría"
+                 [options]="categoryOptions()" [(ngModel)]="categoryId" (ngModelChange)="error.set(null)"
+                 [invalid]="error() === 'Elige a qué se dedica tu negocio.'" />
       @if (categoriesFailed()) {
         <span class="pn-field__error">
           No hemos podido cargar las categorías.
@@ -194,17 +219,14 @@
       }
     </label>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Nombre del negocio</span>
-      <input class="pn-input" type="text" name="businessName" placeholder="Barbería Nómada" [(ngModel)]="businessName" />
-    </label>
-
     <!-- No username any more (backend V105): the email is what signs in. -->
     <label class="pn-field">
       <span class="pn-field__label">Teléfono</span>
       <input class="pn-input" type="tel" name="phone" autocomplete="tel"
-             placeholder="600 00 00 00" [(ngModel)]="phone" />
-      <span class="pn-field__hint">El correo lo usarás para iniciar sesión.</span>
+             placeholder="600 12 34 56" [(ngModel)]="phone" />
+      @if (!withProvider()) {
+        <span class="pn-field__hint">El correo lo usarás para iniciar sesión.</span>
+      }
     </label>
 
     <!-- Con Google o Apple no hay contraseña: la cuenta entra por el
@@ -214,12 +236,8 @@
       <label class="pn-field">
         <span class="pn-field__label">Contraseña</span>
         <input class="pn-input" type="password" name="password" autocomplete="new-password"
-               placeholder="Mínimo 8 caracteres" [(ngModel)]="password" />
-        <span class="auth-strength" [class.good]="strength() >= 4">
-          @for (mark of [1, 2, 3, 4, 5]; track mark) {
-            <span [class.on]="strength() >= mark"></span>
-          }
-        </span>
+               [(ngModel)]="password" />
+        <pn-password-rules [password]="password" />
       </label>
     }
 
@@ -290,31 +308,43 @@
           (available)="placesUp.set($event)"
         />
         @if (resolvedAddress(); as found) {
-          <div class="pn-notice pn-notice--info" style="margin-bottom:18px">
-            <span class="material-symbols-rounded">where_to_vote</span>
-            <div>
-              <strong>{{ found.address || found.formatted }}</strong>
-              <span class="pn-notice__body">
-                {{ addressZone(found) }}
-                @if (!found.streetNumber) {
-                  <br />Falta el número de portal: sin él, el cliente llega a la calle pero no a la puerta.
-                }
-              </span>
-            </div>
-          </div>
+          @if (!found.streetNumber) {
+            <p class="pn-field__hint" style="margin:-8px 0 18px">
+              Falta el número de portal: sin él, el cliente llega a la calle pero no a la puerta.
+            </p>
+          }
         }
-        @if (!placesUp()) {
+        <!-- Picking a suggestion fills these; whoever prefers can open them and type. -->
+        @if (showManual()) {
+          @if (!placesUp() && !manual()) {
+            <p class="pn-field__hint auth-manual-note">Ahora no hay sugerencias: escribe tu dirección a mano.</p>
+          }
           <div class="auth-grid">
             <label class="pn-field">
               <span class="pn-field__label">Ciudad</span>
-              <input class="pn-input" type="text" name="city" placeholder="Valencia" [(ngModel)]="city" />
+              <input class="pn-input" type="text" name="city" autocomplete="address-level2" placeholder="Valencia" [(ngModel)]="city" />
             </label>
             <label class="pn-field">
               <span class="pn-field__label">Código postal</span>
-              <input class="pn-input" type="text" name="postalCode" placeholder="46003" [(ngModel)]="postalCode" />
+              <input class="pn-input" type="text" name="postalCode" autocomplete="postal-code" inputmode="numeric" placeholder="46003" [(ngModel)]="postalCode" />
             </label>
           </div>
+        } @else {
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm auth-manual" (click)="manual.set(true)">
+            <span class="material-symbols-rounded">edit_note</span>
+            Prefiero rellenarla manualmente
+          </button>
         }
+
+        <!-- `location_map_picker.dart`: the text finds the street, the pin finds the door. -->
+        <div class="pn-group auth-map">
+          <p class="pn-group__head">Ubicación exacta</p>
+          <pn-location-map [point]="pin()" [disabled]="busy()" (moved)="onPinMoved($event)"
+                           (available)="mapUp.set($event)" />
+          @if (mapUp()) {
+            <p class="pn-group__foot">Mueve el punto si la dirección no cae justo en tu puerta.</p>
+          }
+        </div>
       } @else {
         <pn-address-search
           label="Zona donde trabajas"
@@ -327,17 +357,25 @@
           (resolved)="onAddressResolved($event)"
           (available)="placesUp.set($event)"
         />
-        @if (!placesUp()) {
+        @if (showManual()) {
+          @if (!placesUp() && !manual()) {
+            <p class="pn-field__hint auth-manual-note">Ahora no hay sugerencias: escribe tu ciudad a mano.</p>
+          }
           <div class="auth-grid">
             <label class="pn-field">
               <span class="pn-field__label">Ciudad</span>
-              <input class="pn-input" type="text" name="city" placeholder="Valencia" [(ngModel)]="city" />
+              <input class="pn-input" type="text" name="city" autocomplete="address-level2" placeholder="Valencia" [(ngModel)]="city" />
             </label>
             <label class="pn-field">
               <span class="pn-field__label">Provincia</span>
-              <input class="pn-input" type="text" name="province" placeholder="Valencia" [(ngModel)]="province" />
+              <input class="pn-input" type="text" name="province" autocomplete="address-level1" placeholder="Valencia" [(ngModel)]="province" />
             </label>
           </div>
+        } @else {
+          <button type="button" class="pn-btn pn-btn--text pn-btn--sm auth-manual" (click)="manual.set(true)">
+            <span class="material-symbols-rounded">edit_note</span>
+            Prefiero rellenarla manualmente
+          </button>
         }
         <p class="pn-field__hint">
           No hace falta dirección exacta: al no tener local, tu ficha no muestra ninguna ni el botón de cómo llegar.
@@ -382,11 +420,13 @@
     <div class="auth-grid">
       <label class="pn-field">
         <span class="pn-field__label">Precio (€)</span>
-        <input class="pn-input" type="number" min="0" step="0.5" name="servicePrice" placeholder="18" [(ngModel)]="servicePrice" />
+        <pn-number [wide]="true" name="servicePrice" label="Precio en euros" [min]="0" [step]="0.5" placeholder="18"
+                   [optional]="true" unit="€" [(ngModel)]="servicePrice" />
       </label>
       <label class="pn-field">
         <span class="pn-field__label">Duración (min)</span>
-        <input class="pn-input" type="number" min="5" step="5" name="serviceDuration" [(ngModel)]="serviceDuration" />
+        <pn-number [wide]="true" name="serviceDuration" label="Duración en minutos" [min]="5" [step]="5" unit="min"
+                   [(ngModel)]="serviceDuration" />
       </label>
     </div>
 

@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { Api } from '../core/api/api';
 import { BusinessPolicy, PolicyGroup } from '../core/api/models';
-import { message, resource } from '../core/data/resource';
+import { message, resource, serverReason } from '../core/data/resource';
 import { PnEmptyComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -71,7 +72,7 @@ type DialogKind = 'catalog' | 'policy' | 'category' | null;
 @Component({
   selector: 'app-panel-normas',
   standalone: true,
-  imports: [FormsModule, PnEmptyComponent, PnDialogComponent],
+  imports: [FormsModule, PnEmptyComponent, PnDialogComponent, PnSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './normas.component.html',
   styleUrl: './normas.component.css',
@@ -396,6 +397,5 @@ export class NormasComponent {
  * yours", not an expired session), otherwise the generic translation.
  */
 function serverMessage(cause: unknown): string {
-  const detail = (cause as { error?: { message?: string } }).error?.message;
-  return detail || message(cause);
+  return serverReason(cause) || message(cause);
 }

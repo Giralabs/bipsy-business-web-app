@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
 import { message } from '../core/data/resource';
+import { PnSliderComponent } from '../ui/slider.component';
 import { ToastService } from '../ui/toast.service';
 
 /**
@@ -37,17 +38,17 @@ const clampWindow = (value: number) =>
  * then refused, so the impossible value was only found out on saving.
  *
  * Nothing is charged at all without «Pedir tarjeta al reservar», which lives
- * in Funcionalidades; when it is off the screen says so and saves a 0.
+ * in Cobros; when it is off the screen says so and saves a 0.
  */
 @Component({
   selector: 'app-panel-cancelaciones',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PnSliderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
-      <a class="pn-btn pn-btn--text pn-btn--sm back" routerLink="/panel/ajustes/funcionalidades">
-        <span class="material-symbols-rounded">arrow_back</span>Funcionalidades
+      <a class="pn-btn pn-btn--text pn-btn--sm back" routerLink="/panel/ajustes/cobros">
+        <span class="material-symbols-rounded">arrow_back</span>Cobros
       </a>
 
       <div class="pn-head">
@@ -75,7 +76,7 @@ const clampWindow = (value: number) =>
           <div>
             <span class="pn-notice__body">
               No estás pidiendo tarjeta, así que no se cobra ninguna penalización. Se enciende en
-              <a routerLink="/panel/ajustes/funcionalidades">Funcionalidades</a>.
+              <a routerLink="/panel/ajustes/cobros">Cobros</a>.
             </span>
           </div>
         </div>
@@ -91,14 +92,12 @@ const clampWindow = (value: number) =>
                   <span class="pn-row__title">Tarifa</span>
                   <span class="cn-row__value pn-tabular">{{ fee }} %</span>
                 </span>
-                <input
-                  class="cn-slider"
-                  type="range"
+                <pn-slider
                   name="fee"
-                  min="0"
+                  [min]="0"
                   [max]="limits.maxFeePercent"
-                  step="5"
-                  aria-label="Tarifa"
+                  [step]="5"
+                  label="Tarifa"
                   [disabled]="!requiresCard() || busy()"
                   [(ngModel)]="fee"
                 />
@@ -109,14 +108,12 @@ const clampWindow = (value: number) =>
                   <span class="pn-row__title">Si avisa con menos de</span>
                   <span class="cn-row__value pn-tabular">{{ window }} h</span>
                 </span>
-                <input
-                  class="cn-slider"
-                  type="range"
+                <pn-slider
                   name="window"
                   [min]="limits.minWindowHours"
                   [max]="limits.maxWindowHours"
-                  step="1"
-                  aria-label="Antelación"
+                  [step]="1"
+                  label="Antelación"
                   [disabled]="!requiresCard() || busy()"
                   [(ngModel)]="window"
                 />
@@ -149,8 +146,6 @@ const clampWindow = (value: number) =>
       .cn-row { display: flex; flex-direction: column; gap: 8px; padding: 14px 0; }
       .cn-row__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
       .cn-row__value { font-weight: 800; color: var(--clr-text-1); }
-      .cn-slider { width: 100%; accent-color: var(--clr-text-1); }
-      .cn-slider:disabled { opacity: 0.45; }
       .cn-example { margin: 0; line-height: 1.55; }
     `,
   ],

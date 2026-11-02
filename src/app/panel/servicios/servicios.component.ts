@@ -7,6 +7,7 @@ import { ServiceMode, ServiceResponse, SlotGrid } from '../core/api/models';
 import { duration as durationText, price } from '../core/util/format';
 import { PnEmptyComponent, PnSwitchComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnNumberComponent } from '../ui/number.component';
 import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
@@ -52,6 +53,7 @@ const MAX_SURCHARGE_EUROS = 200;
     PnDialogComponent,
     PnPhotoPickerComponent,
     PnServiceHoursComponent,
+    PnNumberComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './servicios.component.html',

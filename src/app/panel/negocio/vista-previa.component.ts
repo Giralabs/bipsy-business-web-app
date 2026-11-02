@@ -11,6 +11,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
+import { businessSlug } from '../core/business-link';
 import {
   BusinessDetail,
   PageResponse,
@@ -59,6 +60,18 @@ type WebSize = keyof typeof WEB_SIZES;
 
 /** The chrome of the fake browser, in pixels: it is part of the frame. */
 const BROWSER_BAR = 46;
+
+/**
+ * The tablet and the phone, drawn as the device with its own Safari: bezel,
+ * status bar and the browser's chrome, which in iOS sits on top on an iPad
+ * and at the bottom on an iPhone. `view` is what is left for the page.
+ */
+const DEVICES = {
+  tablet: { bezel: 18, radius: 30, status: 24, chrome: 50 },
+  movil: { bezel: 12, radius: 46, status: 50, chrome: 108 },
+} as const;
+/** The caption under a device, with its gap. */
+const CAPTION = 34;
 /** The two phones side by side, plus their bezels, the gap and the label. */
 const PHONES_WIDTH = 900;
 const PHONES_HEIGHT = 975;
@@ -121,22 +134,55 @@ export class VistaPreviaComponent implements OnDestroy {
   readonly webWidth = computed(() => WEB_SIZES[this.webSize()].width);
   readonly webHeight = computed(() => WEB_SIZES[this.webSize()].height);
 
+  /** The device frame of the tablet and the phone; null on the desktop. */
+  readonly device = computed(() => {
+    const size = this.webSize();
+    if (size === 'escritorio') return { bezel: 0, radius: 0, status: 0, view: this.webHeight() };
+    const d = DEVICES[size];
+    return { bezel: d.bezel, radius: d.radius, status: d.status, view: this.webHeight() - d.status - d.chrome };
+  });
+
   /** Size of what is being shown, before shrinking it to fit the panel. */
-  readonly frameWidth = computed(() => (this.mode() === 'web' ? this.webWidth() : PHONES_WIDTH));
-  readonly frameHeight = computed(() =>
-    this.mode() === 'web' ? this.webHeight() + BROWSER_BAR : PHONES_HEIGHT,
-  );
+  readonly frameWidth = computed(() => {
+    if (this.mode() === 'app') return PHONES_WIDTH;
+    return this.webWidth() + this.device().bezel * 2;
+  });
+  readonly frameHeight = computed(() => {
+    if (this.mode() === 'app') return PHONES_HEIGHT;
+    if (this.webSize() === 'escritorio') return this.webHeight() + BROWSER_BAR;
+    return this.webHeight() + this.device().bezel * 2 + CAPTION;
+  });
 
   /**
    * How much the frame has to shrink to fit the panel. Only down, never up:
    * a phone blown up to 1.4 would stop being a phone.
+   *
+   * A device also has to fit the HEIGHT of the window: a tablet you have to
+   * scroll to see the bottom of is not a tablet, it is a long page. The
+   * desktop window keeps fitting the width only, the page scrolls inside it.
    */
   private readonly stageWidth = signal(0);
+  private readonly stageHeight = signal(0);
   readonly scale = computed(() => {
     const available = this.stageWidth();
     if (available <= 0) return 1;
-    return Math.min(1, available / this.frameWidth());
+    const byWidth = available / this.frameWidth();
+    const fitsHeight = this.mode() === 'app' || this.webSize() !== 'escritorio';
+    const tall = this.stageHeight();
+    const byHeight = fitsHeight && tall > 0 ? Math.max(0.5, tall / this.frameHeight()) : 1;
+    return Math.min(1, byWidth, byHeight);
   });
+
+  /** What the window leaves under the top of the stage, minus the note below it. */
+  private measureHeight(host: HTMLElement): void {
+    const top = host.getBoundingClientRect().top + window.scrollY;
+    this.stageHeight.set(window.innerHeight - top - 56);
+  }
+  private readonly onWindowResize = () => {
+    const host = this.stageHost;
+    if (host) this.measureHeight(host);
+  };
+  private stageHost: HTMLElement | null = null;
 
   private observer?: ResizeObserver;
 
@@ -148,10 +194,12 @@ export class VistaPreviaComponent implements OnDestroy {
   @ViewChild('stage')
   set stage(ref: ElementRef<HTMLElement> | undefined) {
     this.observer?.disconnect();
-    const host = ref?.nativeElement;
+    const host = ref?.nativeElement ?? null;
+    this.stageHost = host;
     if (!host || typeof ResizeObserver === 'undefined') return;
     this.observer = new ResizeObserver((entries) => {
       this.stageWidth.set(entries[0].contentRect.width);
+      this.measureHeight(host);
     });
     this.observer.observe(host);
   }
@@ -232,12 +280,17 @@ export class VistaPreviaComponent implements OnDestroy {
     return `bipsy.es/negocio/${businessSlug(b.id, b.name)}`;
   });
 
+  /** Just the host, for Safari's address bar: it does not show the path. */
+  readonly publicHost = computed(() => this.publicUrl().split('/')[0]);
+
   constructor() {
     void this.load();
+    window.addEventListener('resize', this.onWindowResize);
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    window.removeEventListener('resize', this.onWindowResize);
   }
 
   async load(): Promise<void> {
@@ -326,16 +379,4 @@ function trimPolicies(groups: PolicyGroup[], limit: number): PolicyGroup[] {
     trimmed.push({ ...group, policies: slice });
   }
   return trimmed;
-}
-
-/** `businessSlug()` of the customer web: `barberia-el-maestro-3`. */
-function businessSlug(id: number, name: string): string {
-  const slug = name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60);
-  return slug ? `${slug}-${id}` : String(id);
 }

@@ -44,6 +44,7 @@ const WORKER_PATHS = [
   '/panel/mi-horario',
   '/panel/mis-ausencias',
   '/panel/mi-perfil',
+  '/panel/enlace',
   '/panel/resenas',
   '/panel/ajustes/cuenta',
   '/panel/ajustes/notificaciones',
@@ -52,8 +53,18 @@ const WORKER_PATHS = [
   '/panel/verificar-email',
 ];
 
-function workerMayOpen(url: string): boolean {
+/**
+ * The front desk permission opens the list and the cards; importing and the
+ * banned list stay the owner's, and those routes do not let the role through.
+ */
+const WORKER_DESK_PATH = '/panel/clientes';
+const OWNER_DESK_PATHS = ['/panel/clientes/importar', '/panel/clientes/vetados'];
+
+function workerMayOpen(url: string, auth: AuthService): boolean {
   const path = url.split(/[?#]/)[0];
+  if (path.startsWith(WORKER_DESK_PATH)) {
+    return auth.canSeeCustomers() && !OWNER_DESK_PATHS.some((p) => path.startsWith(p));
+  }
   return path === '/panel' || path === '/panel/' || WORKER_PATHS.some((p) => path.startsWith(p));
 }
 
@@ -100,7 +111,7 @@ export const panelGuard: CanActivateFn = async (route, state) => {
     }
   }
 
-  if (auth.isWorker() && !workerMayOpen(target)) return router.createUrlTree(['/panel']);
+  if (auth.isWorker() && !workerMayOpen(target, auth)) return router.createUrlTree(['/panel']);
 
   return true;
 };

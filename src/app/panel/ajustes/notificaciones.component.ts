@@ -1,28 +1,27 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
+import { message } from '../core/data/resource';
 import {
-  BUSINESS_NOTIF_SECTIONS,
-  CHAT_NOTIF_SECTION,
-  NotifKey,
+  BUSINESS_NOTIF_GROUPS,
+  NotifGroup,
   NotifKeyValue,
-  NotifSection,
   NotificationPrefs,
-  WAITLIST_NOTIF_SECTION,
-  WORKER_NOTIF_SECTIONS,
+  WORKER_NOTIF_GROUPS,
 } from '../core/data/desktop-notify.service';
-import { WaitlistStore } from '../core/data/waitlist.store';
 import { PnSwitchComponent } from '../ui/controls';
 import { ToastService } from '../ui/toast.service';
 
 /**
  * `/panel/ajustes/notificaciones` — `notifications_screen_business.dart`.
  *
- * In the app these preferences belong to the device, not the account. Same
- * here: they live in this browser (same keys as the app, `notif_*`, which are
- * also the `notifKey`s of the backend) and decide which desktop notifications
- * `DesktopNotifyService` shows while the panel is open. The owner and a worker
- * see their own kinds, as in the app.
+ * One row per group with its switch, and its notices unfold BELOW while it is
+ * on. The group switch is a control, not a summary: it turns them all on or off.
+ * It stays on while one is left, so turning off the last one folds the list. A
+ * group of a single notice does not unfold: its row already is that notice.
+ *
+ * All of that belongs to the account and lives on the server. Only «Este
+ * navegador» is local: `notif_web_desktop` and the browser's permission.
  */
 @Component({
   selector: 'app-panel-notificaciones',
@@ -38,7 +37,7 @@ import { ToastService } from '../ui/toast.service';
 
       <div class="pn-head">
         <div class="pn-head__text">
-          <p class="pn-head__greet">Elige qué notificaciones quieres recibir en este dispositivo.</p>
+          <p class="pn-head__greet">Elige qué notificaciones quieres recibir.</p>
           <h1>Notificaciones</h1>
         </div>
       </div>
@@ -56,8 +55,8 @@ import { ToastService } from '../ui/toast.service';
                 </span>
                 @switch (prefs.permission()) {
                   @case ('granted') {
-                    <pn-switch [checked]="value(keys.webDesktop)" label="Avisos en el escritorio"
-                               (toggle)="set(keys.webDesktop, $event)" />
+                    <pn-switch [checked]="prefs.desktopEnabled()" label="Avisos en el escritorio"
+                               (toggle)="setDesktop($event)" />
                   }
                   @case ('default') {
                     <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" (click)="ask()">Activar</button>
@@ -73,31 +72,46 @@ import { ToastService } from '../ui/toast.service';
             </div>
           </div>
 
-          @for (section of sections(); track section.title) {
-            <div class="pn-group">
-              <p class="pn-group__head">{{ section.title }}</p>
-              <div class="pn-group__body">
-                @for (pref of section.prefs; track pref.key) {
-                  <div class="pn-row" [class.off]="!live()">
-                    <span class="material-symbols-rounded pn-row__icon">{{ pref.icon }}</span>
-                    <span class="pn-row__main">
-                      <span class="pn-row__title">{{ pref.title }}</span>
-                      <span class="pn-row__sub">{{ pref.sub }}</span>
-                    </span>
-                    @if (pref.web) {
-                      <pn-switch [checked]="value(pref.key)" [label]="pref.title"
-                                 (toggle)="set(pref.key, $event)" />
-                    } @else {
-                      <span class="pn-status pn-status--grey">Solo en el móvil</span>
+          @switch (prefs.status()) {
+            @case ('error') {
+              <!-- Not painted as «all on»: that would lie about their settings. -->
+              <div class="pn-empty">
+                <span class="material-symbols-rounded">cloud_off</span>
+                <p>No hemos podido cargar tus avisos.</p>
+                <button type="button" class="pn-btn pn-btn--secondary" (click)="prefs.load(true)">Reintentar</button>
+              </div>
+            }
+            @case ('ready') {
+              @for (group of groups(); track group.title) {
+                <div class="pn-group">
+                  <div class="pn-group__body">
+                    <div class="pn-row">
+                      <span class="material-symbols-rounded pn-row__icon">{{ group.icon }}</span>
+                      <span class="pn-row__main"><span class="pn-row__title">{{ group.title }}</span></span>
+                      <pn-switch [checked]="groupOn(group)" [label]="group.title"
+                                 (toggle)="setGroup(group, $event)" />
+                    </div>
+                    @if (group.notices.length > 1 && groupOn(group)) {
+                      @for (notice of group.notices; track notice.key) {
+                        <div class="pn-row notice">
+                          <span class="material-symbols-rounded pn-row__icon">{{ notice.icon }}</span>
+                          <span class="pn-row__main"><span class="pn-row__title">{{ notice.label }}</span></span>
+                          <pn-switch [checked]="prefs.isEnabled(notice.key)" [label]="notice.label"
+                                     (toggle)="save([notice.key], $event)" />
+                        </div>
+                      }
                     }
                   </div>
-                }
-              </div>
-            </div>
+                </div>
+              }
+              <p class="pn-group__foot">
+                Valen para tu cuenta, también en el móvil. Los avisos de cobros y de seguridad llegan siempre.
+              </p>
+            }
+            @default {
+              <div class="pn-skeleton" style="height:320px;margin-top:16px"></div>
+            }
           }
-          <p class="pn-group__foot">
-            Esto vale solo para este navegador. En tu móvil, los avisos se ajustan desde la app.
-          </p>
         </div>
 
         <div class="pn-col-5">
@@ -131,37 +145,23 @@ import { ToastService } from '../ui/toast.service';
     `
       :host { display: block; }
       .back { margin: 0 0 14px -12px; text-decoration: none; }
-      .off { opacity: 0.55; }
       .denied { margin-top: 14px; }
+      .notice { padding-left: 32px; }
     `,
   ],
 })
 export class NotificacionesComponent {
   readonly auth = inject(AuthService);
   readonly prefs = inject(NotificationPrefs);
-  private readonly waitlist = inject(WaitlistStore);
   private readonly toasts = inject(ToastService);
 
-  readonly keys = NotifKey;
-
-  readonly sections = computed<NotifSection[]>(() => {
-    const base = this.auth.isWorker() ? WORKER_NOTIF_SECTIONS : BUSINESS_NOTIF_SECTIONS;
+  readonly groups = computed<NotifGroup[]>(() => {
+    const base = this.auth.isWorker() ? WORKER_NOTIF_GROUPS : BUSINESS_NOTIF_GROUPS;
     // An autonomous business has no team: no absence requests, no clock-ins.
-    const own = this.auth.isBusiness() && this.auth.isAutonomous()
-      ? base.filter((s) => s.title !== 'Ausencias' && s.title !== 'Fichajes')
+    return this.auth.isBusiness() && this.auth.isAutonomous()
+      ? base.filter((g) => g.title !== 'Ausencias' && g.title !== 'Fichaje')
       : base;
-    return [
-      ...own,
-      // Shared by both roles, and only where there is something to hear about.
-      ...(this.waitlist.enabled() ? [WAITLIST_NOTIF_SECTION] : []),
-      ...(this.auth.canUseChat() ? [CHAT_NOTIF_SECTION] : []),
-    ];
   });
-
-  /** The per-kind switches only matter once the browser shows notifications. */
-  readonly live = computed(
-    () => this.prefs.permission() === 'granted' && this.prefs.isEnabled(NotifKey.webDesktop),
-  );
 
   readonly permissionText = computed(() => {
     switch (this.prefs.permission()) {
@@ -176,18 +176,35 @@ export class NotificacionesComponent {
     }
   });
 
-  value(key: NotifKeyValue): boolean {
-    return this.prefs.isEnabled(key);
+  constructor() {
+    void this.prefs.load();
   }
 
-  set(key: NotifKeyValue, on: boolean): void {
-    if (!this.prefs.set(key, on)) this.toasts.error('Tu navegador no deja guardar esta preferencia.');
+  groupOn(group: NotifGroup): boolean {
+    return group.notices.some((notice) => this.prefs.isEnabled(notice.key));
+  }
+
+  setGroup(group: NotifGroup, on: boolean): void {
+    void this.save(group.notices.map((notice) => notice.key), on);
+  }
+
+  /** The service already undid it; all that is left is saying why it moved back. */
+  async save(keys: NotifKeyValue[], on: boolean): Promise<void> {
+    try {
+      await this.prefs.setEnabled(keys, on);
+    } catch (cause) {
+      this.toasts.error(message(cause) || 'No hemos podido guardar el cambio.');
+    }
+  }
+
+  setDesktop(on: boolean): void {
+    if (!this.prefs.setDesktopEnabled(on)) this.toasts.error('Tu navegador no deja guardar esta preferencia.');
   }
 
   async ask(): Promise<void> {
     const answer = await this.prefs.requestPermission();
     if (answer === 'granted') {
-      this.prefs.set(NotifKey.webDesktop, true);
+      this.prefs.setDesktopEnabled(true);
       this.toasts.show('Avisos activados');
     } else if (answer === 'denied') {
       this.toasts.error('El navegador ha bloqueado los avisos.');

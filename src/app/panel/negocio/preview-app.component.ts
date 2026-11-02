@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { PolicyGroup, ServiceResponse } from '../core/api/models';
 import { fromInstant } from '../core/util/dates';
+import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
 import {
   PreviewVm,
   appPrice,
@@ -56,6 +57,7 @@ const COVER_RATIO = 16 / 9;
 @Component({
   selector: 'app-preview-app',
   standalone: true,
+  imports: [PnVerifiedBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './preview-app.component.html',
   styleUrl: './preview-app.component.css',
@@ -155,6 +157,41 @@ export class PreviewAppComponent {
 
   initials(name: string | null): string {
     return reviewInitials(name ?? '');
+  }
+
+  /**
+   * `_SocialRow`: only the networks the business has, in the order of
+   * «Editar perfil» — web, Instagram, Facebook, X, TikTok and WhatsApp — with
+   * the addresses `BusinessSocialLinks` builds from the stored handles.
+   */
+  get socialLinks(): { label: string; icon: string | null; url: string }[] {
+    const s = this.vm.business.social ?? {};
+    const handle = (value: string | null | undefined) => (value ?? '').trim().replace(/^@/, '');
+    const site = (s.website ?? '').trim();
+    const phone = (s.whatsapp ?? '').replace(/[^0-9]/g, '');
+    const links: { label: string; icon: string | null; url: string | null }[] = [
+      { label: 'Web', icon: null, url: site ? (/^https?:\/\//i.test(site) ? site : `https://${site}`) : null },
+      { label: 'Instagram', icon: 'instagram', url: handle(s.instagram) ? `https://instagram.com/${handle(s.instagram)}` : null },
+      { label: 'Facebook', icon: 'facebook', url: handle(s.facebook) ? `https://facebook.com/${handle(s.facebook)}` : null },
+      { label: 'X', icon: 'x', url: handle(s.x) ? `https://x.com/${handle(s.x)}` : null },
+      { label: 'TikTok', icon: 'tiktok', url: handle(s.tiktok) ? `https://tiktok.com/@${handle(s.tiktok)}` : null },
+      { label: 'WhatsApp', icon: 'whatsapp', url: phone ? `https://wa.me/${phone}` : null },
+    ];
+    return links.filter((link): link is { label: string; icon: string | null; url: string } => link.url !== null);
+  }
+
+  /**
+   * `_placeNote` of `gipsi_service_row.dart`: where the service is given, only
+   * when it is not just at the venue, with the surcharge stuck to it.
+   */
+  placeNote(service: ServiceResponse): string | null {
+    const where =
+      service.serviceMode === 'BOTH' ? 'También a domicilio'
+      : service.serviceMode === 'AT_CUSTOMER' ? 'Solo a domicilio'
+      : null;
+    if (where === null) return null;
+    const cents = service.homeSurchargeCents ?? 0;
+    return cents > 0 ? `${where} · +${appPrice(cents / 100)}` : where;
   }
 
   serviceIcon(service: ServiceResponse): string {

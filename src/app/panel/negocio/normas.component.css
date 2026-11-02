@@ -6,7 +6,7 @@
 .nm-group__head .pn-group__head { padding-bottom: 0; }
 .nm-group__title { display: inline-flex; align-items: center; gap: 8px; }
 .nm-group__title .material-symbols-rounded { font-size: 17px; }
-.pn-group > .nm-group__title { padding-bottom: 10px; }
+.pn-fg > .nm-group__title { display: flex; }
 .nm-group__actions { display: inline-flex; align-items: center; gap: 2px; flex: none; }
 .nm-group__actions .pn-icon-btn .material-symbols-rounded { font-size: 19px; }
 .nm-danger { color: var(--clr-danger-text); }
@@ -37,17 +37,43 @@ button.nm-row__main:hover .nm-text { text-decoration: underline; text-underline-
 
 .nm-add .pn-row__icon, .nm-add .pn-row__title { color: var(--clr-text); }
 
-.nm-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+/* ----- DIÁLOGOS -------------------------------------------------------- */
+
+.pn-fg:last-child { margin-bottom: 0; }
+.nm-error { margin: 9px 4px 0; }
+.nm-count { text-align: right; }
+
+/* A select in a row: the row is the box, so the field keeps only its arrow.
+   `.pn-fg__input` wipes the background, arrow included, so it is drawn again. */
+.pn-fg__row .pn-select.pn-fg__input,
+.pn-fg__row .pn-select.pn-fg__input:focus {
+  min-height: 46px;
+  padding: 0 24px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A958F'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right -4px center / 20px;
+}
+.pn-fg__input:disabled { color: var(--clr-text-3); cursor: not-allowed; }
+
+/* The card clips: a ring drawn outside the row would be cut in half. */
+.pn-fg__body .pn-row:focus-visible { outline-offset: -3px; border-radius: 0; }
+
+.nm-remove { justify-content: center; min-height: 46px; text-align: center; cursor: pointer; }
+.nm-remove .pn-row__main { flex: none; }
+.nm-remove:hover { background: var(--pn-field); }
+
+.nm-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; padding: 12px; }
 .nm-icon {
-  width: 44px;
-  height: 44px;
+  height: 40px;
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 12px;
-  background: var(--pn-field);
+  border-radius: 10px;
+  background: transparent;
   color: var(--clr-text-2);
   cursor: pointer;
 }
-.nm-icon .material-symbols-rounded { font-size: 20px; }
+.nm-icon:hover { background: var(--pn-field); color: var(--clr-text); }
+.nm-icon:focus-visible { outline-offset: 0; border-radius: 10px; }
+.nm-icon .material-symbols-rounded { font-size: 21px; }
 .nm-icon[aria-checked='true'] { background: var(--pn-accent); color: var(--pn-on-accent); }

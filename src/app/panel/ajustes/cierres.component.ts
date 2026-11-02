@@ -10,6 +10,7 @@ import { MONTHS, addDays, dayKey, hhmm, shortDate, toDate } from '../core/util/d
 import { PnEmptyComponent, PnErrorComponent } from '../ui/controls';
 import { ConfirmService } from '../ui/confirm.service';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnDateComponent } from '../ui/date.component';
 import { ToastService } from '../ui/toast.service';
 
 /**
@@ -31,7 +32,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-panel-cierres',
   standalone: true,
-  imports: [FormsModule, RouterLink, PnEmptyComponent, PnErrorComponent, PnDialogComponent],
+  imports: [FormsModule, RouterLink, PnEmptyComponent, PnErrorComponent, PnDialogComponent, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
@@ -124,24 +125,31 @@ import { ToastService } from '../ui/toast.service';
       <pn-dialog title="Cerrar unos días" (closed)="creating.set(false)">
         <p class="pn-dim intro">Días en que el local no abre. Nadie del equipo dará citas.</p>
 
-        <div class="dates">
-          <label class="pn-field">
-            <span class="pn-field__label">Desde</span>
-            <input class="pn-input" type="date" name="from" [min]="today" [max]="maxDay"
-                   [ngModel]="from" (ngModelChange)="setFrom($event)" />
-          </label>
-          <label class="pn-field">
-            <span class="pn-field__label">Hasta</span>
-            <input class="pn-input" type="date" name="to" [min]="from || today" [max]="maxDay"
-                   [ngModel]="to" (ngModelChange)="setTo($event)" />
-          </label>
+        <div class="pn-fg">
+          <p class="pn-fg__head">Fechas</p>
+          <div class="pn-fg__body">
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Desde</span>
+              <pn-date look="row" name="from" [min]="today" [max]="maxDay"
+                     [ngModel]="from" (ngModelChange)="setFrom($event)" />
+            </label>
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Hasta</span>
+              <pn-date look="row" name="to" [min]="from || today" [max]="maxDay"
+                     [ngModel]="to" (ngModelChange)="setTo($event)" />
+            </label>
+          </div>
         </div>
 
-        <label class="pn-field">
-          <span class="pn-field__label">Motivo (opcional)</span>
-          <input class="pn-input" name="reason" maxlength="255" placeholder="Vacaciones, formación, baja..."
-                 [(ngModel)]="reason" />
-        </label>
+        <div class="pn-fg last">
+          <div class="pn-fg__body">
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Motivo (opcional)</span>
+              <input class="pn-fg__input" name="reason" maxlength="255" placeholder="Vacaciones, formación, baja..."
+                     [(ngModel)]="reason" />
+            </label>
+          </div>
+        </div>
 
         @if (checking()) {
           <p class="checking"><span class="pn-spinner"></span>Mirando qué citas hay...</p>
@@ -209,14 +217,17 @@ import { ToastService } from '../ui/toast.service';
       }
       .cl__icon .material-symbols-rounded { font-size: 21px; }
       .old { margin-top: 28px; }
-      .intro { margin-bottom: 18px; line-height: 1.55; }
-      .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+      .intro { margin-bottom: 16px; font-size: 0.875rem; line-height: 1.6; }
+      /* The last block of the form: what follows is the check's answer. */
+      .last { margin-bottom: 0; }
+      .last ~ .pn-notice { margin-top: 16px; }
+      .last ~ .pn-field__error { margin: 12px 4px 0; }
       .checking {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        margin-bottom: 12px;
+        margin-top: 16px;
         font-size: 0.8125rem;
         color: var(--clr-text-2);
       }
@@ -232,7 +243,6 @@ import { ToastService } from '../ui/toast.service';
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      @media (max-width: 520px) { .dates { grid-template-columns: 1fr; } }
     `,
   ],
 })

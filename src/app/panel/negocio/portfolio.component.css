@@ -52,13 +52,36 @@
 .pf-tile__actions .pn-icon-btn:hover { background: rgba(255, 255, 255, 0.18); }
 .pf-tile__actions .material-symbols-rounded { font-size: 18px; }
 
+/* ----- DIÁLOGOS -------------------------------------------------------- */
+
 .pf-preview {
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border-radius: var(--pn-radius-row);
-  margin-bottom: 20px;
+  border-radius: 14px;
+  margin-bottom: 22px;
+  background: var(--pn-card);
 }
+.pn-fg:last-child { margin-bottom: 0; }
+
+.pf-opt { display: block; margin-top: 1px; font-size: 0.75rem; font-weight: 500; color: var(--clr-text-3); }
+
+/* A select in a row: the row is the box, so the field keeps only its arrow.
+   `.pn-fg__input` wipes the background, arrow included, so it is drawn again. */
+.pn-fg__row .pn-select.pn-fg__input,
+.pn-fg__row .pn-select.pn-fg__input:focus {
+  min-height: 46px;
+  padding: 0 24px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A958F'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right -4px center / 20px;
+}
+
+.pf-remove { justify-content: center; min-height: 46px; text-align: center; cursor: pointer; }
+.pf-remove .pn-row__main { flex: none; }
+.pf-remove:hover { background: var(--pn-field); }
+.pf-remove:focus-visible { outline-offset: -3px; border-radius: 0; }
 
 /* ----- Instagram ----- */
 

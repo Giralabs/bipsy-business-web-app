@@ -10,6 +10,7 @@ import { ServicesStore } from '../core/data/services.store';
 import { PnEmptyComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
 import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -23,7 +24,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-panel-portfolio',
   standalone: true,
-  imports: [FormsModule, RouterLink, PnEmptyComponent, PnDialogComponent, PnPhotoPickerComponent],
+  imports: [FormsModule, RouterLink, PnEmptyComponent, PnDialogComponent, PnPhotoPickerComponent, PnSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portfolio.component.html',
   styleUrl: './portfolio.component.css',
@@ -34,6 +35,15 @@ export class PortfolioComponent {
   private readonly confirm = inject(ConfirmService);
   private readonly toasts = inject(ToastService);
   readonly services = inject(ServicesStore);
+
+  private readonly serviceList = computed(() =>
+    this.services.all().map((service) => ({ value: service.id as number | null, label: service.name })),
+  );
+
+  /** The services to tag a photo with, after the «none» option with its own wording. */
+  serviceOptions(none: string): PnOption<number | null>[] {
+    return [{ value: null, label: none }, ...this.serviceList()];
+  }
   readonly auth = inject(AuthService);
 
   readonly uploading = signal(false);

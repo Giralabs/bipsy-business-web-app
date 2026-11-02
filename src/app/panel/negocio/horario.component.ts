@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Api } from '../core/api/api';
 import { scheduleToApi } from '../core/api/schedule';
 import { AgendaStore } from '../core/data/agenda.store';
-import { message } from '../core/data/resource';
+import { message, serverReason } from '../core/data/resource';
 import { ToastService } from '../ui/toast.service';
 import {
   Week,
@@ -130,9 +130,8 @@ export class HorarioComponent {
       this.toasts.show('Horario guardado');
     } catch (cause) {
       const status = (cause as { status?: number }).status;
-      const detail = (cause as { error?: { message?: string } }).error?.message;
       this.toasts.error(
-        status === 400 ? detail || 'Revisa los tramos: hay alguno que no vale.' : message(cause),
+        status === 400 ? serverReason(cause) || 'Revisa los tramos: hay alguno que no vale.' : message(cause),
       );
     } finally {
       this.busy.set(false);

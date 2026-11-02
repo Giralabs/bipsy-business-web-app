@@ -20,7 +20,10 @@
     } @else {
       <span class="vpa-punch"></span>
     }
-    <div class="ph__status vpa-status" [class.vpa-status--dark]="coverGone()">
+    <!-- Sobre el hueco de la portada (el acento) el blanco no se lee: ahí va
+         el color de encima del acento. -->
+    <div class="ph__status vpa-status" [class.vpa-status--dark]="coverGone()"
+         [class.vpa-status--on-accent]="!coverGone() && !vm.coverUrl">
       <span>{{ clock }}</span>
       <span class="ph__status-icons">
         <span class="material-symbols-rounded">signal_cellular_alt</span>
@@ -52,8 +55,12 @@
            A sangre, 16:9 y SIN degradado: la portada se ve tal cual la subió
            el negocio. -->
       <div class="vpa-cover">
+        <!-- Sin portada, GipsiImagePlaceholder: el acento con una tienda. Es
+             «no hay foto», no un error. -->
         @if (vm.coverUrl; as url) {
           <img [src]="url" alt="" (error)="hideBroken($event)" />
+        } @else {
+          <span class="vpa-cover__none"><span class="material-symbols-rounded">storefront</span></span>
         }
       </div>
 
@@ -63,7 +70,12 @@
           @if (vm.avatarUrl; as url) {
             <img class="vpa-logo" [src]="url" alt="" />
           }
-          <h2 class="vpa-title">{{ vm.business.name }}</h2>
+          <h2 class="vpa-title">
+            {{ vm.business.name }}
+            @if (vm.business.verified) {
+              <pn-verified-badge [size]="24" />
+            }
+          </h2>
         </div>
 
         <div class="vpa-meta">
@@ -116,6 +128,24 @@
                       aria-label="Escribir" (click)="act.emit()">
                 <span class="material-symbols-rounded">chat_bubble</span>
               </button>
+            }
+          </div>
+        }
+
+        <!-- `_SocialRow`: dónde encontrar al negocio fuera de Bipsy. Como en la
+             vista previa de la app, estas SÍ se abren: es la única forma de
+             comprobar que cada enlace lleva a su cuenta. -->
+        @if (socialLinks.length > 0) {
+          <div class="vpa-social">
+            @for (link of socialLinks; track link.label) {
+              <a class="vpa-social__btn" [href]="link.url" target="_blank" rel="noopener noreferrer"
+                 [attr.aria-label]="link.label" [attr.title]="link.label">
+                @if (link.icon; as icon) {
+                  <span class="vpa-social__mark" [style.--vpa-mark]="'url(assets_bipsy/brands/' + icon + '.svg)'"></span>
+                } @else {
+                  <span class="material-symbols-rounded">language</span>
+                }
+              </a>
             }
           </div>
         }
@@ -180,6 +210,12 @@
                         <span class="vpa-service__dur">{{ duration(service.duration) }}</span>
                         <span class="vpa-service__price">{{ price(service.price) }}</span>
                       </span>
+                      @if (placeNote(service); as note) {
+                        <span class="vpa-service__place">
+                          <span class="material-symbols-rounded">directions_car</span>
+                          <span class="vpa-service__place-text">{{ note }}</span>
+                        </span>
+                      }
                     </span>
                     <span class="material-symbols-rounded vpa-service__chev">arrow_forward_ios</span>
                   </button>

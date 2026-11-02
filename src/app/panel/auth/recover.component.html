@@ -40,7 +40,8 @@
     <label class="pn-field">
       <span class="pn-field__label">Nueva contraseña</span>
       <input class="pn-input" type="password" name="password" autocomplete="new-password"
-             placeholder="Mínimo 8 caracteres" [(ngModel)]="password" />
+             [(ngModel)]="password" />
+      <pn-password-rules [password]="password" />
     </label>
 
     @if (error(); as text) { <p class="pn-field__error auth-error" role="alert">{{ text }}</p> }

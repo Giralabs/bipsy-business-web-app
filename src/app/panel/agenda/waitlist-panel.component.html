@@ -55,7 +55,8 @@
 
 @if (picked(); as entry) {
   <pn-dialog [title]="entry.customerName" (closed)="pick(null)">
-    <div class="pn-group__body wl-detail">
+    <div class="pn-fg">
+    <div class="pn-fg__body">
       <div class="pn-row">
         <span class="material-symbols-rounded pn-row__icon">content_cut</span>
         <span class="pn-row__main"><span class="pn-row__title">Servicio</span></span>
@@ -89,26 +90,36 @@
         <span class="pn-row__value">{{ longDate(fromInstant(entry.waitingSince)) }}</span>
       </div>
     </div>
+    </div>
 
     @if (entry.notes) {
-      <div class="wl-note">
-        <strong>Su nota</strong>
-        <p>{{ entry.notes }}</p>
+      <div class="pn-fg">
+        <p class="pn-fg__head">Su nota</p>
+        <div class="pn-fg__body">
+          <p class="wl-note">{{ entry.notes }}</p>
+        </div>
       </div>
     }
 
-    <div class="wl-note">
-      <strong>Ofrecer un hueco</strong>
-      <p>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Ofrecer un hueco</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Día</span>
+          <pn-date look="row" name="slotDay" label="Día del hueco" [min]="today" [(ngModel)]="slotDay" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Hora</span>
+          <pn-select look="row" name="slotTime" label="Hora del hueco" placeholder="Elegir"
+                     [options]="slotTimes" [(ngModel)]="slotTime" />
+        </label>
+      </div>
+      <p class="pn-fg__foot">
         Para {{ entry.serviceName }}{{ entry.workerName ? ' con ' + entry.workerName : '' }}. Avisamos a quien
         le encaje de la lista, según cómo tengas repartidos los huecos.
       </p>
-      <label class="pn-field">
-        <span class="pn-field__label">Día y hora</span>
-        <input class="pn-input" type="datetime-local" name="slotStart" [(ngModel)]="slotStart" />
-      </label>
       @if (offerResult(); as text) {
-        <p>{{ text }}</p>
+        <p class="wl-result" role="status">{{ text }}</p>
       }
     </div>
 
@@ -123,46 +134,47 @@
 
 @if (settingsOpen()) {
   <pn-dialog title="Cómo se reparten los huecos" (closed)="settingsOpen.set(false)">
-    <div class="pn-group">
-      <div class="pn-group__body">
-        <button type="button" class="pn-row" (click)="mode = 'SEQUENTIAL'">
-          <span class="pn-row__main">
-            <span class="pn-row__title">En orden</span>
-            <span class="pn-row__sub">
+    <div class="pn-fg">
+      <p class="pn-fg__head">A quién avisamos</p>
+      <div class="pn-fg__body" role="radiogroup" aria-label="A quién avisamos">
+        <button type="button" class="pn-fg__choice" role="radio" [attr.aria-checked]="mode === 'SEQUENTIAL'"
+                (click)="mode = 'SEQUENTIAL'">
+          <span class="material-symbols-rounded">format_list_numbered</span>
+          <span class="pn-fg__choice-main">
+            <span class="pn-fg__choice-title">En orden</span>
+            <span class="pn-fg__choice-sub">
               Avisamos al primero de la lista y esperamos su respuesta. Si dice que no o no contesta a
               tiempo, pasamos al siguiente.
             </span>
           </span>
-          @if (mode === 'SEQUENTIAL') {
-            <span class="material-symbols-rounded pn-row__icon">check</span>
-          }
+          <span class="material-symbols-rounded pn-fg__tick">check</span>
         </button>
-        <button type="button" class="pn-row" (click)="mode = 'BROADCAST'">
-          <span class="pn-row__main">
-            <span class="pn-row__title">A todos</span>
-            <span class="pn-row__sub">
+        <button type="button" class="pn-fg__choice" role="radio" [attr.aria-checked]="mode === 'BROADCAST'"
+                (click)="mode = 'BROADCAST'">
+          <span class="material-symbols-rounded">campaign</span>
+          <span class="pn-fg__choice-main">
+            <span class="pn-fg__choice-title">A todos</span>
+            <span class="pn-fg__choice-sub">
               Avisamos a la vez a todos a quienes les encaje el hueco y se lo queda el primero que lo coja.
             </span>
           </span>
-          @if (mode === 'BROADCAST') {
-            <span class="material-symbols-rounded pn-row__icon">check</span>
-          }
+          <span class="material-symbols-rounded pn-fg__tick">check</span>
         </button>
       </div>
     </div>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Plazo para contestar</span>
-      <select class="pn-select" [(ngModel)]="hours" name="hours">
-        @for (option of [6, 12, 24, 48, 72]; track option) {
-          <option [ngValue]="option">{{ option }} horas</option>
-        }
-      </select>
-      <span class="pn-field__hint">
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        <label class="pn-fg__row wl-wide">
+          <span class="pn-fg__label">Plazo para contestar</span>
+          <pn-select look="row" name="hours" label="Plazo para contestar" [options]="hourOptions" [(ngModel)]="hours" />
+        </label>
+      </div>
+      <p class="pn-fg__foot">
         Si el hueco es para dentro de menos de 24 horas avisamos a toda la lista a la vez, aunque tengas
         puesto «en orden».
-      </span>
-    </label>
+      </p>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--secondary" (click)="settingsOpen.set(false)">Cancelar</button>

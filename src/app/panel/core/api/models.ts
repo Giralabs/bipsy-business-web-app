@@ -67,6 +67,15 @@ export interface BusinessProfile {
   businessChatEnabled?: boolean;
   waitlistEnabled: boolean;
   waitlistManageEnabled?: boolean;
+  /**
+   * A worker's front desk permission (V111): the customer list and giving an
+   * appointment, both with one switch because the second starts in the first.
+   */
+  customersEnabled?: boolean;
+  /** The owner's own average, over ALL the reviews. */
+  averageRating?: number | null;
+  /** A worker's: the average of the business they belong to. Only filled in `/me`. */
+  businessAverageRating?: number | null;
   waitlistNotifyMode: WaitlistNotifyMode;
   waitlistResponseHours: number;
   businessId?: number;
@@ -131,6 +140,16 @@ export interface BusinessProfile {
   bookingLimitEnabled: boolean;
   bookingLimitPerCustomer: number | null;
   onlinePaymentMode: OnlinePaymentMode;
+  /** «Pago por app» (V114) in force: the owner chose it AND the account can collect. */
+  paymentRequestEnabled?: boolean;
+  /**
+   * «Pago por app» as the owner chose it. The one its switch paints and the one
+   * that excludes `autoSettleEnabled`: reading what is in force would let a
+   * half-verified account turn both on. Saved as `paymentRequestEnabled`.
+   */
+  paymentRequestIntent?: boolean;
+  /** «Marcar como pagadas al terminar» (V117). Needs no payouts account. */
+  autoSettleEnabled?: boolean;
   setupComplete: boolean;
   onboardingComplete: boolean;
   signupRoute: string | null;
@@ -138,6 +157,51 @@ export interface BusinessProfile {
   entitlements: string[];
   superAccess: boolean;
   subscription: SubscriptionStatus | null;
+  /** Whether customers see the Bipsy seal right now: granted AND able to collect. */
+  verified?: boolean;
+}
+
+// ----- VERIFICATION (V123) --------------------------------------------------
+
+/**
+ * `UNKNOWN` covers a backend newer than the panel and is painted as «not asked
+ * for»: the safe side, and the server rejects what does not apply.
+ */
+export type VerificationStatus = 'NONE' | 'PENDING' | 'VERIFIED' | 'REJECTED' | 'UNKNOWN';
+
+/**
+ * `UNKNOWN` is a requirement this version cannot name. It still counts, so the
+ * panel never offers a request the server would turn down.
+ */
+export type VerificationRequirementCode =
+  | 'PAYMENTS'
+  | 'EMAIL_VERIFIED'
+  | 'PROFILE_PHOTO'
+  | 'COVER'
+  | 'DESCRIPTION'
+  | 'SERVICES'
+  | 'SCHEDULE'
+  | 'TEAM'
+  | 'UNKNOWN';
+
+export interface VerificationRequirement {
+  code: VerificationRequirementCode;
+  met: boolean;
+  /** Who it is missing for, when the requirement is about people. */
+  missing: string[];
+}
+
+/** `GET /businesses/me/verification`, already evaluated by the server. */
+export interface BusinessVerification {
+  status: VerificationStatus;
+  /** Whether customers see the seal NOW: a grant hides while payments are down. */
+  verified: boolean;
+  requirements: VerificationRequirement[];
+  canRequest: boolean;
+  /** The reason for the last rejection or revocation. */
+  note: string | null;
+  requestedAt: string | null;
+  verifiedAt: string | null;
 }
 
 export type OnlinePaymentMode = 'OFF' | 'OPTIONAL' | 'REQUIRED';
@@ -203,6 +267,13 @@ export interface BookingResponse {
   cancelReason: string | null;
   priceCents: number | null;
   prepaidCents: number;
+  /**
+   * The business stamped it as collected OUTSIDE Bipsy (cash, its own reader).
+   * Not money in Stripe, so it does not count in Cobros; for the agenda it means
+   * «collected» just like `prepaidCents`. Only filled in the agenda endpoints:
+   * a customer's file gets false here and 0 in `prepaidCents`.
+   */
+  settledOffline?: boolean;
   canReview?: boolean;
   businessChatEnabled?: boolean;
   /** Absent on a backend older than V94: then it is at the venue. */
@@ -279,9 +350,39 @@ export type AgendaState =
   | 'esperandoCliente'
   | 'confirmada'
   | 'pagada'
+  | 'pendienteDePago'
   | 'pasada'
   | 'cancelada'
   | 'noVino';
+
+/** `PaymentRequestResponse`: what was asked of the customer's app. `expiresAt` is an `Instant`. */
+export interface PaymentRequest {
+  id: number;
+  bookingId: number;
+  status: 'SENT' | 'PAID' | 'EXPIRED' | 'CANCELED';
+  amountCents: number;
+  expiresAt: string;
+  createdAt?: string | null;
+}
+
+/**
+ * `GET /businesses/me/bookings/{id}/collect`. Brings the reason already written
+ * because the panel decides nothing: what is painted on the greyed-out option
+ * comes from here. The `canCollectInPerson` pair of the DTO is Tap to Pay: unused.
+ */
+export interface CollectStatus {
+  bookingId: number;
+  amountCents: number;
+  /** Collected through Bipsy, net of refunds. */
+  paidCents: number;
+  dueCents: number;
+  settledOffline: boolean;
+  settledOfflineAt?: string | null;
+  settledOfflineBy?: string | null;
+  canRequest: boolean;
+  reason?: string | null;
+  request?: PaymentRequest | null;
+}
 
 // ----- SERVICES ----------------------------------------------------------
 
@@ -433,6 +534,8 @@ export interface TeamWorker {
   allowOvertime: boolean;
   chatEnabled: boolean;
   waitlistManageEnabled: boolean;
+  /** Front desk permission (V111), see `BusinessProfile.customersEnabled`. */
+  customersEnabled?: boolean;
   profileImageUrl: string | null;
 }
 
@@ -913,6 +1016,11 @@ export interface ReferralCode {
   editable: boolean;
 }
 
+/** `GET|PUT /me/notification-prefs`: only what is off travels. */
+export interface NotificationPrefsResponse {
+  muted: string[];
+}
+
 export interface CategoryRef {
   id: number;
   code: string;
@@ -974,6 +1082,8 @@ export interface CreateTicketRequest {
   /** Required, max 4000. */
   description: string;
   kind: SupportTicketKind;
+  /** The two e-mails wait for `POST …/{id}/notify`, so the copy to support carries the files. */
+  deferNotice?: boolean;
 }
 
 /** `SupportTicketResponse`. Timestamps are instants. `GET /support/tickets/me` pages them. */
@@ -1087,6 +1197,8 @@ export interface BusinessDetail {
   travelBufferMinutes?: number;
   /** Days a PENDING booking survives before the server cancels it. */
   pendingAutoCancelDays?: number;
+  /** Public on purpose: the seal is meant for customers. */
+  verified?: boolean;
 }
 
 /** `ScheduleEntryResponse` as it comes from `/businesses/{id}/schedule`. */

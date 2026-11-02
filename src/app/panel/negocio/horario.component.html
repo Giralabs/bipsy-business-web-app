@@ -47,21 +47,11 @@
               <!-- `selected` on the option and not `[value]` on the select:
                    the options are rendered by @for, so the select has nothing
                    to match against when the value binding runs. -->
-              <select class="pn-select ho-select"
-                      (change)="setTime(index, rangeIndex, 'startTime', $any($event.target).value)"
-                      [attr.aria-label]="'Hora de apertura, ' + day">
-                @for (time of times; track time) {
-                  <option [value]="time" [selected]="time === range.startTime">{{ time }}</option>
-                }
-              </select>
+              <pn-select class="ho-select" [options]="times" [value]="range.startTime" [label]="'Hora de apertura, ' + day"
+                         (changed)="setTime(index, rangeIndex, 'startTime', $any($event))" />
               <span class="ho-range__dash">–</span>
-              <select class="pn-select ho-select"
-                      (change)="setTime(index, rangeIndex, 'endTime', $any($event.target).value)"
-                      [attr.aria-label]="'Hora de cierre, ' + day">
-                @for (time of times; track time) {
-                  <option [value]="time" [selected]="time === range.endTime">{{ time }}</option>
-                }
-              </select>
+              <pn-select class="ho-select" [options]="times" [value]="range.endTime" [label]="'Hora de cierre, ' + day"
+                         (changed)="setTime(index, rangeIndex, 'endTime', $any($event))" />
               <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Quitar tramo"
                       (click)="removeRange(index, rangeIndex)">
                 <span class="material-symbols-rounded">close</span>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, isDevMode } from '@angular/core';
 
 /**
  * Spot for a Mr. Bip illustration.
@@ -39,13 +39,18 @@ export class BipSlotComponent {
   /** Hides the caption and keeps only the silhouette, for small slots. */
   @Input() compact = false;
 
-  /** False once the artwork file has failed to load. */
+  /** False once the artwork file has failed to load, and failed again on the retry. */
   hasArtwork = true;
+
+  /** The design notes on the placeholder are for us: a visitor only sees the symbol. */
+  readonly showNotes = isDevMode();
+
+  private retried = false;
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
   get artworkSrc(): string {
-    return `mr_bip/${this.code}.webp`;
+    return `mr_bip/${this.code}.webp${this.retried ? '?retry=1' : ''}`;
   }
 
   get mascotName(): string {
@@ -53,6 +58,15 @@ export class BipSlotComponent {
   }
 
   onArtworkError(): void {
+    // One blip (a deploy in progress, a bad connection) must not leave the
+    // placeholder up for good: every published code has its file.
+    if (!this.retried) {
+      setTimeout(() => {
+        this.retried = true;
+        this.cdr.markForCheck();
+      }, 1500);
+      return;
+    }
     this.hasArtwork = false;
     this.cdr.markForCheck();
   }

@@ -1,10 +1,12 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection } from '@angular/core';
 import {
+  PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
   withNavigationErrorHandler,
+  withPreloading,
   withViewTransitions,
 } from '@angular/router';
 
@@ -30,6 +32,9 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions({ skipInitialTransition: true }),
       // Same rule from the router's side, where the URL that failed is known.
       withNavigationErrorHandler(onNavigationError),
+      // Every section's code is fetched in the background once the first page
+      // is up, so a click opens it at once instead of waiting for its chunk.
+      withPreloading(PreloadAllModules),
     ),
   ],
 };

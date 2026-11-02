@@ -6,6 +6,8 @@ import { message } from '../core/data/resource';
 import { dayKey, longDate } from '../core/util/dates';
 import { PnEmptyComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnDateComponent } from '../ui/date.component';
+import { PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -33,7 +35,7 @@ const STATUS: Record<Absence['status'], { label: string; tone: string }> = {
 @Component({
   selector: 'app-mis-ausencias',
   standalone: true,
-  imports: [FormsModule, PnEmptyComponent, PnDialogComponent],
+  imports: [FormsModule, PnEmptyComponent, PnDialogComponent, PnSelectComponent, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
@@ -83,7 +85,7 @@ const STATUS: Record<Absence['status'], { label: string; tone: string }> = {
               </span>
               @if (absence.status === 'PENDING') {
                 <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="cancel(absence)">
-                  Retirar
+                  Cancelar solicitud
                 </button>
               }
             </div>
@@ -96,34 +98,44 @@ const STATUS: Record<Absence['status'], { label: string; tone: string }> = {
       <pn-dialog title="Solicitar ausencia" (closed)="asking.set(false)">
         <p class="pn-dim intro">Elige el tipo y las fechas. El negocio aprobará o rechazará tu solicitud.</p>
 
-        <p class="pn-field__label">Tipo de ausencia</p>
-        <div class="types">
-          @for (option of types; track option.id) {
-            <button type="button" class="pn-chip" [attr.aria-pressed]="type === option.id" (click)="type = option.id">
-              <span class="material-symbols-rounded">{{ option.icon }}</span>{{ option.label }}
-            </button>
-          }
+        <!-- The same fields, filled in the same way, as when the owner gives one
+             (ausencias.component). Only where it goes and the button change. -->
+        <div class="pn-fg">
+          <div class="pn-fg__body">
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Tipo</span>
+              <pn-select look="row" name="type" label="Tipo" [options]="types" valueKey="id" [(ngModel)]="type" />
+            </label>
+          </div>
         </div>
 
-        <div class="dates">
-          <label class="pn-field">
-            <span class="pn-field__label">Desde</span>
-            <input class="pn-input" type="date" name="from" [min]="today" [(ngModel)]="from" />
-          </label>
-          <label class="pn-field">
-            <span class="pn-field__label">Hasta</span>
-            <input class="pn-input" type="date" name="to" [min]="from || today" [(ngModel)]="to" />
-          </label>
+        <div class="pn-fg">
+          <p class="pn-fg__head">Fechas</p>
+          <div class="pn-fg__body">
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Desde</span>
+              <pn-date look="row" name="from" [min]="today"
+                     [ngModel]="from" (ngModelChange)="setFrom($event)" />
+            </label>
+            <label class="pn-fg__row">
+              <span class="pn-fg__label">Hasta</span>
+              <pn-date look="row" name="to" [min]="from || today" [(ngModel)]="to" />
+            </label>
+          </div>
         </div>
 
-        <label class="pn-field">
-          <span class="pn-field__label">Motivo</span>
-          <textarea class="pn-textarea" rows="3" name="reason" maxlength="500"
-                    placeholder="Explica brevemente si quieres" [(ngModel)]="reason"></textarea>
-        </label>
+        <div class="pn-fg last">
+          <p class="pn-fg__head">Motivo</p>
+          <div class="pn-fg__body">
+            <label class="pn-fg__row pn-fg__row--stack">
+              <textarea class="pn-fg__input reason" rows="3" name="reason" maxlength="500" aria-label="Motivo"
+                        placeholder="Explica brevemente si quieres" [(ngModel)]="reason"></textarea>
+            </label>
+          </div>
+        </div>
 
         @if (formError(); as text) {
-          <p class="pn-field__error" role="alert">{{ text }}</p>
+          <p class="pn-field__error error" role="alert">{{ text }}</p>
         }
 
         <ng-container dialogActions>
@@ -150,10 +162,22 @@ const STATUS: Record<Absence['status'], { label: string; tone: string }> = {
       }
       .ab__icon .material-symbols-rounded { font-size: 21px; }
       .ab__note { color: var(--clr-text-2); }
-      .intro { margin-bottom: 18px; line-height: 1.55; }
-      .types { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-      .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-      @media (max-width: 520px) { .dates { grid-template-columns: 1fr; } }
+      .intro { margin-bottom: 16px; font-size: 0.875rem; line-height: 1.6; }
+      /* A select inside a grouped row: no box of its own, only its arrow. */
+      .pn-fg__input.type {
+        min-height: 46px;
+        padding: 0 28px 0 0;
+        border-radius: 0;
+        background-color: transparent;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A958F'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0 center;
+        background-size: 20px;
+        box-shadow: none;
+      }
+      .reason { min-height: 72px; }
+      .last { margin-bottom: 0; }
+      .error { margin: 12px 4px 0; }
     `,
   ],
 })
@@ -211,6 +235,17 @@ export class MisAusenciasComponent {
     this.reason = '';
     this.formError.set(null);
     this.asking.set(true);
+  }
+
+  /**
+   * Picking the start drags the end along if it had none or fell before: an
+   * absence that ends before it starts does not exist, and making them correct
+   * a field they did not choose is worse. From today on: what is asked for here
+   * cannot be days already worked, unlike what the owner records.
+   */
+  setFrom(value: string): void {
+    this.from = value;
+    if (value && (!this.to || this.to < value)) this.to = value;
   }
 
   async send(): Promise<void> {

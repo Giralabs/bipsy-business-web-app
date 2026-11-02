@@ -43,6 +43,10 @@
   white-space: nowrap;
 }
 
+/* The last block of the dialog: its margin would only push the error away. */
+.cl-notes { margin-bottom: 0; }
+.cl-error { margin: 12px 4px 0; }
+
 @media (max-width: 640px) {
   .cl-bar { flex-wrap: wrap; }
   .cl-search { max-width: none; flex-basis: 100%; }

@@ -48,7 +48,23 @@
 
   <div class="pn-grid">
     <section class="pn-card pn-col-8">
+      <!-- Not staff: nobody invites them or takes their permissions away, so it
+           leads to where they switch it on and get a name. The photo is the
+           profile one, the same a customer sees when choosing who attends. -->
       <div class="pn-block__head">
+        <span class="material-symbols-rounded">person</span>
+        <h2>Tú</h2>
+      </div>
+      <a class="eq-row eq-row--owner" routerLink="/panel/ajustes/reservas">
+        <pn-avatar [name]="ownerName()" [url]="auth.profile()?.profileImageUrl ?? null" size="lg" />
+        <span class="eq-row__main">
+          <span class="eq-row__name">{{ ownerName() }}</span>
+          <span class="eq-row__user">{{ auth.profile()?.ownerPerforms ? 'Atiendes citas' : 'No atiendes citas' }}</span>
+        </span>
+        <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+      </a>
+
+      <div class="pn-block__head eq-staff-head">
         <span class="material-symbols-rounded">group</span>
         <h2>Trabajadores</h2>
       </div>
@@ -75,6 +91,7 @@
                 }
                 @if (worker.autoAccept) { <span class="pn-status pn-status--accent">Acepta solo</span> }
                 @if (worker.chatEnabled) { <span class="pn-status pn-status--accent">Chat</span> }
+                @if (worker.customersEnabled) { <span class="pn-status pn-status--accent">Clientes y citas</span> }
               </span>
             </span>
             <span class="eq-row__services pn-muted">{{ servicesOf(worker) }}</span>
@@ -102,8 +119,8 @@
               <span class="eq-inv__mail">{{ invitation.email ?? 'Sin correo' }}</span>
               <span class="eq-inv__exp pn-muted">Caduca en 12 h</span>
             </span>
-            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Copiar"
-                    (click)="copy(invitation.token)">
+            <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Copiar la invitación con su enlace"
+                    title="Copiar la invitación con su enlace" (click)="copyInvitation(invitation.token)">
               <span class="material-symbols-rounded">content_copy</span>
             </button>
             <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Anular"
@@ -166,6 +183,18 @@
                        (toggle)="toggle(worker, 'waitlistManageEnabled', $event)" />
           </div>
         }
+        <!-- The front desk. It hangs from nothing the business can switch off,
+             so it is always offered. Editing, deleting and importing stay yours;
+             the appointments they give are theirs. -->
+        <div class="pn-row">
+          <span class="material-symbols-rounded pn-row__icon">person</span>
+          <span class="pn-row__main">
+            <span class="pn-row__title">Clientes y citas</span>
+            <span class="pn-row__sub">Ver clientes y pedir citas</span>
+          </span>
+          <pn-switch [checked]="worker.customersEnabled === true" label="Clientes y citas"
+                     (toggle)="toggle(worker, 'customersEnabled', $event)" />
+        </div>
       </div>
     </div>
 
@@ -214,15 +243,23 @@
       </div>
     }
 
-    <a class="pn-btn pn-btn--secondary pn-btn--block eq-schedule"
-       [routerLink]="['/panel/equipo', worker.id, 'horario']">
-      <span class="material-symbols-rounded">schedule</span>
-      Editar su horario
-    </a>
+    <div class="pn-group">
+      <div class="pn-group__body">
+        <a class="pn-row" [routerLink]="['/panel/equipo', worker.id, 'horario']">
+          <span class="material-symbols-rounded pn-row__icon">schedule</span>
+          <span class="pn-row__main"><span class="pn-row__title">Editar su horario</span></span>
+          <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+        </a>
+      </div>
+    </div>
 
-    <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="unlink(worker)">
-      Eliminar trabajador
-    </button>
+    <div class="pn-group eq-last">
+      <div class="pn-group__body">
+        <button type="button" class="pn-row eq-danger" (click)="unlink(worker)">
+          Eliminar trabajador
+        </button>
+      </div>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--primary" (click)="picked.set(null)">Listo</button>
@@ -237,21 +274,28 @@
       <div class="eq-code">
         <p class="pn-dim">Comparte este código con tu trabajador. Caduca en 12 horas.</p>
         <p class="eq-code__value pn-tabular">{{ invitation.token }}</p>
-        <button type="button" class="pn-btn pn-btn--secondary" (click)="copy(invitation.token)">
-          <span class="material-symbols-rounded">content_copy</span>Copiar código
+        <button type="button" class="pn-btn pn-btn--primary" (click)="copyInvitation(invitation.token)">
+          <span class="material-symbols-rounded">content_copy</span>Copiar invitación
+        </button>
+        <button type="button" class="pn-btn pn-btn--text" (click)="copy(invitation.token)">
+          Copiar solo el código
         </button>
       </div>
     } @else {
-      <p class="pn-dim eq-empty">
+      <p class="pn-dim eq-empty eq-intro">
         Le generamos un código de seis dígitos. Lo mete en la app de Bipsy Business y entra en tu equipo
         con su propia agenda.
       </p>
-      <label class="pn-field">
-        <span class="pn-field__label">Su correo <span class="pn-muted">· opcional</span></span>
-        <input class="pn-input" type="email" name="inviteEmail" placeholder="trabajador@correo.com"
-               [(ngModel)]="inviteEmail" />
-        <span class="pn-field__hint">Si lo pones, le mandamos el código por correo además de enseñártelo.</span>
-      </label>
+      <div class="pn-fg eq-last">
+        <div class="pn-fg__body">
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">Su correo <span class="pn-muted">· opcional</span></span>
+            <input class="pn-fg__input" type="email" name="inviteEmail" placeholder="trabajador@correo.com"
+                   [(ngModel)]="inviteEmail" />
+          </label>
+        </div>
+        <p class="pn-fg__foot">Si lo pones, le mandamos el código por correo además de enseñártelo.</p>
+      </div>
     }
 
     <ng-container dialogActions>

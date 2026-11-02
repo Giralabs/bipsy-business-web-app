@@ -2,11 +2,11 @@
   <p class="nb-intro">Elige a quién, qué y cuándo. Se lo enviamos para que lo confirme.</p>
 
   <!-- ----- CLIENTE ----- -->
-  <div class="nb-section">
-    <div class="nb-section__head">
-      <span class="pn-field__label">Cliente</span>
+  <div class="pn-fg">
+    <div class="pn-fg__head nb-head">
+      <span>Cliente</span>
       @if (!adding()) {
-        <button type="button" class="pn-btn pn-btn--text pn-btn--sm" [disabled]="busy()" (click)="startAdding()">
+        <button type="button" class="nb-head__action" [disabled]="busy()" (click)="startAdding()">
           <span class="material-symbols-rounded">person_add</span>
           Nuevo cliente
         </button>
@@ -15,92 +15,97 @@
 
     @if (adding()) {
       <!-- The card is created in place: the list gives way to its three fields. -->
-      <div class="nb-new">
-        <label class="pn-field">
-          <span class="pn-field__label">Nombre</span>
-          <input class="pn-input" type="text" name="newName" [(ngModel)]="newCustomer.name" />
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Nombre</span>
+          <input class="pn-fg__input" type="text" name="newName" [(ngModel)]="newCustomer.name" />
         </label>
-        <div class="nb-new__pair">
-          <label class="pn-field">
-            <span class="pn-field__label">Teléfono</span>
-            <input class="pn-input" type="tel" name="newPhone" [(ngModel)]="newCustomer.phone" />
-          </label>
-          <label class="pn-field">
-            <span class="pn-field__label">Correo</span>
-            <input class="pn-input" type="email" name="newEmail" [(ngModel)]="newCustomer.email" />
-          </label>
-        </div>
-        @if (customerError(); as message) {
-          <p class="pn-field__error nb-new__error">{{ message }}</p>
-        }
-        <div class="nb-new__actions">
-          <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" [disabled]="savingCustomer()"
-                  (click)="adding.set(false)">Cancelar</button>
-          <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" [disabled]="savingCustomer()"
-                  (click)="saveNewCustomer()">Guardar</button>
-        </div>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Teléfono</span>
+          <input class="pn-fg__input" type="tel" name="newPhone" [(ngModel)]="newCustomer.phone" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Correo</span>
+          <input class="pn-fg__input" type="email" name="newEmail" required [(ngModel)]="newCustomer.email" />
+        </label>
+      </div>
+      @if (customerError(); as message) {
+        <p class="pn-field__error">{{ message }}</p>
+      }
+      <div class="nb-new__actions">
+        <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" [disabled]="savingCustomer()"
+                (click)="adding.set(false)">Cancelar</button>
+        <button type="button" class="pn-btn pn-btn--primary pn-btn--sm" [disabled]="savingCustomer()"
+                (click)="saveNewCustomer()">Guardar</button>
       </div>
     }
 
     @if (customer(); as chosen) {
       @if (!adding()) {
-        <div class="nb-chosen">
-          <pn-avatar [name]="chosen.name" [url]="chosen.profileImageUrl" size="sm" />
-          <span class="nb-person__main">
-            <span class="nb-person__name">{{ chosen.name }}</span>
-            <span class="nb-person__sub">{{ subtitleOf(chosen) }}</span>
-          </span>
-          <button type="button" class="pn-btn pn-btn--text pn-btn--sm" [disabled]="busy()" (click)="clearCustomer()">
-            Cambiar
-          </button>
+        <div class="pn-fg__body">
+          <div class="nb-chosen">
+            <pn-avatar [name]="chosen.name" [url]="chosen.profileImageUrl" size="sm" />
+            <span class="nb-person__main">
+              <span class="nb-person__name">{{ chosen.name }}</span>
+              <span class="nb-person__sub">{{ subtitleOf(chosen) }}</span>
+            </span>
+            <button type="button" class="pn-btn pn-btn--text pn-btn--sm" [disabled]="busy()" (click)="clearCustomer()">
+              Cambiar
+            </button>
+          </div>
         </div>
       }
     } @else if (!adding()) {
-      <label class="pn-search">
-        <span class="material-symbols-rounded">search</span>
-        <input type="search" name="customerQuery" placeholder="Nombre, teléfono o email" aria-label="Cliente"
-               [ngModel]="query()" (ngModelChange)="query.set($event)" />
-      </label>
+      <!-- The phone book as the app draws it: the search on top of the card and
+           the people under it, a row each. -->
+      <div class="pn-fg__body">
+        <label class="nb-search">
+          <span class="material-symbols-rounded">search</span>
+          <input class="pn-fg__input" type="search" name="customerQuery" placeholder="Nombre, teléfono o email"
+                 aria-label="Cliente" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+        </label>
 
-      <div class="nb-people">
-        @switch (customersState()) {
-          @case ('loading') {
-            <div class="pn-skeleton nb-people__wait"></div>
-          }
-          @case ('failed') {
-            <p class="nb-people__msg">No se ha podido cargar tu agenda</p>
-          }
-          @default {
-            @for (person of matches(); track person.id) {
-              <!-- Dimmed, not hidden: the owner has to see that this person is
-                   in the phone book and understand what is missing. -->
-              <div class="nb-person" [class.nb-person--off]="!reachable(person)">
-                <button type="button" class="nb-person__pick" [disabled]="!reachable(person)" (click)="pick(person)">
-                  <pn-avatar [name]="person.name" [url]="person.profileImageUrl" size="sm" />
-                  <span class="nb-person__main">
-                    <span class="nb-person__name">{{ person.name }}</span>
-                    <span class="nb-person__sub" [class.nb-person__sub--warn]="!reachable(person)">
-                      {{ subtitleOf(person) }}
+        <div class="nb-people">
+          @switch (customersState()) {
+            @case ('loading') {
+              <div class="pn-skeleton nb-people__wait"></div>
+            }
+            @case ('failed') {
+              <p class="nb-people__msg">No se ha podido cargar tu agenda</p>
+            }
+            @default {
+              @for (person of matches(); track person.id) {
+                <!-- Dimmed, not hidden: the owner has to see that this person is
+                     in the phone book and understand what is missing. -->
+                <div class="nb-person" [class.nb-person--off]="!reachable(person)">
+                  <button type="button" class="nb-person__pick" [disabled]="!reachable(person)" (click)="pick(person)">
+                    <pn-avatar [name]="person.name" [url]="person.profileImageUrl" size="sm" />
+                    <span class="nb-person__main">
+                      <span class="nb-person__name">{{ person.name }}</span>
+                      <span class="nb-person__sub" [class.nb-person__sub--warn]="!reachable(person)">
+                        {{ subtitleOf(person) }}
+                      </span>
                     </span>
-                  </span>
-                </button>
-                @if (!reachable(person)) {
-                  <button type="button" class="pn-btn pn-btn--text pn-btn--sm" [disabled]="person.invitedAt != null"
-                          (click)="invite(person)">
-                    {{ person.invitedAt == null ? 'Invitar' : 'Invitado' }}
                   </button>
-                }
-              </div>
-            } @empty {
-              <p class="nb-people__msg">Nadie en tu agenda con ese nombre.</p>
+                  <!-- Stamping an invitation is the owner's route. -->
+                  @if (!reachable(person) && auth.isBusiness()) {
+                    <button type="button" class="pn-btn pn-btn--text pn-btn--sm" [disabled]="person.invitedAt != null"
+                            (click)="invite(person)">
+                      {{ person.invitedAt == null ? 'Invitar' : 'Invitado' }}
+                    </button>
+                  }
+                </div>
+              } @empty {
+                <p class="nb-people__msg">Nadie en tu agenda con ese nombre.</p>
+              }
             }
           }
-        }
+        </div>
       </div>
     }
 
     @if (customerNotice(); as notice) {
-      <p class="pn-field__hint">{{ notice }}</p>
+      <p class="pn-fg__foot">{{ notice }}</p>
     }
     @if (unreachable(); as person) {
       <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm nb-invite" (click)="invite(person)">
@@ -110,95 +115,98 @@
   </div>
 
   <!-- ----- LA CITA ----- -->
-  <p class="nb-title">La cita</p>
-
-  <label class="pn-field">
-    <span class="pn-field__label">Servicio</span>
-    <select class="pn-select" name="service" [disabled]="busy() || givable().length === 0"
-            [ngModel]="serviceId()" (ngModelChange)="setService($event)">
-      <option [ngValue]="null" disabled>Elegir</option>
-      @for (item of givable(); track item.id) {
-        <option [ngValue]="item.id">{{ serviceLabel(item) }}</option>
-      }
-    </select>
-    @if (services.services.error()) {
-      <span class="pn-field__error">No se han podido cargar tus servicios</span>
-    } @else if (noLocalServices()) {
-      <span class="pn-field__error">Todos tus servicios son solo a domicilio, y eso todavía no se puede dar desde aquí.</span>
-    }
-  </label>
-
-  <div class="nb-pair">
-    @if (team.all().length > 0) {
-      <label class="pn-field">
-        <span class="pn-field__label">Profesional</span>
-        <select class="pn-select" name="worker" [disabled]="busy()"
-                [ngModel]="pickedWorkerId()" (ngModelChange)="pickedWorkerId.set($event)">
-          <option [ngValue]="null">Cualquiera disponible</option>
-          @for (worker of professionals(); track worker.id) {
-            <option [ngValue]="worker.id">{{ workerLabel(worker) }}</option>
-          }
-        </select>
+  <div class="pn-fg">
+    <p class="pn-fg__head">La cita</p>
+    <div class="pn-fg__body">
+      <label class="pn-fg__row">
+        <span class="pn-fg__label">Servicio</span>
+        <pn-select look="row" name="service" label="Servicio" placeholder="Elegir"
+                   [disabled]="busy() || givable().length === 0" [options]="serviceOptions()"
+                   [ngModel]="serviceId()" (ngModelChange)="setService($event)" />
       </label>
-    }
 
-    <label class="pn-field">
-      <span class="pn-field__label">Día</span>
-      <input class="pn-input" type="date" name="day" [min]="minDay" [max]="maxDay" [disabled]="busy()"
-             [ngModel]="dayValue()" (ngModelChange)="setDay($event)" />
-    </label>
+      <!-- A worker does not choose: the appointment is his. -->
+      @if (auth.isBusiness() && team.all().length > 0) {
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Profesional</span>
+          <pn-select look="row" name="worker" label="Profesional" [disabled]="busy()" [options]="workerOptions()"
+                     [ngModel]="pickedWorkerId()" (ngModelChange)="pickedWorkerId.set($event)" />
+        </label>
+      }
+
+      <label class="pn-fg__row">
+        <span class="pn-fg__label">Día</span>
+        <pn-date look="row" name="day" [min]="minDay" [max]="maxDay" [disabled]="busy()"
+               [ngModel]="dayValue()" (ngModelChange)="setDay($event)" />
+      </label>
+    </div>
+    @if (services.services.error()) {
+      <p class="pn-field__error">No se han podido cargar tus servicios</p>
+    } @else if (noLocalServices() && auth.isWorker()) {
+      <p class="pn-field__error">No tienes ningún servicio en el local que puedas dar. Los asigna el negocio.</p>
+    } @else if (noLocalServices()) {
+      <p class="pn-field__error">Todos tus servicios son solo a domicilio, y eso todavía no se puede dar desde aquí.</p>
+    }
   </div>
 
   <!-- The free times, straight under the day: only once there is a service,
-       because without its duration there is no such thing as a free slot. -->
+       because without its duration there is no such thing as a free slot.
+       A grid of hours and not rows: forty rows of «10:15» are scrolled, a
+       table of them is read at a glance. -->
   @if (service()) {
-    <div class="pn-field">
-      <span class="pn-field__label">Hora</span>
-      @switch (slotsState()) {
-        @case ('loading') {
-          <div class="pn-skeleton nb-slots__wait"></div>
-        }
-        @case ('failed') {
-          <p class="nb-slots__msg">No se han podido cargar los huecos</p>
-        }
-        @case ('ready') {
-          @for (group of slotGroups(); track group.title) {
-            <p class="nb-slots__group">{{ group.title }}</p>
-            <div class="nb-slots">
-              @for (item of group.slots; track item.start) {
-                <button type="button" class="pn-chip nb-slot pn-tabular" [disabled]="busy()"
-                        [attr.aria-pressed]="slot()?.start === item.start" (click)="pickSlot(item)">
-                  {{ item.start }}
-                </button>
-              }
-            </div>
-          } @empty {
-            <p class="nb-slots__msg">Ese día no queda ningún hueco libre. Prueba con otro.</p>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Hora</p>
+      <div class="pn-fg__body nb-hours">
+        @switch (slotsState()) {
+          @case ('loading') {
+            <div class="pn-skeleton nb-slots__wait"></div>
+          }
+          @case ('failed') {
+            <p class="nb-slots__msg">No se han podido cargar los huecos</p>
+          }
+          @case ('ready') {
+            @for (group of slotGroups(); track group.title) {
+              <p class="nb-slots__group">{{ group.title }}</p>
+              <div class="nb-slots">
+                @for (item of group.slots; track item.start) {
+                  <button type="button" class="pn-chip nb-slot pn-tabular" [disabled]="busy()"
+                          [attr.aria-pressed]="slot()?.start === item.start" (click)="pickSlot(item)">
+                    {{ item.start }}
+                  </button>
+                }
+              </div>
+            } @empty {
+              <p class="nb-slots__msg">Ese día no queda ningún hueco libre. Prueba con otro.</p>
+            }
           }
         }
-      }
+      </div>
     </div>
   }
 
-  <label class="pn-field">
-    <span class="pn-field__label">Nota</span>
-    <textarea class="pn-textarea nb-notes" rows="2" name="notes" maxlength="500" [disabled]="busy()"
-              placeholder="Lo que convenga recordar de esta cita" [(ngModel)]="notes"></textarea>
-  </label>
+  <div class="pn-fg">
+    <p class="pn-fg__head">Nota</p>
+    <div class="pn-fg__body">
+      <label class="pn-fg__row pn-fg__row--stack">
+        <textarea class="pn-fg__input nb-notes" rows="2" name="notes" maxlength="500" aria-label="Nota"
+                  [disabled]="busy()" placeholder="Lo que convenga recordar de esta cita"
+                  [(ngModel)]="notes"></textarea>
+      </label>
+    </div>
+    <!-- What is about to happen, said BEFORE pressing: with an account the
+         appointment is proposed, not given; by email it is theirs at once. -->
+    <p class="pn-fg__foot">
+      @if (byEmail()) {
+        Le enviaremos la cita por correo y queda reservada desde ya. Desde el correo podrá confirmarte que irá o avisarte de que no puede.
+      } @else {
+        La cita queda reservada 10 minutos mientras el cliente la confirma. Si no contesta, el hueco vuelve a quedar libre.
+      }
+    </p>
+  </div>
 
   @if (error(); as message) {
-    <p class="pn-field__error nb-error">{{ message }}</p>
+    <p class="pn-field__error nb-error" role="alert">{{ message }}</p>
   }
-
-  <!-- What is about to happen, said BEFORE pressing: with an account the
-       appointment is proposed, not given; by email it is theirs at once. -->
-  <p class="nb-foot">
-    @if (byEmail()) {
-      Le enviaremos la cita por correo y queda reservada desde ya. Desde el correo podrá confirmarte que irá o avisarte de que no puede.
-    } @else {
-      La cita queda reservada 10 minutos mientras el cliente la confirma. Si no contesta, el hueco vuelve a quedar libre.
-    }
-  </p>
 
   <ng-container dialogActions>
     <button type="button" class="pn-btn pn-btn--secondary" [disabled]="busy()" (click)="closed.emit()">Cancelar</button>

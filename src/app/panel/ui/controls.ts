@@ -35,6 +35,10 @@ export interface SegmentOption {
   label: string;
   /** Shown as a small balloon after the label, for pending counters. */
   badge?: number;
+  /** The red balloon of the sidebar: something to answer, not just a count. */
+  badgeUrgent?: boolean;
+  /** What the balloon means, read aloud: a bare figure says nothing. */
+  badgeLabel?: string;
 }
 
 @Component({
@@ -52,7 +56,8 @@ export interface SegmentOption {
         >
           {{ option.label }}
           @if (option.badge) {
-            <span class="pn-seg__badge">{{ option.badge }}</span>
+            <span class="pn-seg__badge" [class.pn-seg__badge--urgent]="option.badgeUrgent"
+                  [attr.aria-label]="option.badgeLabel ?? null">{{ option.badge }}</span>
           }
         </button>
       }
@@ -65,6 +70,16 @@ export interface SegmentOption {
         font-size: 0.6875rem;
         font-weight: 800;
         color: var(--clr-warn-text);
+      }
+      .pn-seg__badge--urgent {
+        display: inline-block;
+        min-width: 20px;
+        padding: 2px 6px;
+        border-radius: var(--r-pill);
+        background: var(--clr-danger);
+        color: #fff;
+        text-align: center;
+        line-height: 1.2;
       }
     `,
   ],

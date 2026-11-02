@@ -1,0 +1,105 @@
+<pn-dialog title="Cobrar la cita" (closed)="closed.emit()">
+  @if (loading()) {
+    <div class="pn-skeleton cb-wait"></div>
+  } @else if (!status()) {
+    <pn-error title="No hemos podido comprobar el cobro de esta cita." [text]="error() ?? ''" (retry)="retry()" />
+  } @else {
+    @if (status(); as s) {
+      <p class="cb-sub pn-tabular">{{ subtitle() }}</p>
+
+      @switch (view()) {
+        @case ('elegir') {
+          <!-- Two ways, a row each, as the app's sheet: not two big tiles. -->
+          <div class="pn-fg">
+            <div class="pn-fg__body">
+              <button type="button" class="pn-fg__choice cb-way" [disabled]="!s.canRequest || busy() || marked()"
+                      aria-label="Pedírselo a su app" (click)="ask()">
+                @if (via() === 'app') {
+                  <span class="cb-way__icon"><span class="pn-spinner"></span></span>
+                } @else {
+                  <span class="material-symbols-rounded cb-way__icon">send_to_mobile</span>
+                }
+                <span class="pn-fg__choice-main"><span class="pn-fg__choice-title">Su app</span></span>
+                <span class="material-symbols-rounded cb-way__chev">arrow_forward_ios</span>
+              </button>
+
+              <button type="button" class="pn-fg__choice cb-way" [class.cb-way--done]="marked()"
+                      [disabled]="busy() || marked()" aria-label="Ya está cobrada" (click)="markCollected()">
+                @if (marked()) {
+                  <span class="material-symbols-rounded fill cb-way__icon">check_circle</span>
+                } @else if (via() === 'mano') {
+                  <span class="cb-way__icon"><span class="pn-spinner"></span></span>
+                } @else {
+                  <span class="material-symbols-rounded cb-way__icon">payments</span>
+                }
+                <span class="pn-fg__choice-main"><span class="pn-fg__choice-title">Ya cobrada</span></span>
+                @if (!marked()) {
+                  <span class="material-symbols-rounded cb-way__chev">arrow_forward_ios</span>
+                }
+              </button>
+            </div>
+            <p class="pn-fg__foot">
+              Selecciona «Ya cobrada» si ha pagado en efectivo o por otro método fuera de la app.
+            </p>
+          </div>
+        }
+
+        @case ('esperando') {
+          <div class="pn-fg">
+            <div class="pn-fg__body">
+              <div class="pn-row">
+                <span class="cb-way__icon"><span class="pn-spinner"></span></span>
+                <span class="pn-row__main"><span class="pn-row__title">Esperando a que pague</span></span>
+                @if (minutesLeft() !== null) {
+                  <span class="pn-row__value pn-tabular">{{ minutesLeft() }} min</span>
+                }
+              </div>
+            </div>
+            <p class="pn-fg__foot">Le ha salido en su móvil. En cuanto pague, lo verás aquí.</p>
+          </div>
+        }
+
+        @case ('hecho') {
+          <div class="pn-fg">
+            <div class="pn-fg__body">
+              <div class="pn-row">
+                <span class="material-symbols-rounded pn-row__icon">{{ ending().icon }}</span>
+                <span class="pn-row__main"><span class="pn-row__title">{{ ending().text }}</span></span>
+                <!-- Only if there is money to speak of: next to «Se acabó el plazo»
+                     a figure reads as what was collected. -->
+                @if (ending().collected) {
+                  <span class="pn-row__value pn-tabular">{{ money(s.amountCents) }}</span>
+                }
+              </div>
+              @if (s.settledOffline) {
+                <button type="button" class="pn-row cb-undo" [disabled]="busy()" (click)="undo()">
+                  <span class="pn-row__main"><span class="pn-row__title">No estaba cobrada</span></span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      @if (error(); as text) {
+        <p class="pn-field__error cb-error" role="alert">{{ text }}</p>
+      }
+    }
+  }
+
+  <ng-container dialogActions>
+    @if (marked() || view() === 'hecho') {
+      @if (!marked()) {
+        <button type="button" class="pn-btn pn-btn--secondary" (click)="back.emit()">Atrás</button>
+      }
+      <button type="button" class="pn-btn pn-btn--primary" (click)="closed.emit()">Cerrar</button>
+    } @else {
+      <button type="button" class="pn-btn pn-btn--secondary" (click)="back.emit()">Atrás</button>
+      @if (view() === 'esperando') {
+        <button type="button" class="pn-btn pn-btn--danger" [disabled]="busy()" (click)="withdraw()">
+          @if (busy()) { <span class="pn-spinner"></span> } @else { Retirar la petición }
+        </button>
+      }
+    }
+  </ng-container>
+</pn-dialog>

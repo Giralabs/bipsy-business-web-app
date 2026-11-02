@@ -1,7 +1,7 @@
-<app-auth-layout bip="MB-05" claim="Entra y mira cómo va tu día.">
+<app-auth-layout bip="MB-05" claim="Entra y mira cómo va tu día." [symbolOnly]="true">
   <h1 class="auth-title">Entra en tu negocio</h1>
   <p class="auth-lead">
-    Dueños y trabajadores entran por aquí, con el mismo correo que en la app Bipsy Negocio.
+    Dueños y trabajadores entran por aquí, con el mismo correo que en la app Bipsy Business.
   </p>
 
   @if (expired) {
@@ -19,7 +19,7 @@
       <span class="material-symbols-rounded">check_circle</span>
       <div>
         <strong>Contraseña cambiada</strong>
-        <span class="pn-notice__body">Entra con la nueva.</span>
+        <span class="pn-notice__body">Se han cerrado todas las sesiones. Entra otra vez con tu contraseña nueva.</span>
       </div>
     </div>
   }
@@ -71,8 +71,8 @@
          sustituir por un icono de Material, y sus guías de marca fijan el
          color de cada uno (blanco y negro). No crean cuentas: si ese correo no
          tiene ninguna, el alta sigue desde aquí con el correo ya verificado.
-         Los trabajadores no entran por aquí: el backend solo acepta negocios
-         en /auth/{google,apple}/business. -->
+         Valen para dueños y trabajadores: /auth/{google,apple}/business
+         resuelve la cuenta profesional, sea del rol que sea. -->
     <div class="auth-social">
       @if (googleEnabled) {
         <button type="button" class="social-btn social-btn--google" [disabled]="busy()"
@@ -106,7 +106,6 @@
         </button>
       }
     </div>
-    <p class="auth-google-note">Solo para cuentas de negocio.</p>
   }
 
   <a class="auth-invite" routerLink="/unirse">

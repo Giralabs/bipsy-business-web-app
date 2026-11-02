@@ -88,8 +88,34 @@
 .ficha__desc--empty { color: var(--clr-text-3); }
 
 .ficha__photos-head { margin-top: 26px; padding-left: 0; }
-.ficha__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.ficha__remove { margin-top: 6px; margin-left: -12px; }
+.ficha__photos { display: grid; gap: 2px; margin-inline: -12px; }
+
+.ficha__name { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.ficha__problem { display: inline-flex; color: var(--clr-danger); text-decoration: none; }
+.ficha__problem .material-symbols-rounded { font-size: 22px; }
+
+/* ----- PLAN Y VERIFICACIÓN --------------------------------------------- */
+
+.ng-status { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: var(--pn-gap); }
+.ng-status__card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--pn-radius-row);
+  background: var(--pn-card);
+  box-shadow: var(--pn-rim);
+  color: var(--clr-text);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) ease;
+}
+.ng-status__card:hover { background: var(--pn-field); }
+/* The seal carries its own air inside the glyph: a size below the lotus, both
+   read as the same. */
+.ng-status__seal { display: grid; place-items: center; width: 28px; height: 28px; }
 
 /* ----- QUALITY -------------------------------------------------------- */
 
@@ -136,12 +162,9 @@
 .ng-area__radius { display: flex; flex-direction: column; gap: 8px; padding: 4px 20px 16px; }
 .ng-area__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .ng-area__value { font-weight: 800; }
-.ng-area__slider { width: 100%; accent-color: var(--pn-accent); }
-.ng-area__slider:disabled { opacity: 0.45; }
 
 @media (max-width: 640px) {
   .ng-modes, .ng-two { grid-template-columns: 1fr; }
-  .ficha__photos { grid-template-columns: 1fr; }
   .ficha__id { padding-inline: 20px; }
   .ficha__body { padding: 20px; }
   .ficha__avatar { width: 78px; height: 78px; font-size: 1.75rem; }

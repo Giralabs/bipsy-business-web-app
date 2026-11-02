@@ -10,8 +10,10 @@ import {
   SocialSignInUnavailable,
   providerLabel,
 } from '../core/auth/social-auth.service';
-import { message } from '../core/data/resource';
+import { newPasswordError } from '../core/auth/password-policy';
+import { fieldErrors, message } from '../core/data/resource';
 import { ConfirmService } from '../ui/confirm.service';
+import { PnPasswordRulesComponent } from '../ui/password-rules.component';
 import { ToastService } from '../ui/toast.service';
 
 /**
@@ -24,7 +26,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-panel-cuenta',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PnPasswordRulesComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
@@ -40,42 +42,62 @@ import { ToastService } from '../ui/toast.service';
       </div>
 
       <div class="pn-grid">
-        <section class="pn-card pn-col-6">
-          <div class="pn-block__head">
-            <span class="material-symbols-rounded">lock</span>
-            <h2>Cambiar contraseña</h2>
-          </div>
+        <!-- Who signed up with a provider and never chose a password has none
+             to change: hasPassword paints the row in the app's profile too. -->
+        @if (auth.user()?.hasPassword !== false) {
+          <section class="pn-card pn-col-6">
+            <div class="pn-block__head">
+              <span class="material-symbols-rounded">lock</span>
+              <h2>Cambiar contraseña</h2>
+            </div>
 
-          <label class="pn-field">
-            <span class="pn-field__label">Contraseña actual</span>
-            <input class="pn-input" type="password" name="current" autocomplete="current-password"
-                   [(ngModel)]="current" />
-          </label>
-          <label class="pn-field">
-            <span class="pn-field__label">Nueva contraseña</span>
-            <input class="pn-input" type="password" name="next" autocomplete="new-password"
-                   placeholder="Mínimo 8 caracteres" [(ngModel)]="next" />
-          </label>
+            <label class="pn-field">
+              <span class="pn-field__label">Tu contraseña actual</span>
+              <input class="pn-input" type="password" name="current" autocomplete="current-password"
+                     [(ngModel)]="current" />
+              <span class="pn-field__hint">
+                Si no la recuerdas, sal de tu cuenta y usa "He olvidado mi contraseña" en la pantalla de entrar.
+              </span>
+            </label>
+            <label class="pn-field">
+              <span class="pn-field__label">Nueva contraseña</span>
+              <input class="pn-input" type="password" name="next" autocomplete="new-password"
+                     [(ngModel)]="next" />
+              <pn-password-rules [password]="next" />
+            </label>
+            <label class="pn-field">
+              <span class="pn-field__label">Repite la contraseña</span>
+              <input class="pn-input" type="password" name="repeat" autocomplete="new-password"
+                     [(ngModel)]="repeat" />
+              <span class="pn-field__hint">
+                Se cerrarán todas las sesiones, también la de este dispositivo: tendrás que volver a entrar.
+              </span>
+            </label>
 
-          <button type="button" class="pn-btn pn-btn--primary pn-btn--block"
-                  [disabled]="busy()" (click)="changePassword()">
-            Guardar contraseña
-          </button>
-        </section>
+            @if (passwordError(); as text) {
+              <p class="pn-field__error" role="alert">{{ text }}</p>
+            }
+
+            <button type="button" class="pn-btn pn-btn--primary pn-btn--block"
+                    [disabled]="busy()" (click)="changePassword()">
+              @if (busy()) { <span class="pn-spinner"></span> } @else { Guardar contraseña }
+            </button>
+          </section>
+        }
 
         <section class="pn-card pn-col-6">
           <div class="pn-block__head">
             <span class="material-symbols-rounded">devices</span>
-            <h2>Sesiones</h2>
+            <h2>Tus sesiones</h2>
           </div>
 
           <p class="pn-dim body">
-            Si has entrado en un ordenador que no es tuyo, cierra todas las sesiones abiertas. Tendrás que
-            volver a entrar aquí y en el móvil.
+            Si has entrado desde un móvil o un ordenador que ya no usas, cierra todas las sesiones. También se
+            cerrará esta, y tendrás que volver a entrar.
           </p>
 
           <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="revokeAll()">
-            Cerrar sesión en todos los dispositivos
+            Cerrar sesión en otros dispositivos
           </button>
         </section>
 
@@ -196,7 +218,9 @@ export class CuentaComponent {
 
   current = '';
   next = '';
+  repeat = '';
   readonly busy = signal(false);
+  readonly passwordError = signal<string | null>(null);
   /** Qué proveedor se está vinculando o desvinculando. Null si ninguno. */
   readonly linking = signal<SocialProvider | null>(null);
   readonly linkError = signal<string | null>(null);
@@ -268,30 +292,51 @@ export class CuentaComponent {
   }
 
   async changePassword(): Promise<void> {
-    if (this.next.length < 8) {
-      this.toasts.error('La nueva contraseña necesita al menos ocho caracteres.');
-      return;
-    }
+    const invalid = !this.current
+      ? 'Introduce tu contraseña actual.'
+      : newPasswordError(this.next, 'Introduce una contraseña nueva.') ??
+        (this.next === this.current
+          ? 'Debe ser distinta de la actual.'
+          : this.next !== this.repeat
+            ? 'Las contraseñas no coinciden.'
+            : null);
+    this.passwordError.set(invalid);
+    if (invalid) return;
+
     this.busy.set(true);
     try {
       await this.api.post('/me/change-password', {
         currentPassword: this.current,
         newPassword: this.next,
       });
-      this.current = '';
-      this.next = '';
-      this.toasts.show('Contraseña cambiada');
-    } catch {
-      this.toasts.error('No ha podido ser. Comprueba la contraseña actual.');
-    } finally {
+    } catch (cause) {
+      this.passwordError.set(this.changePasswordError(cause));
       this.busy.set(false);
+      return;
     }
+    // The server has just closed every session, this one too. Said on the way
+    // out: otherwise they land on the sign-in page without knowing why.
+    await this.auth.logout();
+    location.assign('/acceder?cambiada=1');
+  }
+
+  /**
+   * A 400 means two different things here. WITH per-field errors it is the new
+   * password, which the policy refuses; WITHOUT them it is the current one being
+   * wrong. Blaming the current one for both sends people to fix the wrong field.
+   */
+  private changePasswordError(cause: unknown): string {
+    if (fieldErrors(cause).length) return message(cause);
+    const status = (cause as { status?: number }).status;
+    if (status === 400) return 'La contraseña actual no es correcta.';
+    if (status === 401) return 'Tu sesión ha caducado.';
+    return message(cause);
   }
 
   async revokeAll(): Promise<void> {
     const answer = await this.confirm.ask({
       title: 'Cerrar todas las sesiones',
-      message: 'Se cierra también esta. Tendrás que volver a entrar.',
+      message: 'Se cerrará la sesión en todos tus dispositivos. Tendrás que volver a iniciar sesión en cada uno.',
       confirmLabel: 'Cerrar todas',
       destructive: true,
     });
@@ -301,7 +346,7 @@ export class CuentaComponent {
       await this.auth.logout();
       location.assign('/acceder');
     } catch {
-      this.toasts.error('No se ha podido.');
+      this.toasts.error('No hemos podido cerrar las otras sesiones. Vuelve a intentarlo en un momento.');
     }
   }
 }

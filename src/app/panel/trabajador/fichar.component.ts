@@ -83,25 +83,13 @@ function minutesLabel(minutes: number): string {
         </button>
       </section>
 
-      <div class="pn-grid sum">
-        <div class="pn-card pn-col-4 pn-kpi">
-          <span class="pn-kpi__value pn-tabular">{{ minutes(todayMinutes()) }}</span>
-          <span class="pn-kpi__label">HOY</span>
-        </div>
-        <div class="pn-card pn-col-4 pn-kpi">
-          <span class="pn-kpi__value pn-tabular">{{ minutes(weekMinutes()) }}</span>
-          <span class="pn-kpi__label">ESTA SEMANA</span>
-        </div>
-        <div class="pn-card pn-col-4 pn-kpi">
-          <span class="pn-kpi__value pn-tabular">{{ minutes(monthMinutes()) }}</span>
-          <span class="pn-kpi__label">ESTE MES · {{ monthDays() }}</span>
-        </div>
-      </div>
-
-      <section class="pn-card">
+      <section class="pn-card history">
         <div class="pn-block__head">
           <span class="material-symbols-rounded">history</span>
           <h2>Registro de fichajes</h2>
+          @if (work.clockTotal() > 0) {
+            <span class="pn-block__more pn-muted">{{ shiftsLabel() }}</span>
+          }
         </div>
 
         @if (work.clockHistory.error(); as problem) {
@@ -122,12 +110,18 @@ function minutesLabel(minutes: number): string {
                   <span class="material-symbols-rounded entry__icon">schedule</span>
                   <span class="entry__times pn-tabular">
                     {{ hhmm(toDate(entry.checkInAt)) }} →
-                    @if (entry.checkOutAt) { {{ hhmm(toDate(entry.checkOutAt)) }} } @else { <em>en curso</em> }
+                    @if (entry.checkOutAt) { {{ hhmm(toDate(entry.checkOutAt)) }} }
                   </span>
                   <span class="entry__dur pn-tabular">{{ minutes(minutesOf(entry)) }}</span>
                 </div>
               }
             </div>
+          }
+          @if (work.clockHasMore()) {
+            <button type="button" class="pn-btn pn-btn--secondary pn-btn--block more"
+                    [disabled]="work.clockLoadingMore()" (click)="more()">
+              @if (work.clockLoadingMore()) { <span class="pn-spinner"></span> } @else { Ver más }
+            </button>
           }
         }
       </section>
@@ -191,8 +185,7 @@ function minutesLabel(minutes: number): string {
       .clock__skeleton { width: 280px; height: 96px; margin-top: 22px; }
       .clock__cta { margin-top: 28px; min-width: 260px; }
 
-      .sum { margin: var(--pn-gap) 0; }
-      .sum .pn-kpi__value { font-size: clamp(1.625rem, 2.4vw, 2.125rem); }
+      .history { margin-top: var(--pn-gap); }
 
       .day + .day { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--pn-line); }
       .day__head { display: flex; align-items: baseline; gap: 10px; padding: 4px 0 8px; }
@@ -203,8 +196,8 @@ function minutesLabel(minutes: number): string {
       .entry:nth-child(odd) { background: var(--pn-field); }
       .entry__icon { font-size: 18px; color: var(--clr-text-3); }
       .entry__times { flex: 1; font-size: 0.875rem; color: var(--clr-text-2); }
-      .entry__times em { font-style: normal; color: var(--clr-success); font-weight: 700; }
       .entry__dur { font-size: 0.875rem; font-weight: 700; }
+      .more { margin-top: 18px; }
 
       @media (prefers-reduced-motion: reduce) { .clock--on::before { animation: none; } }
     `,
@@ -244,11 +237,21 @@ export class FicharComponent {
     return Math.max(0, Math.round((end.getTime() - fromInstant(entry.checkInAt).getTime()) / 60_000));
   }
 
-  /** The history plus the open shift, which the history may not list yet. */
+  readonly shiftsLabel = computed(() => plural(this.work.clockTotal(), 'jornada', 'jornadas'));
+
+  async more(): Promise<void> {
+    try {
+      await this.work.loadMoreClock();
+    } catch {
+      this.toasts.error('No se ha podido cargar el historial.');
+    }
+  }
+
+  /** What the totals add up: the history plus the open shift, which it never lists. */
   private readonly entries = computed(() => {
     const history = this.work.clockHistory.value();
     const open = this.work.openClock.value();
-    return open && !history.some((entry) => entry.id === open.id) ? [open, ...history] : history;
+    return open ? [open, ...history] : history;
   });
 
   private sumSince(from: Date): number {
@@ -263,39 +266,15 @@ export class FicharComponent {
     return this.sumSince(start);
   });
 
-  readonly weekMinutes = computed(() => {
-    const start = new Date(this.now());
-    start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-    return this.sumSince(start);
-  });
-
-  private readonly monthStart = computed(() => {
-    const now = this.now();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-
-  readonly monthMinutes = computed(() => this.sumSince(this.monthStart()));
-
-  readonly monthDays = computed(() => {
-    const start = this.monthStart();
-    const days = new Set(
-      this.entries()
-        .filter((entry) => fromInstant(entry.checkInAt) >= start)
-        .map((entry) => dayKey(fromInstant(entry.checkInAt))),
-    );
-    return plural(days.size, 'jornada', 'jornadas').toUpperCase();
-  });
-
   readonly days = computed<DayGroup[]>(() => {
     const groups = new Map<string, ClockEntry[]>();
-    for (const entry of this.entries()) {
+    // Closed shifts only: the open one is on the stopwatch above.
+    for (const entry of this.work.clockHistory.value()) {
       const key = dayKey(fromInstant(entry.checkInAt));
       groups.set(key, [...(groups.get(key) ?? []), entry]);
     }
     return [...groups.entries()]
       .sort((a, b) => b[0].localeCompare(a[0]))
-      .slice(0, 31)
       .map(([key, entries]) => {
         const date = new Date(`${key}T00:00:00`);
         const label = relativeDay(date);

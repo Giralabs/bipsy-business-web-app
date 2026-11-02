@@ -44,6 +44,17 @@ export const panelRoutes: Routes = [
         title: 'Mi perfil · Bipsy Business',
         loadComponent: () => import('./trabajador/mi-perfil.component').then((m) => m.MiPerfilComponent),
       },
+      // ----- Lo de los dos: el enlace es del negocio, y el trabajador también lo reparte
+      {
+        path: 'enlace',
+        title: 'Mi enlace · Bipsy Business',
+        loadComponent: () => import('./enlace/enlace.component').then((m) => m.EnlaceComponent),
+      },
+      {
+        path: 'enlace/cartel',
+        title: 'Cartel · Bipsy Business',
+        loadComponent: () => import('./enlace/cartel.component').then((m) => m.CartelComponent),
+      },
       // ----- Lo del negocio ---------------------------------------------------
       {
         path: 'agenda',
@@ -105,6 +116,11 @@ export const panelRoutes: Routes = [
         path: 'negocio',
         title: 'Tu ficha · Bipsy Business',
         loadComponent: () => import('./negocio/negocio.component').then((m) => m.NegocioComponent),
+      },
+      {
+        path: 'negocio/verificacion',
+        title: 'Verificación · Bipsy Business',
+        loadComponent: () => import('./negocio/verificacion.component').then((m) => m.VerificacionComponent),
       },
       {
         path: 'negocio/horario',

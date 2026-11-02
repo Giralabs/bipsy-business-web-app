@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { BipNegocioComponent } from './bip-negocio.component';
+import { PnVerifiedBadgeComponent } from './verified-badge.component';
 
 /**
  * La cabecera del inicio: el saludo a la izquierda y Mr. Bip a la derecha,
@@ -13,13 +14,18 @@ import { BipNegocioComponent } from './bip-negocio.component';
 @Component({
   selector: 'pn-desk-hero',
   standalone: true,
-  imports: [BipNegocioComponent],
+  imports: [BipNegocioComponent, PnVerifiedBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="hero">
       <div class="hero__text">
         <p class="hero__greet">{{ greet }}</p>
-        <h1 class="hero__title">{{ title }}</h1>
+        <h1 class="hero__title">
+          {{ title }}
+          @if (verified) {
+            <pn-verified-badge class="hero__seal" [size]="30" />
+          }
+        </h1>
         @if (line) {
           <p class="hero__line">{{ line }}</p>
         }
@@ -75,6 +81,7 @@ import { BipNegocioComponent } from './bip-negocio.component';
         line-height: 1;
         overflow-wrap: anywhere;
       }
+      .hero__seal { margin-left: 4px; }
       .hero__line { margin-top: 12px; font-size: 1rem; color: var(--clr-text-2); line-height: 1.5; }
       .hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
       .hero__chips:empty { display: none; }
@@ -122,4 +129,6 @@ export class PnDeskHeroComponent {
   @Input() greet = '';
   @Input() title = '';
   @Input() line = '';
+  /** The Bipsy seal next to the name. Only the business has one. */
+  @Input() verified = false;
 }

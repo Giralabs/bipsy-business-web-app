@@ -97,52 +97,57 @@
 
     @if (professionals().length === 0) {
       <p class="au-none">No tienes trabajadores en tu equipo.</p>
-    } @else {
-      <label class="pn-field">
-        <span class="pn-field__label">Trabajador</span>
-        <select class="pn-select" name="worker" [ngModel]="workerId()" (ngModelChange)="pick($event)">
-          <option [ngValue]="null" disabled>Elige un trabajador</option>
-          @for (worker of professionals(); track worker.id) {
-            <option [ngValue]="worker.id">{{ worker.id === team.owner()?.id ? 'Yo' : worker.name }}</option>
-          }
-        </select>
-      </label>
     }
 
-    <!-- The type belongs to a staff absence; the owner's day off has none, so
-         the field goes away instead of showing something that is not saved. -->
-    @if (!forOwner()) {
-      <label class="pn-field">
-        <span class="pn-field__label">Tipo</span>
-        <select class="pn-select" name="type" [(ngModel)]="type">
-          @for (option of types; track option.id) {
-            <option [ngValue]="option.id">{{ option.label }}</option>
-          }
-        </select>
-      </label>
-    }
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        @if (professionals().length > 0) {
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">Trabajador</span>
+            <pn-select look="row" name="worker" label="Trabajador" placeholder="Elige un trabajador"
+                       [options]="workerOptions()" [ngModel]="workerId()" (ngModelChange)="pick($event)" />
+          </label>
+        }
 
-    <div class="au-dates">
-      <label class="pn-field">
-        <span class="pn-field__label">Desde</span>
-        <input class="pn-input" type="date" name="from" [min]="minDay" [max]="maxDay"
-               [ngModel]="from" (ngModelChange)="setFrom($event)" />
-      </label>
-      <label class="pn-field">
-        <span class="pn-field__label">Hasta</span>
-        <input class="pn-input" type="date" name="to" [min]="from || minDay" [max]="maxDay"
-               [ngModel]="to" (ngModelChange)="setTo($event)" />
-      </label>
+        <!-- The type belongs to a staff absence; the owner's day off has none, so
+             the field goes away instead of showing something that is not saved. -->
+        @if (!forOwner()) {
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">Tipo</span>
+            <pn-select look="row" name="type" label="Tipo" [options]="types" valueKey="id" [(ngModel)]="type" />
+          </label>
+        }
+      </div>
     </div>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Motivo (opcional)</span>
-      <input class="pn-input" name="reason" maxlength="255"
-             placeholder="Baja por enfermedad, vacaciones de empresa..." [(ngModel)]="reason" />
-    </label>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Fechas</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Desde</span>
+          <pn-date look="row" name="from" [min]="minDay" [max]="maxDay"
+                 [ngModel]="from" (ngModelChange)="setFrom($event)" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Hasta</span>
+          <pn-date look="row" name="to" [min]="from || minDay" [max]="maxDay"
+                 [ngModel]="to" (ngModelChange)="setTo($event)" />
+        </label>
+      </div>
+    </div>
+
+    <div class="pn-fg au-last">
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Motivo (opcional)</span>
+          <input class="pn-fg__input" name="reason" maxlength="255"
+                 placeholder="Baja por enfermedad, vacaciones de empresa..." [(ngModel)]="reason" />
+        </label>
+      </div>
+    </div>
 
     @if (inTheWay().length > 0) {
-      <div class="pn-notice pn-notice--warn">
+      <div class="pn-notice pn-notice--warn au-warn">
         <span class="material-symbols-rounded">warning</span>
         <div>
           <strong>{{ count(inTheWay().length, 'cita que resolver', 'citas que resolver') }}</strong>

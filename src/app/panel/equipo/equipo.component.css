@@ -19,6 +19,8 @@
   transition: background-color var(--dur-fast) ease;
 }
 .eq-row:hover { background: var(--pn-field); }
+.eq-row--owner { text-decoration: none; }
+.eq-staff-head { margin-top: 20px; }
 .eq-row + .eq-row { box-shadow: inset 0 1px 0 var(--clr-hairline); }
 
 .eq-row__main { flex: 1; min-width: 0; }
@@ -52,7 +54,13 @@
 }
 .eq-inv__exp { display: block; font-size: 0.75rem; }
 
-.eq-schedule { margin-bottom: 10px; text-decoration: none; }
+/* ----- LOS DIÁLOGOS ----- */
+
+.eq-intro { margin-bottom: 16px; }
+/* The last block of a sheet: its margin would add to the body's padding. */
+.eq-last { margin-bottom: 0; }
+/* A destructive action as the iOS Settings draw it: alone, in red, centred. */
+.eq-danger { justify-content: center; font-weight: 600; color: var(--clr-danger-text); }
 
 .eq-code { text-align: center; padding: 10px 0 4px; }
 .eq-code__value {
