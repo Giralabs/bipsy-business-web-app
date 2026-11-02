@@ -59,7 +59,7 @@
         @if (i > 0 && sections()[i - 1].group !== section.group) {
           <span class="sb__gap" aria-hidden="true"></span>
         }
-        <a class="sb__item" [routerLink]="section.route"
+        <a class="sb__item" [routerLink]="section.route" (pointerenter)="prefetch(section.id)" (focus)="prefetch(section.id)"
            [class.is-here]="here()?.id === section.id"
            [attr.aria-current]="here()?.id === section.id ? 'page' : null"
            [attr.data-coach]="'nav:' + section.id"
@@ -83,6 +83,7 @@
         <a class="sb__item" routerLink="/panel/ajustes"
            [class.is-here]="isSettings()"
            [attr.aria-current]="isSettings() ? 'page' : null"
+           data-coach="nav:ajustes"
            [attr.title]="rail() ? 'Ajustes' : null">
           <span class="sb__icon">
             <span class="material-symbols-rounded" [class.fill]="isSettings()">settings</span>
@@ -106,15 +107,25 @@
           <div class="sb__backdrop" (click)="closeMenu()"></div>
           <div class="sb__menu" role="menu">
             <div class="sb__menu-head">
-              <p class="sb__menu-name">{{ auth.user()?.name || who() }}</p>
+              <p class="sb__menu-name">
+                {{ auth.user()?.name || who() }}
+                <!-- El mismo sello que ve el cliente. Solo el negocio: el trabajador no tiene verificación propia. -->
+                @if (auth.isBusiness() && auth.profile()?.verified) {
+                  <pn-verified-badge [size]="16" />
+                }
+              </p>
               <p class="sb__menu-mail">{{ auth.user()?.email }}</p>
             </div>
 
-            @if (auth.isBusiness()) {
-              <a class="sb__menu-row" role="menuitem" routerLink="/panel/ajustes/suscripcion" (click)="closeMenu()">
-                <span class="material-symbols-rounded">workspace_premium</span> Mi plan
+            @if (verification.rejected()) {
+              <a class="sb__menu-row sb__menu-row--danger" role="menuitem" routerLink="/panel/negocio/verificacion" (click)="closeMenu()">
+                <span class="material-symbols-rounded fill">error</span> Hay algo que revisar en tu verificación
               </a>
-            } @else {
+            }
+            <a class="sb__menu-row" role="menuitem" routerLink="/panel/enlace" (click)="closeMenu()">
+              <span class="material-symbols-rounded">ios_share</span> Mi enlace
+            </a>
+            @if (!auth.isBusiness()) {
               <a class="sb__menu-row" role="menuitem" routerLink="/panel/mi-perfil" (click)="closeMenu()">
                 <span class="material-symbols-rounded">account_circle</span> Mi perfil
               </a>
@@ -165,6 +176,7 @@
         <span class="material-symbols-rounded">account_balance</span>
         <a routerLink="/panel/ajustes/cobros">
           Tienes pendiente configurar los cobros para poder cobrar cancelaciones y citas.
+          <span class="pn-strip__go">Configurar →</span>
         </a>
         <button type="button" class="pn-strip__close" aria-label="Cerrar"
                 (click)="payoutsBannerDismissed.set(true)">

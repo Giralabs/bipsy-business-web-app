@@ -12,13 +12,17 @@ export type ChatSocketEvent =
   | { type: 'message.created'; conversationId: number; message: ChatMessage }
   | { type: 'conversation.read'; conversationId: number; side: ChatSide; at: string | null }
   | { type: 'conversation.delivered'; conversationId: number; side: ChatSide; at: string | null }
+  /** A bell, not data (`BookingSocketEvents.java`): something changed, read the agenda again. */
+  | { type: 'booking.changed'; bookingId: number; reason: string }
   | { type: 'connected' }
   | { type: 'down' };
 
 export type ChatSocketState = 'idle' | 'connecting' | 'open' | 'down';
 
 /**
- * The live chat channel, twin of `packages/gipsi_api/.../chat_socket.dart`.
+ * The live channel, twin of `packages/gipsi_api/.../gipsi_socket.dart`. It was
+ * born for the chat and also carries booking changes now: one connection per
+ * session, whatever the chat setting says. The name and the `/ws/chat` path stay.
  *
  * Protocol, read from the backend (`WebSocketConfig`, `ChatSocketHandler`,
  * `JwtAuthenticationFilter`): a raw WebSocket (no STOMP, no SockJS) at
@@ -232,14 +236,22 @@ function wsUrl(): string {
 function parse(raw: string): ChatSocketEvent | null {
   try {
     const json = JSON.parse(raw) as Record<string, unknown>;
+    // The type first: reading `conversationId` first dropped, in silence, every
+    // event that has none, like a booking's.
     const conversationId = Number(json['conversationId']);
-    if (!Number.isFinite(conversationId)) return null;
     switch (json['type']) {
+      case 'booking.changed':
+        return {
+          type: 'booking.changed',
+          bookingId: Number(json['bookingId']),
+          reason: String(json['reason'] ?? ''),
+        };
       case 'message.created':
-        if (!json['message']) return null;
+        if (!json['message'] || !Number.isFinite(conversationId)) return null;
         return { type: 'message.created', conversationId, message: json['message'] as ChatMessage };
       case 'conversation.read':
       case 'conversation.delivered':
+        if (!Number.isFinite(conversationId)) return null;
         return {
           type: json['type'] as 'conversation.read' | 'conversation.delivered',
           conversationId,

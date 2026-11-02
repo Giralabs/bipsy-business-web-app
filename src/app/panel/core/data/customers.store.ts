@@ -6,6 +6,7 @@ import {
   CustomerOrigin,
   SaveCustomerRequest,
 } from '../api/models';
+import { AuthService } from '../auth/auth.service';
 import { resource } from './resource';
 
 /** How long the search waits after the last keystroke before asking. */
@@ -17,14 +18,21 @@ const SEARCH_DEBOUNCE_MS = 250;
  *
  * Two lists, like the app: `customers` is the WHOLE agenda (vetoed people, the
  * import's duplicate check and «is the agenda empty» read it) and `matches` is
- * what the server answers to the search box and the three filters. Nothing is
- * narrowed in the browser: the phone search compares normalised digits, trust
- * comes from the customer's booking history and the booking count from an
- * aggregation, so repeating any of it here would end up finding other people.
+ * what the server answers to the search box and two of the filters: the phone
+ * search compares normalised digits, trust comes from the customer's booking
+ * history and the booking count from an aggregation, so repeating any of it here
+ * would end up finding other people.
+ *
+ * The ORIGIN does not travel. The three pages come out of the SAME answer and
+ * are split here (`ofOrigin`), so moving between them costs no request and does
+ * not flash. It can be done because it comes entirely from each row's `source`,
+ * exactly as the server does it; if `CustomerOrigin.matches` changes there, it
+ * changes here.
  */
 @Injectable({ providedIn: 'root' })
 export class CustomersStore {
   private readonly api = inject(Api);
+  private readonly auth = inject(AuthService);
 
   readonly customers = resource<BusinessCustomer[]>(
     () => this.api.get<BusinessCustomer[]>('/businesses/me/customers'),
@@ -44,8 +52,10 @@ export class CustomersStore {
     () => this.origin() !== null || this.trusted() !== null || this.withBooking() !== null,
   );
 
-  /** A search term or a filter: the list on screen is the server's answer. */
-  private readonly narrowed = computed(() => this.query().trim() !== '' || this.filtersActive());
+  /** A search term or a server filter: the list on screen is the server's answer. */
+  private readonly narrowed = computed(
+    () => this.query().trim() !== '' || this.trusted() !== null || this.withBooking() !== null,
+  );
 
   /** The server's answer to the current search and filters; null until it arrives. */
   private readonly matches = signal<BusinessCustomer[] | null>(null);
@@ -65,7 +75,7 @@ export class CustomersStore {
    */
   readonly filtered = computed(() => {
     const list = this.narrowed() ? (this.matches() ?? this.all()) : this.all();
-    return list.filter((c) => !c.banned);
+    return ofOrigin(list, this.origin()).filter((c) => !c.banned);
   });
 
   readonly banned = computed(() => this.all().filter((c) => c.banned));
@@ -94,9 +104,9 @@ export class CustomersStore {
     this.timer = setTimeout(() => void this.search(), SEARCH_DEBOUNCE_MS);
   }
 
+  /** No request: the three pages are the same list. */
   setOrigin(origin: CustomerOrigin | null): void {
     this.origin.set(origin);
-    void this.search();
   }
 
   /** Tapping the one already on takes it off, as in the app's sheet. */
@@ -136,7 +146,6 @@ export class CustomersStore {
     try {
       const found = await this.api.get<BusinessCustomer[]>('/businesses/me/customers', {
         q: this.query().trim(),
-        origin: this.origin(),
         trusted: this.trusted(),
         withBooking: this.withBooking(),
       });
@@ -159,9 +168,11 @@ export class CustomersStore {
     return this.api.get<BusinessCustomerDetail>(`/businesses/me/customers/${id}`);
   }
 
-  async create(payload: SaveCustomerRequest): Promise<void> {
-    await this.api.post('/businesses/me/customers', payload);
+  /** The email is mandatory here (400 without it), not when editing or importing. */
+  async create(payload: SaveCustomerRequest): Promise<BusinessCustomer> {
+    const created = await this.api.post<BusinessCustomer>('/businesses/me/customers', payload);
     await this.refresh();
+    return created;
   }
 
   async update(id: number, payload: SaveCustomerRequest): Promise<void> {
@@ -174,9 +185,11 @@ export class CustomersStore {
     await this.refresh();
   }
 
-  async invite(id: number): Promise<void> {
-    await this.api.post(`/businesses/me/customers/${id}/invite`);
+  /** Stamps that they were invited. The owner's: the route does not let a worker through. */
+  async invite(id: number): Promise<BusinessCustomer> {
+    const updated = await this.api.post<BusinessCustomer>(`/businesses/me/customers/${id}/invite`);
     await this.refresh();
+    return updated;
   }
 
   /**
@@ -212,4 +225,45 @@ export class CustomersStore {
     await this.api.delete(`/businesses/me/bans/${customerId}`);
     await this.refresh();
   }
+
+  /**
+   * The code that goes in an invitation, or null if none has been chosen. A
+   * worker reads the business's through his own route. If asking fails it is
+   * null too, and the invitation goes without it: not inviting anybody for not
+   * having read an optional code would be worse.
+   */
+  async referralCode(): Promise<string | null> {
+    const path = this.auth.isWorker() ? '/workers/me/referral' : '/businesses/me/referral';
+    try {
+      // `editable` stays true only while there is none chosen: a suggestion is not a code.
+      const { code, editable } = await this.api.get<{ code: string | null; editable: boolean }>(path);
+      return code && !editable ? code : null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+/** Mine or from Bipsy: whoever arrived by booking, and everything else. */
+function ofOrigin(list: BusinessCustomer[], origin: CustomerOrigin | null): BusinessCustomer[] {
+  if (origin === null) return list;
+  return list.filter((c) => (c.source === 'BOOKING') === (origin === 'BIPSY'));
+}
+
+/**
+ * What stops a card from being saved (`customer_form_sheet.dart`). The email is
+ * mandatory only when adding: it is the one channel that reaches a customer
+ * without the app, but older cards and imported contacts may have none and must
+ * still be editable. Without phone or email a card serves for nothing.
+ */
+export function customerFormError(
+  form: { name: string; phone: string; email: string },
+  adding: boolean,
+): string | null {
+  const email = form.email.trim();
+  if (!form.name.trim()) return 'El nombre es obligatorio.';
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return 'El email no es válido.';
+  if (adding && !email) return 'Añade su email: es por donde le llegan los avisos de sus citas.';
+  if (!form.phone.trim() && !email) return 'Añade al menos un teléfono o un email.';
+  return null;
 }

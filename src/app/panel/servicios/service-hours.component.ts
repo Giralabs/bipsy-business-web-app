@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { SlotGrid, WeekdayName } from '../core/api/models';
 import { PnSwitchComponent } from '../ui/controls';
+import { PnSelectComponent } from '../ui/select.component';
 import {
   Band,
   BandsByDay,
@@ -31,7 +32,7 @@ import {
 @Component({
   selector: 'pn-service-hours',
   standalone: true,
-  imports: [PnSwitchComponent],
+  imports: [PnSwitchComponent, PnSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="sh">
@@ -70,27 +71,21 @@ import {
                 @if (!isClosed(day)) {
                   @for (band of bandsOf(day); track $index) {
                     <div class="sh__band">
-                      <select
-                        class="pn-select"
-                        [attr.aria-label]="'Hora de inicio, ' + label(day)"
+                      <pn-select
+                        class="sh__time"
+                        [label]="'Hora de inicio, ' + label(day)"
+                        [options]="starts(day)"
                         [value]="band.start"
-                        (change)="setStart(day, $index, asValue($event))"
-                      >
-                        @for (time of starts(day); track time) {
-                          <option [value]="time" [selected]="time === band.start">{{ time }}</option>
-                        }
-                      </select>
+                        (changed)="setStart(day, $index, $any($event))"
+                      />
                       <span class="sh__dash">–</span>
-                      <select
-                        class="pn-select"
-                        [attr.aria-label]="'Hora de fin, ' + label(day)"
+                      <pn-select
+                        class="sh__time"
+                        [label]="'Hora de fin, ' + label(day)"
+                        [options]="ends(day, band)"
                         [value]="band.end"
-                        (change)="setEnd(day, $index, asValue($event))"
-                      >
-                        @for (time of ends(day, band); track time) {
-                          <option [value]="time" [selected]="time === band.end">{{ time }}</option>
-                        }
-                      </select>
+                        (changed)="setEnd(day, $index, $any($event))"
+                      />
                       <button
                         type="button"
                         class="pn-btn pn-btn--text pn-btn--sm"
@@ -142,7 +137,7 @@ import {
       .sh__day-value { font-size: 0.8125rem; color: var(--clr-text-3); }
       .sh__day-value--none { font-style: italic; }
       .sh__band { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-      .sh__band .pn-select { width: 110px; }
+      .sh__time { width: 110px; font-variant-numeric: tabular-nums; }
       .sh__dash { color: var(--clr-text-3); }
       .sh__day-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
       .sh__note { margin: 6px 0 0; }
@@ -197,9 +192,6 @@ export class PnServiceHoursComponent {
     return options.includes(band.end) ? options : [...options, band.end].sort((a, b) => toMinutes(a) - toMinutes(b));
   }
 
-  asValue(event: Event): string {
-    return (event.target as HTMLSelectElement).value;
-  }
 
   addBand(day: WeekdayName): void {
     const whole = wholeDay(this.grid[day] ?? [], this.slotMinutes);

@@ -5,6 +5,9 @@
       <h1>Tu ficha</h1>
     </div>
     <div class="pn-head__actions">
+      <a class="pn-btn pn-btn--secondary" routerLink="/panel/enlace">
+        <span class="material-symbols-rounded">ios_share</span>Mi enlace
+      </a>
       <a class="pn-btn pn-btn--secondary" routerLink="/panel/negocio/vista-previa">
         <span class="material-symbols-rounded">visibility</span>Ver como cliente
       </a>
@@ -12,6 +15,21 @@
         <span class="material-symbols-rounded">edit</span>Editar datos
       </button>
     </div>
+  </div>
+
+  <!-- `plan_verification_row.dart`: dos destinos, dos botones. Con uno solo y el
+       sello aparte no se adivinaba a dónde llevaba cada cosa. -->
+  <div class="ng-status">
+    <a class="ng-status__card" routerLink="/panel/ajustes/suscripcion">
+      <pn-plan-mark [quality]="onQualityPlan()" />
+      <span>{{ onQualityPlan() ? 'Plan Quality' : 'Plan Bipsy' }}</span>
+    </a>
+    <a class="ng-status__card" routerLink="/panel/negocio/verificacion">
+      <span class="ng-status__seal">
+        <pn-verified-badge [size]="24" [tone]="sealTone()" label="Verificación" />
+      </span>
+      <span>{{ verificationLabel() }}</span>
+    </a>
   </div>
 
   <div class="pn-grid">
@@ -41,7 +59,20 @@
         </span>
 
         <div class="ficha__id-text">
-          <h2>{{ auth.businessName() }}</h2>
+          <h2 class="ficha__name">
+            <span>{{ auth.businessName() }}</span>
+            @if (profile()?.verified) {
+              <pn-verified-badge [size]="24" />
+            }
+            <!-- Denegada: hay algo que arreglar. El rojo solo no se oye, por eso la etiqueta. -->
+            @if (verification.rejected()) {
+              <a class="ficha__problem" routerLink="/panel/negocio/verificacion"
+                 aria-label="Hay algo que revisar en tu verificación"
+                 title="Hay algo que revisar en tu verificación">
+                <span class="material-symbols-rounded fill">error</span>
+              </a>
+            }
+          </h2>
           <p class="ficha__meta">
             @if (reviews.count() > 0) {
               <span class="ficha__stars">
@@ -66,35 +97,38 @@
           </p>
         }
 
-        <p class="pn-group__head ficha__photos-head">Tus fotos</p>
+        <!-- Cada foto en su fila y diciendo qué es. Montadas como las ve el cliente
+             no se sabía que la redonda es la del dueño, y se subía un logo donde
+             va una cara. -->
+        <p class="pn-group__head ficha__photos-head">Fotos</p>
         <div class="ficha__photos">
-          <div>
-            <pn-photo-picker
-              label="Foto de perfil"
-              hint="Cuadrada, mínimo 400×400"
-              [current]="profile()?.profileImageUrl ?? null"
-              [busy]="uploading() === 'profile'"
-              (picked)="upload('profile', $event)"
-            />
-            @if (profile()?.profileImageUrl) {
-              <button type="button" class="pn-btn pn-btn--text pn-btn--sm ficha__remove"
-                      (click)="removePhoto('profile')">Quitar foto de perfil</button>
-            }
-          </div>
-
-          <div>
-            <pn-photo-picker
-              label="Portada"
-              hint="Apaisada, 1920×1080 va perfecta"
-              [current]="profile()?.coverImageUrl ?? null"
-              [busy]="uploading() === 'cover'"
-              (picked)="upload('cover', $event)"
-            />
+          <pn-photo-picker
+            variant="row"
+            crop="cover"
+            label="Portada del negocio"
+            hint="Lo que ven tus clientes"
+            [current]="profile()?.coverImageUrl ?? null"
+            [busy]="uploading() === 'cover'"
+            (picked)="upload('cover', $event)"
+          >
             @if (profile()?.coverImageUrl) {
-              <button type="button" class="pn-btn pn-btn--text pn-btn--sm ficha__remove"
-                      (click)="removePhoto('cover')">Quitar portada</button>
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="removePhoto('cover')">Quitar</button>
             }
-          </div>
+          </pn-photo-picker>
+
+          <pn-photo-picker
+            variant="row"
+            crop="avatar"
+            label="Tu foto"
+            hint="Tu perfil personal de Bipsy"
+            [current]="profile()?.profileImageUrl ?? null"
+            [busy]="uploading() === 'profile'"
+            (picked)="upload('profile', $event)"
+          >
+            @if (profile()?.profileImageUrl) {
+              <button type="button" class="pn-btn pn-btn--text pn-btn--sm" (click)="removePhoto('profile')">Quitar</button>
+            }
+          </pn-photo-picker>
         </div>
       </div>
     </section>
@@ -178,29 +212,40 @@
 
 @if (editing()) {
   <pn-dialog title="Editar tu ficha" [wide]="true" (closed)="editing.set(false)">
-    <label class="pn-field">
-      <span class="pn-field__label">Nombre del negocio</span>
-      <input class="pn-input" type="text" name="name" [(ngModel)]="form.name" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Teléfono</span>
-      <input class="pn-input" type="tel" name="phone" [(ngModel)]="form.phone" />
-    </label>
-
-    <p class="pn-field__label">Dónde atiendes</p>
-    <div class="ng-modes" role="radiogroup" aria-label="Modalidad">
-      @for (mode of modes; track mode.id) {
-        <button type="button" class="ng-mode" role="radio" [attr.aria-checked]="form.mode === mode.id"
-                (click)="setMode(mode.id)">
-          <span class="material-symbols-rounded">{{ mode.icon }}</span>
-          <span class="ng-mode__title">{{ mode.title }}</span>
-          <span class="ng-mode__sub">{{ mode.sub }}</span>
-        </button>
-      }
+    <!-- The app's grouped form: one block per subject, a row per field. -->
+    <div class="pn-fg">
+      <p class="pn-fg__head">Tu negocio</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Nombre</span>
+          <input class="pn-fg__input" type="text" name="name" placeholder="Cómo te llaman tus clientes" [(ngModel)]="form.name" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Teléfono</span>
+          <input class="pn-fg__input" type="tel" name="phone" placeholder="600 12 34 56" [(ngModel)]="form.phone" />
+        </label>
+      </div>
     </div>
 
-    <!-- Con local, la calle; sin él, la zona. Ciudad, provincia y código
-         postal salen del buscador en los dos casos. -->
+    <div class="pn-fg">
+      <p class="pn-fg__head">Dónde atiendes</p>
+      <div class="pn-fg__body" role="radiogroup" aria-label="Dónde atiendes">
+        @for (mode of modes; track mode.id) {
+          <button type="button" class="pn-fg__choice" role="radio" [attr.aria-checked]="form.mode === mode.id"
+                  (click)="setMode(mode.id)">
+            <span class="material-symbols-rounded">{{ mode.icon }}</span>
+            <span class="pn-fg__choice-main">
+              <span class="pn-fg__choice-title">{{ mode.title }}</span>
+              <span class="pn-fg__choice-sub">{{ mode.sub }}</span>
+            </span>
+            <span class="material-symbols-rounded pn-fg__tick">check</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Con local, la calle; sin él, la zona. Ciudad y provincia siempre a la
+         vista, como en bipsy-web-app: el buscador las rellena, no las exige. -->
     @if (atCustomer) {
       <pn-address-search
         label="Zona donde trabajas"
@@ -209,7 +254,6 @@
         [hint]="zoneHint"
         [(text)]="form.address"
         (resolved)="onResolved($event)"
-        (available)="placesUp.set($event)"
       />
     } @else {
       <pn-address-search
@@ -220,21 +264,20 @@
         [(text)]="form.address"
         (typed)="addressError.set(null)"
         (resolved)="onResolved($event)"
-        (available)="placesUp.set($event)"
       />
     }
-    @if (!placesUp()) {
-      <div class="ng-two">
-        <label class="pn-field">
-          <span class="pn-field__label">Ciudad</span>
-          <input class="pn-input" type="text" name="city" [(ngModel)]="form.city" />
+    <div class="pn-fg">
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Ciudad</span>
+          <input class="pn-fg__input" type="text" name="city" autocomplete="address-level2" placeholder="Valencia" [(ngModel)]="form.city" />
         </label>
-        <label class="pn-field">
-          <span class="pn-field__label">Provincia</span>
-          <input class="pn-input" type="text" name="province" [(ngModel)]="form.province" />
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Provincia</span>
+          <input class="pn-fg__input" type="text" name="province" autocomplete="address-level1" placeholder="Valencia" [(ngModel)]="form.province" />
         </label>
       </div>
-    }
+    </div>
 
     <!-- Hasta dónde se desplaza (`service_area_sheet.dart`). Solo si se
          desplaza: en un negocio de local, una zona no significa nada. En la
@@ -258,14 +301,12 @@
                 <span class="pn-row__title">Distancia máxima</span>
                 <span class="ng-area__value pn-tabular">{{ form.area.radiusKm }} km a la redonda</span>
               </span>
-              <input
-                class="ng-area__slider"
-                type="range"
+              <pn-slider
                 name="areaRadius"
-                min="1"
+                [min]="1"
                 [max]="areaLimits.maxRadiusKm"
-                step="1"
-                aria-label="Distancia máxima"
+                [step]="1"
+                label="Distancia máxima"
                 [disabled]="busy()"
                 [(ngModel)]="form.area.radiusKm"
               />
@@ -286,42 +327,49 @@
           [(text)]="form.centerText"
           (typed)="centerError.set(null)"
           (resolved)="onCenterResolved($event)"
+          (available)="placesUp.set($event)"
         />
       }
     }
 
-    <label class="pn-field">
-      <span class="pn-field__label">Descripción</span>
-      <textarea class="pn-textarea" rows="5" name="description"
-                placeholder="Cortes clásicos y afeitado a navaja. Tres sillones, sin prisa."
-                [(ngModel)]="form.description"></textarea>
-      <span class="pn-field__hint">Cuéntalo corto: es lo primero que se lee debajo de tu nombre.</span>
-    </label>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Descripción</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row pn-fg__row--stack">
+          <textarea class="pn-fg__input" rows="4" name="description" aria-label="Descripción"
+                    placeholder="Cortes clásicos y afeitado a navaja. Tres sillones, sin prisa."
+                    [(ngModel)]="form.description"></textarea>
+        </label>
+      </div>
+      <p class="pn-fg__foot">Cuéntalo corto: es lo primero que se lee debajo de tu nombre.</p>
+    </div>
 
     <!-- Las seis redes de `social_links_group.dart`. En la app se añaden de
          una en una con dos hojas; en un escritorio caben las seis a la vez y
          se deja en blanco la que no se tenga. -->
-    <p class="pn-field__label">Redes sociales</p>
-    <div class="ng-social">
-      @for (network of networks; track network.id) {
-        <label class="pn-field">
-          <span class="pn-field__label">{{ network.label }}</span>
-          <input
-            class="pn-input"
-            type="text"
-            autocomplete="off"
-            autocapitalize="none"
-            [name]="'social-' + network.id"
-            [maxlength]="network.max"
-            [placeholder]="network.placeholder"
-            [(ngModel)]="form.social[network.id]"
-          />
-        </label>
-      }
+    <div class="pn-fg">
+      <p class="pn-fg__head">Redes sociales</p>
+      <div class="pn-fg__body">
+        @for (network of networks; track network.id) {
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">{{ network.label }}</span>
+            <input
+              class="pn-fg__input"
+              type="text"
+              autocomplete="off"
+              autocapitalize="none"
+              [name]="'social-' + network.id"
+              [maxlength]="network.max"
+              [placeholder]="network.placeholder"
+              [(ngModel)]="form.social[network.id]"
+            />
+          </label>
+        }
+      </div>
+      <p class="pn-fg__foot">
+        Puedes pegar la dirección entera: nos quedamos con tu usuario. Lo que dejes en blanco no sale en tu ficha.
+      </p>
     </div>
-    <p class="pn-field__hint">
-      Puedes pegar la dirección entera: nos quedamos con tu usuario. Lo que dejes en blanco no sale en tu ficha.
-    </p>
 
     @if (formError(); as text) {
       <p class="pn-field__error" role="alert">{{ text }}</p>

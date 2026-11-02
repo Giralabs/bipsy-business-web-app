@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AgendaGridComponent, GridColumn, GridSpot } from './agenda-grid.component';
 import { BookingDialogComponent } from './booking-dialog.component';
 import { CreateBookingDialogComponent } from './create-booking-dialog.component';
@@ -59,6 +59,7 @@ interface NewBookingSeed {
   selector: 'app-panel-agenda',
   standalone: true,
   imports: [
+    RouterLink,
     AgendaGridComponent,
     BookingDialogComponent,
     CreateBookingDialogComponent,
@@ -92,8 +93,28 @@ export class AgendaComponent {
   readonly view = signal<View>('semana');
   readonly picked = signal<BookingResponse | null>(null);
   readonly legendOpen = signal(false);
-  /** «Dar cita» open, and what it starts from. Owner only: `/businesses/me/**` is BUSINESS. */
+  /** «Dar cita» open, and what it starts from. */
   readonly giving = signal<NewBookingSeed | null>(null);
+
+  /** The owner, or a worker with the front desk permission. */
+  readonly canGive = this.auth.canSeeCustomers;
+
+  /**
+   * Whether there are two different things to look at: the owner who attends and
+   * has somebody else. Alone, every appointment is theirs already; not attending,
+   * there is no «mine».
+   */
+  readonly canScope = computed(
+    () =>
+      this.auth.isBusiness() &&
+      this.auth.profile()?.ownerPerforms === true &&
+      this.team.enabled() &&
+      this.team.staff().length > 0,
+  );
+
+  toggleScope(): void {
+    this.agenda.onlyMine.update((mine) => !mine);
+  }
 
   constructor() {
     void this.agenda.load();
@@ -114,7 +135,13 @@ export class AgendaComponent {
       { id: 'semana', label: 'Semana' },
       { id: 'dia', label: 'Día' },
       { id: 'lista', label: 'Lista' },
-      { id: 'pendientes', label: 'Pendientes', badge: this.agenda.pendingCount() },
+      {
+        id: 'pendientes',
+        label: 'Pendientes',
+        badge: this.agenda.pendingCount(),
+        badgeUrgent: true,
+        badgeLabel: plural(this.agenda.pendingCount(), 'cita pendiente', 'citas pendientes') + ' de confirmar',
+      },
     ];
     if (this.waitlist.enabled()) options.push({ id: 'espera', label: 'Espera' });
     return options;
@@ -156,7 +183,11 @@ export class AgendaComponent {
     const date = this.day();
     const open = this.openOf(date);
     const bookings = this.agenda.ofDay(date).filter((booking) => booking.status !== 'CANCELED');
-    const workers = this.team.all();
+    // Looking at their own day, the owner's column is all there is.
+    const workers =
+      this.agenda.onlyMine() && this.canScope()
+        ? this.team.all().filter((worker) => worker.id === this.auth.businessId())
+        : this.team.all();
 
     if (this.auth.isWorker() || this.auth.isAutonomous() || workers.length === 0) {
       return [
@@ -257,7 +288,7 @@ export class AgendaComponent {
 
   /** From an empty spot of the grid: its day, its time and, in the day view, its worker. */
   giveAt(spot: GridSpot): void {
-    if (!this.auth.isBusiness()) return;
+    if (!this.canGive()) return;
     const week = this.view() === 'semana';
     const day = week ? startOfDay(new Date(`${spot.columnId}T00:00:00`)) : this.day();
     const start = new Date(day);

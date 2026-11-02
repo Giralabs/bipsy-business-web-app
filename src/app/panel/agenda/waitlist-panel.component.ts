@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { serverReason } from '../core/data/resource';
 import { WaitlistStore } from '../core/data/waitlist.store';
 import { AuthService } from '../core/auth/auth.service';
 import { BusinessWaitlistEntry, TimeBand, WaitlistNotifyMode } from '../core/api/models';
-import { fromInstant, longDate, shortDate, toIso } from '../core/util/dates';
+import { dayKey, fromInstant, longDate, shortDate, toIso } from '../core/util/dates';
 import { duration as durationText } from '../core/util/format';
 import { PnEmptyComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnDateComponent } from '../ui/date.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -28,7 +31,7 @@ const BAND_LABEL: Record<TimeBand, string> = {
 @Component({
   selector: 'app-waitlist-panel',
   standalone: true,
-  imports: [PnEmptyComponent, PnDialogComponent, FormsModule],
+  imports: [PnEmptyComponent, PnDialogComponent, FormsModule, PnSelectComponent, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './waitlist-panel.component.html',
   styleUrl: './waitlist-panel.component.css',
@@ -50,11 +53,28 @@ export class WaitlistPanelComponent {
   /** What the server said after the last offer, shown in the sheet. */
   readonly offerResult = signal<string | null>(null);
 
-  /** `datetime-local` value (`yyyy-MM-ddTHH:mm`) of the slot to offer. */
-  slotStart = '';
+  /** Day (`yyyy-MM-dd`) and time (`HH:mm`) of the slot to offer, picked apart. */
+  slotDay: string | null = null;
+  slotTime: string | null = null;
+  readonly today = dayKey(new Date());
+  /** Every quarter of an hour from 06:00: the grid the agenda works on. */
+  readonly slotTimes = Array.from({ length: 72 }, (_, i) => {
+    const minutes = 6 * 60 + i * 15;
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  });
+
+  /** What `datetime-local` used to give: `yyyy-MM-ddTHH:mm`, or empty until both are chosen. */
+  get slotStart(): string {
+    return this.slotDay && this.slotTime ? `${this.slotDay}T${this.slotTime}` : '';
+  }
+  set slotStart(value: string) {
+    this.slotDay = value ? value.slice(0, 10) : null;
+    this.slotTime = value ? value.slice(11, 16) : null;
+  }
 
   mode: WaitlistNotifyMode = this.auth.profile()?.waitlistNotifyMode ?? 'SEQUENTIAL';
   hours = this.auth.profile()?.waitlistResponseHours ?? 12;
+  readonly hourOptions: PnOption<number>[] = [6, 12, 24, 48, 72].map((h) => ({ value: h, label: `${h} horas` }));
 
   constructor() {
     void this.store.load();
@@ -106,8 +126,7 @@ export class WaitlistPanelComponent {
       this.offerResult.set(text);
       this.picked.set(this.store.all().find((item) => item.id === entry.id) ?? entry);
     } catch (cause) {
-      const detail = (cause as { error?: { message?: string } }).error?.message;
-      this.toasts.error(detail || 'No se ha podido ofrecer el hueco.');
+      this.toasts.error(serverReason(cause) || 'No se ha podido ofrecer el hueco.');
     } finally {
       this.offering.set(false);
     }
@@ -127,19 +146,27 @@ export class WaitlistPanelComponent {
   }
 
   async remove(entry: BusinessWaitlistEntry): Promise<void> {
+    // Mandatory: the customer hears about it, and this text is the only thing
+    // they will read, because their entry disappears from their own list.
     const answer = await this.confirm.ask({
-      title: 'Quitar de la lista',
-      message: `${entry.customerName} dejará de estar en espera y no recibirá avisos.`,
+      title: '¿Quitar de la lista?',
+      message: `${entry.customerName} dejará de estar en la lista y no recibirá avisos de huecos libres.`,
       confirmLabel: 'Quitar',
       destructive: true,
+      reason: {
+        label: 'Motivo',
+        placeholder: 'Ej.: cerramos esa semana',
+        hint: 'Se lo decimos con tu motivo dentro: es lo único que va a leer, porque su espera desaparece de su lista.',
+        required: true,
+      },
     });
     if (!answer.ok) return;
     try {
-      await this.store.remove(entry.id);
+      await this.store.remove(entry.id, answer.reason);
       this.pick(null);
       this.toasts.show('Fuera de la lista');
     } catch {
-      this.toasts.error('No se ha podido quitar.');
+      this.toasts.error('No se ha podido quitar de la lista.');
     }
   }
 

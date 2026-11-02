@@ -38,10 +38,17 @@ export class ReviewsStore {
   readonly all = this.reviews.value;
   readonly count = computed(() => this.all().length);
 
+  /**
+   * The server's, from `/me`: `averageRating` for the owner and
+   * `businessAverageRating` for a worker, over ALL of them. Counted here only if
+   * the profile comes without it.
+   */
   readonly average = computed(() => {
     const list = this.all();
     if (list.length === 0) return null;
-    return list.reduce((sum, review) => sum + review.rating, 0) / list.length;
+    const profile = this.auth.profile();
+    const known = profile?.averageRating ?? profile?.businessAverageRating;
+    return known ?? list.reduce((sum, review) => sum + review.rating, 0) / list.length;
   });
 
   /** How many reviews gave each score, for the bars in the header. */

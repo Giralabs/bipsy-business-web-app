@@ -10,6 +10,8 @@ import { addDays, dayKey, hhmm, longDate, shortDate, toDate } from '../core/util
 import { plural } from '../core/util/format';
 import { PnEmptyComponent, PnSegmentedComponent, SegmentOption } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
+import { PnDateComponent } from '../ui/date.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
 
@@ -68,7 +70,7 @@ function fromTimeOff(day: TimeOff, businessId: number): Entry {
 @Component({
   selector: 'app-panel-ausencias',
   standalone: true,
-  imports: [FormsModule, RouterLink, PnEmptyComponent, PnSegmentedComponent, PnDialogComponent],
+  imports: [FormsModule, RouterLink, PnEmptyComponent, PnSegmentedComponent, PnDialogComponent, PnSelectComponent, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ausencias.component.html',
   styleUrl: './ausencias.component.css',
@@ -148,6 +150,13 @@ export class AusenciasComponent {
     return owner ? [owner, ...staff] : staff;
   });
 
+  readonly workerOptions = computed<PnOption<number>[]>(() =>
+    this.professionals().map((worker) => ({
+      value: worker.id,
+      label: worker.id === this.team.owner()?.id ? 'Yo' : worker.name,
+    })),
+  );
+
   readonly forOwner = computed(() => this.workerId() != null && this.workerId() === this.team.owner()?.id);
 
   trackOf(entry: Entry): string {
@@ -212,7 +221,11 @@ export class AusenciasComponent {
       message: `Se avisará a ${conflict.customerName} de que su cita se cancela.`,
       confirmLabel: 'Cancelar la cita',
       destructive: true,
-      reason: { label: 'Por qué cancelas', placeholder: 'Opcional' },
+      reason: {
+        label: 'Motivo (opcional)',
+        placeholder: 'Ej: trabajador de baja, no se puede reasignar',
+        hint: 'Se lo enseñamos al cliente junto al aviso de que has cancelado.',
+      },
     });
     if (!answer.ok) return;
     try {
@@ -242,7 +255,11 @@ export class AusenciasComponent {
       message: `${absence.workerName} recibirá el aviso con tu motivo.`,
       confirmLabel: 'Rechazar',
       destructive: true,
-      reason: { label: 'Motivo', placeholder: 'Se lo enseñamos tal cual' },
+      reason: {
+        label: 'Motivo (opcional)',
+        placeholder: 'Explica por qué no es posible',
+        hint: 'El trabajador verá el motivo en su app.',
+      },
     });
     if (!answer.ok) return;
     try {

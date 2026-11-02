@@ -44,8 +44,11 @@ export class PendingSocial {
  * Sirve para reconocer la cuenta, pero **no para escribirle**: Apple sólo
  * reenvía a remitentes registrados, y además el negocio no la reconoce al verla
  * en su perfil. Por eso el alta le pide uno propio, como el registro con correo
- * de toda la vida.
+ * de toda la vida. Lo mismo si el proveedor no da ningún correo: pasa con Apple,
+ * que solo lo entrega la primera vez que se le autoriza.
  */
 export function hidesEmail(identity: SocialIdentity | null): boolean {
-  return (identity?.email ?? '').toLowerCase().endsWith(APPLE_RELAY_DOMAIN);
+  if (!identity) return false;
+  const email = (identity.email ?? '').trim().toLowerCase();
+  return !email || email.endsWith(APPLE_RELAY_DOMAIN);
 }

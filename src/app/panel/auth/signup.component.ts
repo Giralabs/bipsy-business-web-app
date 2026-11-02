@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from './auth-layout.component';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
+import { newPasswordError } from '../core/auth/password-policy';
 import { PendingSocial, hidesEmail } from '../core/auth/pending-social';
 import {
   SocialAuth,
@@ -15,8 +16,13 @@ import {
 } from '../core/auth/social-auth.service';
 import { CategoryRef, ResolvedAddress } from '../core/api/models';
 import { PnAddressSearchComponent } from '../ui/address-search.component';
+import { MapPoint, PnLocationMapComponent } from '../ui/location-map.component';
+import { addressAt } from '../core/places/reverse';
+import { PnPasswordRulesComponent } from '../ui/password-rules.component';
+import { PnNumberComponent } from '../ui/number.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { scheduleToApi } from '../core/api/schedule';
-import { message } from '../core/data/resource';
+import { message, serverReason } from '../core/data/resource';
 import { TRIAL_DAYS } from '../../data/site.data';
 import { CoachService } from '../onboarding/coach.service';
 
@@ -41,7 +47,16 @@ type Step = 1 | 2 | 3 | 4 | 5;
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [AuthLayoutComponent, FormsModule, RouterLink, PnAddressSearchComponent],
+  imports: [
+    AuthLayoutComponent,
+    FormsModule,
+    RouterLink,
+    PnAddressSearchComponent,
+    PnLocationMapComponent,
+    PnPasswordRulesComponent,
+    PnSelectComponent,
+    PnNumberComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signup.component.html',
   styleUrl: './auth-forms.css',
@@ -61,6 +76,9 @@ export class SignupComponent {
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
   readonly categories = signal<CategoryRef[]>([]);
+  readonly categoryOptions = computed<PnOption<number>[]>(() =>
+    this.categories().map((category) => ({ value: category.id, label: category.name })),
+  );
   readonly resendIn = signal(0);
 
   readonly progress = computed(() => this.step() / 5);
@@ -120,7 +138,9 @@ export class SignupComponent {
   readonly categoriesFailed = signal(false);
 
   // Step 2
+  /** Starts empty even with Google or Apple: their name is the person's, not the shop's. */
   businessName = '';
+  readonly nameError = 'Escribe cómo se llama tu negocio.';
   phone = '';
   password = '';
   cif = '';
@@ -137,8 +157,16 @@ export class SignupComponent {
   postalCode = '';
   /** What the address search resolved; dropped as soon as the text is typed again. */
   readonly resolvedAddress = signal<ResolvedAddress | null>(null);
-  /** False once `/places/*` answers 503: then the address goes by hand. */
+  /** The venue's door on the map: from the address picked, or where the pin was dropped. */
+  readonly pin = signal<MapPoint | null>(null);
+  /** False when Google refuses the map: then the pin cannot be asked for. */
+  readonly mapUp = signal(true);
+  /** False once `/places/*` answers 503: the fields then open by themselves. */
   readonly placesUp = signal(true);
+  /** «Prefiero rellenarla manualmente». */
+  readonly manual = signal(false);
+  /** City and postal code show once there is something in them or a reason to type them. */
+  readonly showManual = computed(() => this.manual() || !this.placesUp() || this.resolvedAddress() !== null);
 
   // Step 5
   teamSize: 'SOLO' | 'SMALL' | 'MEDIUM' | 'LARGE' = 'SOLO';
@@ -147,20 +175,6 @@ export class SignupComponent {
   serviceDuration = 30;
   opensWeekends = false;
   requiresCard = false;
-
-  /** 0-4, the same five steps the app's meter shows. */
-  readonly strength = computed(() => {
-    const value = this.password;
-    let score = 0;
-    if (value.length >= 8) score++;
-    if (/[A-Z]/.test(value)) score++;
-    if (/[a-z]/.test(value)) score++;
-    if (/\d/.test(value)) score++;
-    if (/[^A-Za-z0-9]/.test(value)) score++;
-    return score;
-  });
-
-  readonly passwordSignal = signal(0);
 
   constructor() {
     this.adoptPendingSocial();
@@ -181,9 +195,6 @@ export class SignupComponent {
     const identity = this.pending.take();
     if (!identity) return;
     this.identity.set(identity);
-    // Con suerte, un nombre con el que empezar el del negocio. Es sólo el
-    // punto de partida: se puede cambiar antes de crear nada.
-    this.businessName = identity.name ?? '';
     if (hidesEmail(identity)) return;
     this.email = identity.email ?? '';
     this.step.set(2);
@@ -219,14 +230,13 @@ export class SignupComponent {
         this.error.set(cause.message);
         return;
       }
-      if ((cause as { status?: number }).status === 404 && identity?.email) {
+      if ((cause as { status?: number }).status === 404 && identity) {
         this.identity.set(identity);
-        this.businessName = identity.name ?? '';
         this.resumable.set(false);
-        // Con el correo oculto (relay de Apple) el paso 1 se queda en pie para
-        // que escriba uno suyo; con uno normal, directo a los datos.
+        // Con el correo oculto (relay de Apple) o sin ninguno, el paso 1 se
+        // queda en pie para que escriba uno suyo; con uno normal, a los datos.
         if (!hidesEmail(identity)) {
-          this.email = identity.email;
+          this.email = identity.email ?? '';
           this.step.set(2);
         }
         return;
@@ -236,6 +246,18 @@ export class SignupComponent {
       this.busy.set(false);
       this.socialBusy.set(null);
     }
+  }
+
+  /**
+   * La bifurcación de `step_role_screen.dart`: no es un negocio, le han invitado
+   * a un equipo. El correo viaja en la ruta para no pedirlo dos veces y la
+   * identidad del proveedor sigue esperando a la pantalla de aceptar.
+   */
+  async goToInvitation(): Promise<void> {
+    const identity = this.identity();
+    if (identity) this.pending.set(identity);
+    const email = this.email.trim();
+    await this.router.navigate(['/unirse'], { queryParams: email ? { email } : {} });
   }
 
   /** Volver a empezar con el correo de siempre tras elegir un proveedor. */
@@ -349,19 +371,25 @@ export class SignupComponent {
 
   /** Step 2 — this is where the account is actually created. */
   async createAccount(): Promise<void> {
-    // `RegisterBusinessRequest.categoryId` is @NotNull (V22): asked first, as in the app.
+    // In the order of the form: the name first, it is the first field.
+    if (!this.businessName.trim()) {
+      this.error.set(this.nameError);
+      return;
+    }
+    // `RegisterBusinessRequest.categoryId` is @NotNull (V22).
     if (this.categoryId == null) {
       this.error.set('Elige a qué se dedica tu negocio.');
       return;
     }
     const identity = this.identity();
-    if (!this.businessName.trim() || !this.phone.trim()) {
-      this.error.set('Rellena el nombre y el teléfono.');
+    if (!this.phone.trim()) {
+      this.error.set('Falta el teléfono del negocio.');
       return;
     }
     // Con proveedor no hay contraseña: la cuenta entra por él.
-    if (!identity && !this.password) {
-      this.error.set('Elige una contraseña para tu cuenta.');
+    const invalidPassword = identity ? null : newPasswordError(this.password);
+    if (invalidPassword) {
+      this.error.set(invalidPassword);
       return;
     }
     if (!this.acceptedTerms) {
@@ -404,7 +432,7 @@ export class SignupComponent {
       this.startResendTimer(30);
     } catch (cause) {
       const status = (cause as { status?: number }).status;
-      const detail = (cause as { error?: { message?: string } }).error?.message;
+      const detail = serverReason(cause);
       if (status === 429) {
         // «Espera 18 segundos…»: the server is the source of truth for the wait.
         const seconds = Number(/(\d+)/.exec(detail ?? '')?.[1] ?? 30);
@@ -451,43 +479,68 @@ export class SignupComponent {
     }, 1000);
   }
 
-  /** Step 4 — the address search chose one: keep its city, province and point. */
+  /**
+   * Step 4 — a suggestion was picked: it fills the fields and brings the point.
+   * The field keeps the street alone: Google's full text already carries city
+   * and country, and the public page would read «Sevilla, España, Sevilla».
+   */
   onAddressResolved(address: ResolvedAddress): void {
     this.resolvedAddress.set(address);
+    this.address = address.address?.trim() || this.address;
+    this.city = address.city ?? this.city;
+    this.province = address.province ?? this.province;
+    this.postalCode = address.postalCode ?? this.postalCode;
+    if (address.latitude != null && address.longitude != null) {
+      this.pin.set({ latitude: address.latitude, longitude: address.longitude });
+    }
     this.error.set(null);
   }
 
-  /** «41004 · Sevilla · Sevilla» under the chosen street. */
-  addressZone(address: ResolvedAddress): string {
-    return [address.postalCode, address.city, address.province].filter((part) => !!part).join(' · ');
+  /**
+   * Step 4 — the pin was moved: the point is kept whatever happens, and what is
+   * under it fills what is still empty (`_onPinMoved` of the app). A failed
+   * lookup is silent on purpose: moving the pin already did what matters.
+   */
+  async onPinMoved(point: MapPoint): Promise<void> {
+    this.pin.set(point);
+    this.error.set(null);
+    const found = await addressAt(this.api, point.latitude, point.longitude);
+    if (!found || this.pin() !== point) return;
+    if (found.address) this.address = found.address;
+    this.city = found.city ?? this.city;
+    this.postalCode = found.postalCode ?? this.postalCode;
   }
 
   /**
    * Step 4 — where the work happens, as `step4_location_screen.dart._save()`.
-   *
-   * With a venue the address must come from the suggestions (that is what
-   * brings the point on the map); if the backend has no Places key the field
-   * is plain text and city / postal code are typed by hand. Only the street
-   * and number are sent as `address`: Google's full text already carries
-   * city and country, and the public page would read «Sevilla, España,
-   * Sevilla».
+   * With a venue the pin is what is asked for, not a pick from the list, as in
+   * the app. If Google refuses the map too, the written address is enough: the
+   * business is saved without a point and stays out of the searches by
+   * distance until the address is picked again.
    */
   async saveLocation(): Promise<void> {
     const hasVenue = this.serviceMode !== 'AT_CUSTOMER';
     const resolved = this.resolvedAddress();
+    const pin = this.pin();
     if (hasVenue && !this.address.trim()) {
       this.error.set('Escribe la dirección de tu local.');
       return;
     }
-    if (hasVenue && this.placesUp() && !resolved) {
-      this.error.set('Elige tu dirección de la lista de sugerencias.');
+    if (hasVenue && !pin && this.mapUp()) {
+      this.error.set('Elige tu dirección de la lista o toca en el mapa la puerta de tu local.');
+      return;
+    }
+    if (!this.city.trim()) {
+      // Asking for a field nobody can see would be a dead end.
+      this.manual.set(true);
+      this.error.set(hasVenue ? 'Escribe la ciudad de tu local.' : 'Escribe la ciudad donde trabajas.');
       return;
     }
     await this.run(async () => {
-      const street = resolved?.address?.trim() || this.address.trim();
-      const city = resolved?.city ?? (this.city.trim() || null);
-      const province = resolved?.province ?? (this.province.trim() || null);
-      const postalCode = resolved?.postalCode ?? (this.postalCode.trim() || null);
+      const street = this.address.trim();
+      const city = this.city.trim();
+      const province = this.province.trim() || null;
+      const postalCode = this.postalCode.trim() || null;
       await this.api.put('/businesses/me/location', {
         serviceMode: this.serviceMode,
         // For a backend older than V82, which only reads the boolean.
@@ -497,9 +550,7 @@ export class SignupComponent {
         ...(province ? { province } : {}),
         ...(hasVenue && postalCode ? { postalCode } : {}),
         ...(hasVenue && resolved?.placeId ? { placeId: resolved.placeId } : {}),
-        ...(hasVenue && resolved?.latitude != null && resolved.longitude != null
-          ? { latitude: resolved.latitude, longitude: resolved.longitude }
-          : {}),
+        ...(hasVenue && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       });
       // The guard reads the pending step from the profile: without this it
       // still believes the location is missing.
@@ -516,6 +567,7 @@ export class SignupComponent {
     if (wasCustomer || mode === 'AT_CUSTOMER') {
       this.address = '';
       this.resolvedAddress.set(null);
+      this.pin.set(null);
     }
   }
 

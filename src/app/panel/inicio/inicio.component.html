@@ -1,5 +1,6 @@
 <main class="pn-main">
-  <pn-desk-hero [greet]="greeting() + ' · ' + todayLabel()" [title]="auth.businessName()" [line]="summary()">
+  <pn-desk-hero [greet]="greeting() + ' · ' + todayLabel()" [title]="auth.businessName()" [line]="summary()"
+                [verified]="auth.profile()?.verified === true">
     @if (agenda.pendingCount() > 0) {
       <a class="pn-count pn-count--warn" routerLink="/panel/agenda" [queryParams]="{ vista: 'pendientes' }"
          [attr.aria-label]="countLabel(agenda.pendingCount(), 'cita pendiente', 'citas pendientes') + ' de confirmar'">
@@ -16,6 +17,44 @@
     }
   </pn-desk-hero>
 
+  <!-- Lo primero que se ve mientras falte algo: abajo del todo nadie lo encontraba.
+       Sin los requisitos no se pinta ninguno de los dos: con la guía por defecto,
+       un perfil completo enseñaría «0 de 6» el primer medio segundo. -->
+  @if (setup.ready() && !setup.complete()) {
+    <section class="pn-card pn-block setup" data-coach="setup:checklist">
+      <div class="pn-block__head">
+        <span class="material-symbols-rounded">checklist</span>
+        <h2>Completar mi perfil</h2>
+        <span class="pn-block__more setup__count pn-tabular">{{ setup.doneCount() }}/{{ setup.total() }}</span>
+      </div>
+
+      <p class="pn-dim setup__intro">
+        Completarlo nos ayuda a promocionar tu negocio entre más personas.
+      </p>
+      <div class="setup__bar">
+        <div class="pn-bar"><div class="pn-bar__fill" [style.width.%]="setup.progress() * 100"></div></div>
+      </div>
+
+      <pn-setup-steps class="setup__list" [steps]="setup.steps()" />
+    </section>
+  } @else if (setup.offerVerification()) {
+    <!-- La invitación a verificarse, en el sitio de la guía. Se puede cerrar, y
+         entonces no vuelve: la pantalla sigue a mano desde «Tu ficha». -->
+    <section class="pn-card setup verify-offer">
+      <a class="verify-offer__main" routerLink="/panel/negocio/verificacion">
+        <span class="material-symbols-rounded fill">verified</span>
+        <span>
+          <strong>Pide tu verificación</strong>
+          <span class="verify-offer__body">Tu perfil está completo. Consigue el sello de Verificado por Bipsy.</span>
+        </span>
+      </a>
+      <button type="button" class="pn-icon-btn pn-icon-btn--ghost" aria-label="Cerrar aviso"
+              (click)="verification.dismissBanner()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </section>
+  }
+
   <!-- ===== EL DÍA ===== -->
   <section class="day">
     <div class="day__main">
@@ -25,7 +64,13 @@
           Agenda de hoy
         </span>
         <span class="day__hours pn-tabular">
-          @if (todayHours(); as hours) { Abierto {{ hours }} } @else { Sin horario configurado }
+          @if (todayHours(); as hours) {
+            Abierto {{ hours }}
+          } @else if (agenda.schedule.value().length > 0) {
+            Hoy cerrado
+          } @else {
+            Sin horario configurado
+          }
         </span>
       </header>
 
@@ -177,38 +222,6 @@
           <a class="pn-btn pn-btn--secondary pn-btn--sm pn-btn--block" style="margin-top:16px"
              routerLink="/panel/equipo/fichajes">Ver registro</a>
         }
-      </section>
-    }
-
-    @if (!setup.complete()) {
-      <section class="pn-card pn-col-7 pn-block" data-coach="setup:checklist">
-        <div class="pn-block__head">
-          <span class="material-symbols-rounded">checklist</span>
-          <h2>Completar mi perfil</h2>
-          <span class="pn-block__more setup__count pn-tabular">{{ setup.doneCount() }}/{{ setup.total() }}</span>
-        </div>
-
-        <p class="pn-dim setup__intro">
-          Completarlo nos ayuda a promocionar tu negocio entre más personas.
-        </p>
-        <div class="setup__bar">
-          <div class="pn-bar"><div class="pn-bar__fill" [style.width.%]="setup.progress() * 100"></div></div>
-        </div>
-
-        <div class="setup__list">
-          @for (step of setup.steps(); track step.id) {
-            @if (!step.done) {
-              <a class="pn-row" [routerLink]="step.route">
-                <span class="material-symbols-rounded pn-row__icon">{{ step.icon }}</span>
-                <span class="pn-row__main">
-                  <span class="pn-row__title">{{ step.title }}</span>
-                  <span class="pn-row__sub">{{ step.subtitle }}</span>
-                </span>
-                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
-              </a>
-            }
-          }
-        </div>
       </section>
     }
 

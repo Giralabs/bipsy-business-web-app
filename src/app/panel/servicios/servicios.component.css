@@ -55,59 +55,52 @@
 .sv-row__meta { display: block; margin-top: 3px; font-size: 0.8125rem; color: var(--clr-text-3); }
 .sv-row__nostaff { color: var(--clr-warn-text); font-weight: 600; }
 
-.sv-photo { display: block; margin-bottom: 16px; }
-.sv-photo-remove { margin: -8px 0 12px -12px; }
+.sv-photo { display: block; margin-bottom: 22px; }
+.sv-photo-remove { margin: -14px 0 16px -12px; }
 
-.sv-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
-@media (max-width: 560px) { .sv-form-grid { grid-template-columns: 1fr; } }
+/* ----- EL DIÁLOGO ----------------------------------------------------- */
 
-.sv-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 10px;
-  border-radius: var(--pn-radius-field);
-  background: var(--pn-field);
-}
-.sv-stepper__value { font-size: 1rem; font-weight: 700; }
+.sv-description { min-height: 72px; }
 
-/* ----- DÓNDE SE PRESTA ------------------------------------------------ */
+/* The value on the left, where every row keeps it, and the two buttons at
+   the end of the row as an iOS stepper. */
+.sv-stepper { display: flex; align-items: center; gap: 6px; min-height: 46px; }
+.sv-stepper__value { flex: 1; font-size: 0.9375rem; font-weight: 600; }
+.sv-stepper .pn-icon-btn { width: 30px; height: 30px; }
+.sv-stepper .pn-icon-btn .material-symbols-rounded { font-size: 17px; }
 
-.sv-places { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-@media (max-width: 560px) { .sv-places { grid-template-columns: 1fr; } }
-.sv-place {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px;
-  border: 0;
-  border-radius: var(--pn-radius-row);
-  background: var(--pn-field);
-  color: var(--clr-text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color var(--dur-fast) ease;
-}
-.sv-place:hover { background: var(--pn-field-strong); }
-.sv-place[aria-checked='true'] { background: var(--pn-accent); color: var(--pn-on-accent); }
-.sv-place .material-symbols-rounded { font-size: 22px; }
-.sv-place__title { font-size: 0.9375rem; font-weight: 700; }
-.sv-place__sub { font-size: 0.75rem; line-height: 1.4; opacity: 0.75; }
-.sv-places__hint { margin-bottom: 18px; }
+/* «Recargo a domicilio (€)» does not fit the usual label column. */
+.sv-surcharge { grid-template-columns: 180px minmax(0, 1fr); }
+.sv-row--invalid { box-shadow: inset 3px 0 0 var(--clr-danger); }
+.sv-error { margin: 8px 4px 0; }
 
 /* The business only attends one way: nothing to choose, so it reads as a
-   field that is off and says where the value comes from. */
+   row that is off and says where the value comes from. */
 .sv-place-fixed {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding: 15px 18px;
-  border-radius: var(--pn-radius-field);
-  background: var(--pn-field);
+  gap: 14px;
+  min-height: 48px;
+  padding: 12px 16px;
   color: var(--clr-text-3);
+  font-size: 0.9375rem;
   font-weight: 500;
 }
-.sv-place-fixed .material-symbols-rounded { font-size: 20px; }
+.sv-place-fixed .material-symbols-rounded { font-size: 21px; }
+
+/* «Solo a ciertas horas» on a card of its own, like every other block. */
+.sv-hours {
+  margin-bottom: 22px;
+  padding: 2px 16px 12px;
+  border-radius: 14px;
+  background: var(--pn-card);
+}
+.sv-hours:last-child { margin-bottom: 0; }
+.sv-hours + .sv-error { margin-top: -14px; margin-bottom: 22px; }
+
+.sv-danger__btn { justify-content: center; min-height: 48px; color: var(--clr-danger-text); font-weight: 600; }
+.sv-danger { margin-bottom: 0; }
+
+@media (max-width: 600px) {
+  .sv-surcharge { grid-template-columns: minmax(0, 1fr); }
+}

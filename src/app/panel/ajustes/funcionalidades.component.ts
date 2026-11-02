@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
-import { BusinessProfile, OnlinePaymentMode, PayoutAccount } from '../core/api/models';
+import { BusinessProfile } from '../core/api/models';
 import { message } from '../core/data/resource';
-import { ConfirmService } from '../ui/confirm.service';
 import { PnSwitchComponent } from '../ui/controls';
 import { ToastService } from '../ui/toast.service';
 
@@ -14,6 +13,11 @@ import { ToastService } from '../ui/toast.service';
  * «Enciende solo lo que uses. Lo apagado desaparece de la app y de tu ficha.»
  * Each switch saves on its own, optimistically, and rolls back with a notice
  * if the server says no — the app does exactly this.
+ *
+ * How the business charges moved to Cobros (`collect-settings.component.ts`),
+ * next to the account it depends on. «Marcar como pagadas al terminar» stays
+ * here because it works WITHOUT a payouts account: in Cobros it would not even
+ * be visible until signing up.
  */
 @Component({
   selector: 'app-panel-funcionalidades',
@@ -35,6 +39,30 @@ import { ToastService } from '../ui/toast.service';
 
       <div class="pn-grid">
         <div class="pn-col-6">
+          <div class="pn-group">
+            <p class="pn-group__head">Tus citas</p>
+            <div class="pn-group__body">
+              <div class="pn-row">
+                <span class="material-symbols-rounded pn-row__icon">task_alt</span>
+                <span class="pn-row__main">
+                  <span class="pn-row__title">Marcar como pagadas al terminar</span>
+                  <span class="pn-row__sub">
+                    {{ chargesByApp()
+                      ? 'No se puede con «Pago por app».'
+                      : 'Para quien cobra en el mostrador y no quiere ir marcándolas una a una.' }}
+                  </span>
+                </span>
+                <pn-switch [checked]="value('autoSettleEnabled') && !chargesByApp()"
+                           [disabled]="chargesByApp() || savingAutoSettle()"
+                           label="Marcar como pagadas al terminar"
+                           (toggle)="setAutoSettle($event)" />
+              </div>
+            </div>
+            <p class="pn-group__foot">
+              En cuanto una cita termina, queda marcada como pagada y ni tú ni tu equipo tenéis que hacer nada.
+            </p>
+          </div>
+
           <div class="pn-group">
             <p class="pn-group__head">Con tus clientes</p>
             <div class="pn-group__body">
@@ -72,7 +100,9 @@ import { ToastService } from '../ui/toast.service';
               }
             </div>
           </div>
+        </div>
 
+        <div class="pn-col-6">
           <div class="pn-group">
             <p class="pn-group__head">Equipo</p>
             <div class="pn-group__body">
@@ -109,97 +139,6 @@ import { ToastService } from '../ui/toast.service';
             </p>
           </div>
         </div>
-
-        <div class="pn-col-6">
-          <div class="pn-group">
-            <p class="pn-group__head">Cobros</p>
-            <div class="pn-group__body">
-              <a class="pn-row" routerLink="/panel/ajustes/cobros">
-                <span class="material-symbols-rounded pn-row__icon">account_balance</span>
-                <span class="pn-row__main">
-                  <span class="pn-row__title">Cuenta de cobros</span>
-                  <span class="pn-row__sub">Hace falta para cobrar por la app o pedir tarjeta.</span>
-                </span>
-                <span class="pn-row__value">{{ payoutLabel() }}</span>
-                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
-              </a>
-
-              <div class="pn-row">
-                <span class="material-symbols-rounded pn-row__icon">credit_card</span>
-                <span class="pn-row__main">
-                  <span class="pn-row__title">Pedir tarjeta al reservar</span>
-                  <span class="pn-row__sub">
-                    Te protege de los plantones: si no viene, se le cobra la tarifa que tengas puesta.
-                  </span>
-                </span>
-                <!-- Lo que se pinta es lo que está EN VIGOR, no lo que eligió:
-                     un interruptor encendido dice «esto ya funciona», y sin
-                     cuenta de cobros no funciona nada de este bloque. Sin
-                     cobros tampoco se deja encender — lo que se guardaría no
-                     haría nada. -->
-                <pn-switch [checked]="requiresCard()" [disabled]="!canCollect()" label="Pedir tarjeta"
-                           (toggle)="setRequiresCard($event)" />
-              </div>
-
-              <!-- La confianza automática va PEGADA a la tarjeta y no en
-                   Cancelaciones: allí se decide cuánto y hasta cuándo se
-                   cobra, y esto es A QUIÉN se le pide la tarjeta. Solo se ve
-                   si se está pidiendo: sin tarjeta no hay nada que dejar de
-                   pedir. -->
-              @if (requiresCard()) {
-                <div class="pn-row">
-                  <span class="material-symbols-rounded pn-row__icon">workspace_premium</span>
-                  <span class="pn-row__main">
-                    <span class="pn-row__title">Clientes de confianza</span>
-                    <span class="pn-row__sub">Detecta a tus clientes de confianza automáticamente.</span>
-                  </span>
-                  <pn-switch [checked]="value('autoTrustEnabled')" label="Clientes de confianza"
-                             (toggle)="set('autoTrustEnabled', $event)" />
-                </div>
-              }
-
-              <!-- cancellation_policy_screen.dart: en la app también cuelga
-                   de Funcionalidades, no del menú de Perfil. Solo con la
-                   tarjeta en vigor: sin ella no hay nada que cobrar. -->
-              @if (requiresCard()) {
-                <a class="pn-row" routerLink="/panel/ajustes/cancelaciones">
-                  <span class="material-symbols-rounded pn-row__icon">event_busy</span>
-                  <span class="pn-row__main">
-                    <span class="pn-row__title">Cancelaciones</span>
-                    <span class="pn-row__sub">Cuánto se cobra a quien cancela a última hora, y qué es «a última hora».</span>
-                  </span>
-                  <span class="pn-row__value">{{ cancellationLabel() }}</span>
-                  <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
-                </a>
-              }
-            </div>
-            <!-- Con dos filas apagadas hay que decir por qué, o parecen rotas. -->
-            @if (!canCollect()) {
-              <p class="pn-group__foot">{{ payoutsNotice() }}</p>
-            }
-          </div>
-
-          <div class="pn-group">
-            <p class="pn-group__head">Pago de la cita</p>
-            <div class="pn-group__body">
-              @for (option of paymentModes; track option.id) {
-                <button type="button" class="pn-row" [disabled]="!canCollect() && option.id !== 'OFF'"
-                        (click)="setPaymentMode(option.id)">
-                  <span class="pn-row__main">
-                    <span class="pn-row__title">{{ option.title }}</span>
-                    <span class="pn-row__sub">{{ option.sub }}</span>
-                  </span>
-                  @if (paymentMode() === option.id) {
-                    <span class="material-symbols-rounded pn-row__icon">check</span>
-                  }
-                </button>
-              }
-            </div>
-            @if (!canCollect()) {
-              <p class="pn-group__foot">{{ payoutsNotice() }}</p>
-            }
-          </div>
-        </div>
       </div>
     </main>
   `,
@@ -214,58 +153,16 @@ export class FuncionalidadesComponent {
   readonly auth = inject(AuthService);
   private readonly api = inject(Api);
   private readonly toasts = inject(ToastService);
-  private readonly confirm = inject(ConfirmService);
-  private readonly router = inject(Router);
 
-  readonly saving = signal(false);
+  readonly savingAutoSettle = signal(false);
 
   /**
-   * The payouts account decides more than its own row: without it there is
-   * nowhere for a cancellation fee or an in-app payment to land, so both are
-   * held back until it can collect (`features_screen.dart`).
+   * The two ways of closing an appointment cancel each other, so each one blocks
+   * the other. The owner's INTENT and not what is in force: with the latter, a
+   * half-verified account could turn both on and land in the forbidden
+   * combination the moment Stripe verified it.
    */
-  readonly payouts = signal<PayoutAccount | null>(null);
-
-  /**
-   * Si la cuenta puede cobrar AHORA MISMO.
-   *
-   * Mientras la cuenta carga manda `payoutsReady` del perfil, que ya está en
-   * memoria desde el arranque. Sin ese apaño el bloque salía apagado un
-   * segundo —el tiempo de preguntarle a Stripe— y luego se encendía: quien lo
-   * tiene todo bien veía parpadear sus ajustes cada vez que entraba.
-   */
-  readonly canCollect = computed(() => {
-    const account = this.payouts();
-    if (account) return account.chargesEnabled && account.payoutsEnabled;
-    return this.auth.profile()?.payoutsReady === true;
-  });
-
-  /**
-   * Lo que está en vigor: lo que el dueño eligió Y que se pueda cobrar.
-   *
-   * `requiresCardIntent` es su decisión y no se toca; `requiresCard` del
-   * perfil ya viene resuelto por el servidor, pero se recalcula aquí para que
-   * el interruptor siga al estado de la cuenta sin esperar a otro `/me`.
-   */
-  readonly requiresCard = computed(
-    () => this.auth.profile()?.requiresCardIntent === true && this.canCollect(),
-  );
-
-  /** El modo elegido, o «no se paga por la app» mientras no se pueda cobrar. */
-  readonly paymentMode = computed<OnlinePaymentMode>(() =>
-    this.canCollect() ? (this.auth.profile()?.onlinePaymentMode ?? 'OFF') : 'OFF',
-  );
-
-  /**
-   * Por qué está apagado el bloque. Son dos situaciones distintas: no haber
-   * empezado el alta, y estar esperando a que Stripe verifique.
-   */
-  readonly payoutsNotice = computed(() => {
-    const account = this.payouts();
-    return account != null && account.state !== 'NOT_STARTED'
-      ? 'Estamos verificando tu cuenta. En cuanto esté lista podrás pedir tarjeta y cobrar la cita, y lo que elegiste al darte de alta se activa solo.'
-      : 'Activa los cobros para acceder a las funcionalidades de pago y tarjetas.';
-  });
+  readonly chargesByApp = computed(() => this.auth.profile()?.paymentRequestIntent === true);
 
   /** `teamEnabled` is the app's flag; `autonomous` is its old opposite. */
   readonly hasTeam = computed(() => {
@@ -273,28 +170,6 @@ export class FuncionalidadesComponent {
     if (profile?.teamEnabled != null) return profile.teamEnabled;
     return !this.auth.isAutonomous();
   });
-
-  constructor() {
-    void this.loadPayouts();
-  }
-
-  private async loadPayouts(): Promise<void> {
-    try {
-      this.payouts.set(await this.api.get<PayoutAccount>('/businesses/me/payouts'));
-    } catch {
-      this.payouts.set(null);
-    }
-  }
-
-  payoutLabel(): string {
-    const account = this.payouts();
-    // Nada mientras no se sabe: es mejor callarse que decir «sin activar» de
-    // algo que quizá lo está.
-    if (!account) return '';
-    if (this.canCollect()) return 'Activo';
-    if (account.state === 'IN_REVIEW') return 'En revisión';
-    return 'Sin activar';
-  }
 
   /**
    * Working alone or with a team is not an ordinary switch: the server
@@ -313,56 +188,8 @@ export class FuncionalidadesComponent {
     }
   }
 
-  /** «Configúrala y vuelve a encender esto», with a way to go there. */
-  private async needsPayouts(text: string): Promise<void> {
-    const answer = await this.confirm.ask({
-      title: 'Primero, la cuenta de cobros',
-      message: text,
-      confirmLabel: 'Ir a cobros',
-      cancelLabel: 'Más tarde',
-    });
-    if (answer.ok) void this.router.navigateByUrl('/panel/ajustes/cobros');
-  }
-
-  readonly paymentModes: { id: OnlinePaymentMode; title: string; sub: string }[] = [
-    { id: 'OFF', title: 'No se paga por la app', sub: 'Se cobra en el mostrador, como siempre.' },
-    { id: 'OPTIONAL', title: 'Puede pagar por la app', sub: 'El cliente elige si paga al reservar.' },
-    {
-      id: 'REQUIRED',
-      title: 'Tiene que pagar para reservar',
-      sub: 'El hueco se le guarda 15 minutos mientras paga.',
-    },
-  ];
-
   value(key: keyof BusinessProfile): boolean {
     return this.auth.profile()?.[key] === true;
-  }
-
-  /** «30 % · 24 h», or nothing when no card is asked and nothing is charged. */
-  cancellationLabel(): string {
-    const profile = this.auth.profile();
-    if (!profile || !this.requiresCard()) return 'Sin penalización';
-    return `${profile.cancellationFeePercent ?? 0} % · ${profile.cancellationWindowHours ?? 0} h`;
-  }
-
-  /**
-   * Pedir tarjeta: se lee `requiresCardIntent` y se guarda como `requiresCard`.
-   *
-   * Los dos nombres existen porque son dos cosas: lo que el dueño eligió y lo
-   * que está en vigor. `/businesses/me/settings` sigue llamándolo
-   * `requiresCard`, y es el servidor quien decide si llega a aplicarse.
-   */
-  async setRequiresCard(on: boolean): Promise<void> {
-    // El interruptor ya sale apagado sin cuenta de cobros; esto es el cinturón.
-    if (on && !this.canCollect()) return;
-    const before = this.auth.profile()?.requiresCardIntent;
-    this.auth.patchProfile({ requiresCardIntent: on, requiresCard: on });
-    try {
-      await this.api.put('/businesses/me/settings', { requiresCard: on });
-    } catch {
-      this.auth.patchProfile({ requiresCardIntent: before, requiresCard: before === true });
-      this.toasts.error('No se ha podido cambiar.');
-    }
   }
 
   async set(key: keyof BusinessProfile, on: boolean): Promise<void> {
@@ -379,22 +206,19 @@ export class FuncionalidadesComponent {
     }
   }
 
-  async setPaymentMode(mode: OnlinePaymentMode): Promise<void> {
-    const before = this.auth.profile()?.onlinePaymentMode;
-    // Leaving OFF is what needs the account; coming back to OFF never does.
-    if (mode !== 'OFF' && !this.canCollect()) {
-      await this.needsPayouts(
-        'Para cobrar por la app necesitas tu cuenta de cobros activa: es donde entra el dinero de tus clientes.',
-      );
-      return;
-    }
-    this.auth.patchProfile({ onlinePaymentMode: mode });
+  /** The server refuses the combination too, so its reason is shown if it ever gets that far. */
+  async setAutoSettle(on: boolean): Promise<void> {
+    if (this.chargesByApp() || this.savingAutoSettle()) return;
+    const before = this.auth.profile()?.autoSettleEnabled;
+    this.savingAutoSettle.set(true);
+    this.auth.patchProfile({ autoSettleEnabled: on });
     try {
-      await this.api.put('/businesses/me/settings', { onlinePaymentMode: mode });
+      await this.api.put('/businesses/me/settings', { autoSettleEnabled: on });
     } catch (cause) {
-      this.auth.patchProfile({ onlinePaymentMode: before });
-      // The server can refuse a mode for a reason worth reading.
+      this.auth.patchProfile({ autoSettleEnabled: before });
       this.toasts.error(message(cause) || 'No se ha podido cambiar.');
+    } finally {
+      this.savingAutoSettle.set(false);
     }
   }
 }

@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { MyWorkStore } from '../core/data/my-work.store';
 import { message } from '../core/data/resource';
+import { customerInviteMessage } from '../core/invite-messages';
+import { shareOrCopy } from '../core/util/share';
 import { PnAvatarComponent, PnSwitchComponent } from '../ui/controls';
 import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
 import { ToastService } from '../ui/toast.service';
@@ -29,6 +31,16 @@ import { ToastService } from '../ui/toast.service';
         </div>
       </div>
 
+      <!-- La foto es un paso de la guía del negocio («Tu equipo, con foto») y el
+           trabajador esa guía no la ve. Se quita sola al ponerla; por eso no se
+           puede cerrar. -->
+      @if (!auth.profile()?.profileImageUrl) {
+        <button type="button" class="pn-notice pn-notice--warn pf-nudge" (click)="goToPhoto()">
+          <span class="material-symbols-rounded">add_a_photo</span>
+          <span>Recomendamos poner foto de perfil para mejorar la puntuación de tu negocio.</span>
+        </button>
+      }
+
       <div class="pn-grid">
         <section class="pn-card pn-col-7">
           <div class="pn-block__head">
@@ -44,23 +56,27 @@ import { ToastService } from '../ui/toast.service';
             <span class="pn-field__label">Teléfono</span>
             <input class="pn-input" type="tel" name="phone" autocomplete="tel" [(ngModel)]="phone" />
           </label>
-          <label class="pn-field">
+          <!-- Not a field: a row that cannot be written is at least copied, which
+               is what it is needed for, to write to support or sign in elsewhere. -->
+          <div class="pn-field">
             <span class="pn-field__label">Correo</span>
-            <input class="pn-input" [value]="auth.user()?.email ?? ''" disabled />
-            <span class="pn-field__hint">El correo no se puede cambiar desde aquí.</span>
-          </label>
+            <button type="button" class="pn-input pf-mail" title="Copiar" (click)="copyMail()">
+              <span class="pf-mail__text">{{ auth.user()?.email }}</span>
+              <span class="material-symbols-rounded">content_copy</span>
+            </button>
+          </div>
 
           <button type="button" class="pn-btn pn-btn--primary" [disabled]="saving()" (click)="save()">
             @if (saving()) { <span class="pn-spinner"></span> } @else { Guardar cambios }
           </button>
         </section>
 
-        <section class="pn-card pn-col-5">
+        <section class="pn-card pn-col-5" id="tu-foto">
           <div class="pn-block__head">
             <span class="material-symbols-rounded">add_a_photo</span>
             <h2>Tu foto</h2>
           </div>
-          <pn-photo-picker class="pf-photo" label="Cambiar la foto" [current]="auth.profile()?.profileImageUrl ?? null"
+          <pn-photo-picker class="pf-photo" crop="avatar" label="Cambiar la foto" [current]="auth.profile()?.profileImageUrl ?? null"
                            [busy]="uploading()" (picked)="upload($event)" />
           @if (auth.profile()?.profileImageUrl) {
             <button type="button" class="pn-btn pn-btn--text pn-btn--sm pf-remove" (click)="removePhoto()">
@@ -73,28 +89,34 @@ import { ToastService } from '../ui/toast.service';
         <section class="pn-card pn-col-7">
           <div class="pn-block__head">
             <span class="material-symbols-rounded">tune</span>
-            <h2>Preferencias</h2>
+            <h2>Mis preferencias</h2>
           </div>
           <div class="pn-group__body pf-rows">
             <div class="pn-row">
               <span class="material-symbols-rounded pn-row__icon">event_available</span>
               <span class="pn-row__main">
-                <span class="pn-row__title">Disponible para reservas</span>
-                <span class="pn-row__sub">Apágalo y no te entrarán citas nuevas hasta que lo vuelvas a encender.</span>
+                <span class="pn-row__title">Disponible para citas</span>
+                <span class="pn-row__sub">Los clientes pueden reservarte</span>
               </span>
-              <pn-switch [checked]="auth.profile()?.available !== false" label="Disponible para reservas"
+              <pn-switch [checked]="auth.profile()?.available !== false" label="Disponible para citas"
                          (toggle)="setting('available', $event)" />
             </div>
             <div class="pn-row">
-              <span class="material-symbols-rounded pn-row__icon">done_all</span>
+              <span class="material-symbols-rounded pn-row__icon">bolt</span>
               <span class="pn-row__main">
-                <span class="pn-row__title">Aceptar citas automáticamente</span>
-                <span class="pn-row__sub">Tus reservas entran confirmadas, sin que tengas que aceptarlas una a una.</span>
+                <span class="pn-row__title">Aceptar automáticamente</span>
+                <span class="pn-row__sub">Las reservas se aceptan solas</span>
               </span>
-              <pn-switch [checked]="auth.profile()?.autoAccept === true" label="Aceptar citas automáticamente"
+              <pn-switch [checked]="auth.profile()?.autoAccept === true" label="Aceptar automáticamente"
                          (toggle)="setting('autoAccept', $event)" />
             </div>
           </div>
+          @if (auth.profile()?.autoAccept !== true) {
+            <p class="pn-field__hint">
+              Con la aceptación manual tienes que confirmar cada cita desde la Agenda antes de que el cliente
+              reciba la confirmación.
+            </p>
+          }
         </section>
 
         <section class="pn-card pn-col-5">
@@ -104,9 +126,14 @@ import { ToastService } from '../ui/toast.service';
           </div>
           @if (code(); as value) {
             <p class="pf-code pn-tabular">{{ value }}</p>
-            <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="copy(value)">
-              <span class="material-symbols-rounded">content_copy</span>Copiar
-            </button>
+            <div class="pf-code-actions">
+              <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="shareCode(value)">
+                <span class="material-symbols-rounded">ios_share</span>Compartir
+              </button>
+              <button type="button" class="pn-btn pn-btn--secondary pn-btn--sm" (click)="copy(value)">
+                <span class="material-symbols-rounded">content_copy</span>Copiar
+              </button>
+            </div>
             <p class="pn-field__hint">Compártelo con tus clientes: Bipsy lo tiene en cuenta para ofertas y recompensas.</p>
           } @else {
             <p class="pn-dim">Tu negocio todavía no ha elegido su código.</p>
@@ -114,6 +141,14 @@ import { ToastService } from '../ui/toast.service';
         </section>
 
         <section class="pn-card pn-col-12 pf-links">
+          <a class="pn-row" routerLink="/panel/enlace">
+            <span class="material-symbols-rounded pn-row__icon">ios_share</span>
+            <span class="pn-row__main">
+              <span class="pn-row__title">Mi enlace</span>
+              <span class="pn-row__sub">El del negocio, con su código QR. Las citas que entren caen en tu agenda.</span>
+            </span>
+            <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+          </a>
           <a class="pn-row" routerLink="/panel/ajustes/cuenta">
             <span class="material-symbols-rounded pn-row__icon">lock</span>
             <span class="pn-row__main">
@@ -143,6 +178,28 @@ import { ToastService } from '../ui/toast.service';
     `
       :host { display: block; }
       .pf-head { align-items: center; }
+      .pf-mail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+      }
+      .pf-mail__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .pf-mail .material-symbols-rounded { font-size: 18px; color: var(--clr-text-3); }
+      .pf-nudge {
+        width: 100%;
+        margin-bottom: var(--pn-gap);
+        border: 0;
+        color: var(--clr-text);
+        font: inherit;
+        font-size: 0.875rem;
+        text-align: left;
+        cursor: pointer;
+      }
+      .pf-code-actions { display: flex; flex-wrap: wrap; gap: 8px; }
       .pf-photo { margin-bottom: 10px; }
       .pf-remove { margin: 0 0 6px -12px; }
       .pf-rows { background: transparent; box-shadow: none; margin: 0 -20px; }
@@ -219,6 +276,25 @@ export class MiPerfilComponent {
     } catch (cause) {
       this.toasts.error(message(cause));
     }
+  }
+
+  async copyMail(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.auth.user()?.email ?? '');
+      this.toasts.show('Correo copiado');
+    } catch {
+      this.toasts.error('No se ha podido copiar.');
+    }
+  }
+
+  goToPhoto(): void {
+    document.getElementById('tu-foto')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async shareCode(code: string): Promise<void> {
+    const outcome = await shareOrCopy(customerInviteMessage(code), 'Mi código de invitación de Bipsy');
+    if (outcome === 'copied') this.toasts.show('Mensaje copiado. Pégalo donde quieras.');
+    if (outcome === 'failed') this.toasts.error('No se ha podido abrir compartir');
   }
 
   async copy(value: string): Promise<void> {

@@ -20,7 +20,7 @@
 .ho-day__ranges { flex: 1; min-width: 0; }
 
 .ho-range { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.ho-select { width: 110px; padding: 10px 14px; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.ho-select { width: 110px; font-variant-numeric: tabular-nums; }
 .ho-range__dash { color: var(--clr-text-3); }
 
 .ho-day__actions { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -12px; }

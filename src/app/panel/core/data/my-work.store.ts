@@ -1,8 +1,10 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from '../api/api';
-import { Absence, AbsenceType, ClockEntry } from '../api/models';
+import { Absence, AbsenceType, ClockEntry, PageResponse } from '../api/models';
 import { AuthService } from '../auth/auth.service';
 import { resource } from './resource';
+
+const CLOCK_PAGE_SIZE = 20;
 
 export interface AbsenceRequest {
   type: AbsenceType;
@@ -31,7 +33,43 @@ export class MyWorkStore {
     null,
   );
 
-  readonly clockHistory = resource<ClockEntry[]>(() => this.api.get<ClockEntry[]>('/timeclock/me'), []);
+  /**
+   * Closed shifts, most recent first and by pages (`PageResponse`). The open one
+   * is left out by the server, because the stopwatch already paints it, so
+   * `clockTotal` is exactly «recorded shifts».
+   */
+  readonly clockHistory = resource<ClockEntry[]>(() => {
+    this.clockPage = 0;
+    return this.nextClockPage();
+  }, []);
+
+  private clockPage = 0;
+  readonly clockTotal = signal(0);
+  readonly clockHasMore = signal(false);
+  readonly clockLoadingMore = signal(false);
+
+  private async nextClockPage(): Promise<ClockEntry[]> {
+    const page = await this.api.get<PageResponse<ClockEntry>>('/timeclock/me', {
+      page: this.clockPage,
+      size: CLOCK_PAGE_SIZE,
+    });
+    this.clockPage += 1;
+    this.clockTotal.set(page.totalElements);
+    this.clockHasMore.set(!page.last && page.content.length > 0);
+    return page.content;
+  }
+
+  /** The next page of the history, on request. */
+  async loadMoreClock(): Promise<void> {
+    if (this.clockLoadingMore() || !this.clockHasMore()) return;
+    this.clockLoadingMore.set(true);
+    try {
+      const more = await this.nextClockPage();
+      this.clockHistory.set([...this.clockHistory.value(), ...more]);
+    } finally {
+      this.clockLoadingMore.set(false);
+    }
+  }
 
   readonly absences = resource<Absence[]>(() => this.api.get<Absence[]>('/absences/me'), []);
 

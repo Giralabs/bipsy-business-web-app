@@ -150,14 +150,14 @@
 @switch (dialog()) {
   @case ('catalog') {
     <pn-dialog title="Añadir normas" [wide]="true" (closed)="close()">
-      <div class="pn-group">
-        <div class="pn-group__body">
+      <div class="pn-fg">
+        <div class="pn-fg__body">
           <button type="button" class="pn-row nm-add" (click)="startWrite()">
             <span class="material-symbols-rounded pn-row__icon">edit</span>
             <span class="pn-row__main"><span class="pn-row__title">Escribir la mía</span></span>
           </button>
         </div>
-        <p class="pn-group__foot">Marca las que se apliquen a tu negocio. Se publican al instante.</p>
+        <p class="pn-fg__foot">Marca las que se apliquen a tu negocio. Se publican al instante.</p>
       </div>
 
       @if (catalog.error() && !catalog.isLoaded) {
@@ -175,12 +175,12 @@
 
       @for (category of catalog.value(); track category.id) {
         @if (category.templates.length > 0) {
-          <div class="pn-group">
-            <span class="pn-group__head nm-group__title">
+          <div class="pn-fg">
+            <p class="pn-fg__head nm-group__title">
               <span class="material-symbols-rounded">{{ iconFor(category.icon) }}</span>
               {{ category.name }}
-            </span>
-            <div class="pn-group__body">
+            </p>
+            <div class="pn-fg__body">
               @for (template of category.templates; track template.id) {
                 <button type="button" class="pn-row" [disabled]="pending().has(template.id)"
                         [attr.aria-pressed]="published().has(template.id)" (click)="toggle(template)">
@@ -209,32 +209,42 @@
 
   @case ('policy') {
     <pn-dialog [title]="editingPolicy() ? 'Editar norma' : 'Escribir una norma'" (closed)="close()">
-      <label class="pn-field">
-        <span class="pn-field__label">Categoría</span>
-        <select class="pn-select" name="categoryId" [(ngModel)]="policyForm.categoryId"
-                [disabled]="categoryOptions().length === 0" (ngModelChange)="error.set(null)">
-          <option [ngValue]="null" disabled>Elige en qué categoría va</option>
-          @for (category of categoryOptions(); track category.id) {
-            <option [ngValue]="category.id">{{ category.name }}</option>
-          }
-        </select>
-      </label>
+      <div class="pn-fg">
+        <div class="pn-fg__body">
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">Categoría</span>
+            <pn-select look="row" name="categoryId" label="Categoría" placeholder="Elige en qué categoría va"
+                       [options]="categoryOptions()" valueKey="id" labelKey="name"
+                       [disabled]="categoryOptions().length === 0"
+                       [(ngModel)]="policyForm.categoryId" (ngModelChange)="error.set(null)" />
+          </label>
+        </div>
+      </div>
 
-      <label class="pn-field">
-        <span class="pn-field__label">Norma</span>
-        <textarea class="pn-textarea" rows="4" name="text" maxlength="300" [(ngModel)]="policyForm.text"
-                  (ngModelChange)="error.set(null)" placeholder="Servimos café mientras esperas"></textarea>
+      <div class="pn-fg">
+        <p class="pn-fg__head">Norma</p>
+        <div class="pn-fg__body">
+          <label class="pn-fg__row pn-fg__row--stack">
+            <textarea class="pn-fg__input" rows="4" name="text" maxlength="300" aria-label="Norma"
+                      [(ngModel)]="policyForm.text" (ngModelChange)="error.set(null)"
+                      placeholder="Servimos café mientras esperas"></textarea>
+          </label>
+        </div>
         @if (error(); as text) {
-          <span class="pn-field__error">{{ text }}</span>
+          <p class="pn-field__error nm-error">{{ text }}</p>
         } @else {
-          <span class="pn-field__hint">{{ policyForm.text.length }}/300</span>
+          <p class="pn-fg__foot nm-count pn-tabular">{{ policyForm.text.length }}/300</p>
         }
-      </label>
+      </div>
 
       @if (editingPolicy(); as policy) {
-        <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="removePolicy(policy)">
-          Quitar norma
-        </button>
+        <div class="pn-fg">
+          <div class="pn-fg__body">
+            <button type="button" class="pn-row pn-row--danger nm-remove" (click)="removePolicy(policy)">
+              <span class="pn-row__main"><span class="pn-row__title">Quitar norma</span></span>
+            </button>
+          </div>
+        </div>
       }
 
       <ng-container dialogActions>
@@ -248,25 +258,32 @@
 
   @case ('category') {
     <pn-dialog [title]="editingCategory() ? 'Editar categoría' : 'Nueva categoría'" (closed)="close()">
-      <label class="pn-field">
-        <span class="pn-field__label">Nombre</span>
-        <input class="pn-input" name="name" maxlength="60" [(ngModel)]="categoryForm.name"
-               (ngModelChange)="error.set(null)" placeholder="Nuestra forma de trabajar" />
+      <div class="pn-fg">
+        <div class="pn-fg__body">
+          <label class="pn-fg__row">
+            <span class="pn-fg__label">Nombre</span>
+            <input class="pn-fg__input" name="name" maxlength="60" [(ngModel)]="categoryForm.name"
+                   (ngModelChange)="error.set(null)" placeholder="Nuestra forma de trabajar" />
+          </label>
+        </div>
         @if (error(); as text) {
-          <span class="pn-field__error">{{ text }}</span>
+          <p class="pn-field__error nm-error">{{ text }}</p>
         } @else {
-          <span class="pn-field__hint">Es el epígrafe bajo el que se agrupan tus normas en la ficha.</span>
+          <p class="pn-fg__foot">Es el epígrafe bajo el que se agrupan tus normas en la ficha.</p>
         }
-      </label>
+      </div>
 
-      <p class="pn-field__label">Icono</p>
-      <div class="nm-icons" role="radiogroup" aria-label="Icono">
-        @for (icon of icons; track icon[0]) {
-          <button type="button" class="nm-icon" role="radio" [attr.aria-checked]="categoryForm.icon === icon[0]"
-                  [attr.aria-label]="icon[2]" [title]="icon[2]" (click)="pickIcon(icon[0])">
-            <span class="material-symbols-rounded">{{ icon[1] }}</span>
-          </button>
-        }
+      <!-- A grid and not rows: an icon is picked by its look, at a glance. -->
+      <div class="pn-fg">
+        <p class="pn-fg__head">Icono</p>
+        <div class="pn-fg__body nm-icons" role="radiogroup" aria-label="Icono">
+          @for (icon of icons; track icon[0]) {
+            <button type="button" class="nm-icon" role="radio" [attr.aria-checked]="categoryForm.icon === icon[0]"
+                    [attr.aria-label]="icon[2]" [title]="icon[2]" (click)="pickIcon(icon[0])">
+              <span class="material-symbols-rounded">{{ icon[1] }}</span>
+            </button>
+          }
+        </div>
       </div>
 
       <ng-container dialogActions>

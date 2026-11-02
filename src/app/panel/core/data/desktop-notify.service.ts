@@ -8,6 +8,8 @@ import {
   Conversation,
   ReviewResponse,
 } from '../api/models';
+import { Api } from '../api/api';
+import { NotificationPrefsResponse } from '../api/models';
 import { AuthService } from '../auth/auth.service';
 import { longDateTime, toDate } from '../util/dates';
 import { AgendaStore } from './agenda.store';
@@ -49,125 +51,136 @@ export const NotifKey = {
   chatMessage: 'notif_chat_message',
   /** Somebody joins the waiting list, or a slot gets covered from it. */
   waitlistState: 'notif_waitlist_state',
-  /** Web only: the master switch for desktop notifications in this browser. */
-  webDesktop: 'notif_web_desktop',
+  /** Team moves: someone joins, an invitation lapses, someone is taken off. */
+  team: 'notif_team',
+  /** The day's summary and the first appointment. */
+  dayAgenda: 'notif_day_agenda',
+  /** News about the business that is neither appointments nor money. */
+  insights: 'notif_biz_insights',
 } as const;
 
 export type NotifKeyValue = (typeof NotifKey)[keyof typeof NotifKey];
 
-export interface NotifPrefDef {
+/** Not a server key: the master switch of this browser, kept in `localStorage`. */
+const WEB_DESKTOP_KEY = 'notif_web_desktop';
+
+export interface NotifNotice {
   key: NotifKeyValue;
-  title: string;
-  sub: string;
+  label: string;
   icon: string;
-  /** False when only the phone can do it (the clock reminder runs off the phone's schedule). */
-  web: boolean;
 }
 
-export interface NotifSection {
+/** `NotifGrupo`: what is turned on or off at once. Its notices unfold below it. */
+export interface NotifGroup {
   title: string;
-  prefs: NotifPrefDef[];
+  icon: string;
+  notices: NotifNotice[];
 }
 
-/** `_buildBusinessSections` in `notifications_screen_business.dart`, texts from `app_es.arb`. */
-export const BUSINESS_NOTIF_SECTIONS: NotifSection[] = [
+/**
+ * The notices of the team block, for both roles.
+ *
+ * Payouts, payments, subscription, account, set-up and verification are in no
+ * catalog on purpose: `NotifKeys.NEVER_MUTED`, the server refuses to mute them.
+ */
+const COMMON_NOTICES: NotifNotice[] = [
+  { key: NotifKey.team, label: 'Movimientos del equipo', icon: 'groups' },
+  { key: NotifKey.dayAgenda, label: 'Resumen del día', icon: 'wb_sunny' },
+  { key: NotifKey.insights, label: 'Sobre tu negocio', icon: 'insights' },
+];
+
+/** `_negocio` in `notification_groups.dart`, texts from `app_es.arb`. */
+export const BUSINESS_NOTIF_GROUPS: NotifGroup[] = [
   {
     title: 'Citas',
-    prefs: [
-      { key: NotifKey.bizNewBooking, title: 'Nueva cita pendiente', sub: 'Cuando llega una reserva nueva de cualquier trabajador o del negocio.', icon: 'calendar_today', web: true },
-      { key: NotifKey.bizBookingStateChange, title: 'Cambios de estado de cita', sub: 'Cancelaciones y otros cambios de estado. Puede ser ruidoso.', icon: 'swap_horiz', web: true },
+    icon: 'calendar_month',
+    notices: [
+      { key: NotifKey.bizNewBooking, label: 'Nueva cita pendiente', icon: 'calendar_today' },
+      { key: NotifKey.bizBookingStateChange, label: 'Cambios de estado de cita', icon: 'swap_horiz' },
     ],
   },
   {
     title: 'Ausencias',
-    prefs: [
-      { key: NotifKey.bizAbsenceRequest, title: 'Solicitud de ausencia', sub: 'Cuando un trabajador solicita vacaciones o días libres.', icon: 'beach_access', web: true },
-    ],
+    icon: 'beach_access',
+    notices: [{ key: NotifKey.bizAbsenceRequest, label: 'Solicitud de ausencia', icon: 'beach_access' }],
   },
   {
-    title: 'Fichajes',
-    prefs: [
-      { key: NotifKey.bizWorkerClockIn, title: 'Trabajador pica entrada', sub: 'Cuando un trabajador ficha el inicio de su jornada.', icon: 'login', web: true },
-      { key: NotifKey.bizWorkerClockOut, title: 'Trabajador pica salida', sub: 'Cuando un trabajador ficha el fin de su jornada.', icon: 'logout', web: true },
+    title: 'Fichaje',
+    icon: 'timer',
+    notices: [
+      { key: NotifKey.bizWorkerClockIn, label: 'Trabajador pica entrada', icon: 'login' },
+      { key: NotifKey.bizWorkerClockOut, label: 'Trabajador pica salida', icon: 'logout' },
     ],
   },
   {
     title: 'Reseñas',
-    prefs: [
-      { key: NotifKey.bizNewReview, title: 'Nueva reseña recibida', sub: 'Cuando un cliente deja una valoración sobre tu negocio.', icon: 'star', web: true },
-    ],
+    icon: 'star',
+    notices: [{ key: NotifKey.bizNewReview, label: 'Nueva reseña recibida', icon: 'star' }],
   },
+  { title: 'Equipo y resúmenes', icon: 'storefront', notices: COMMON_NOTICES },
 ];
 
-/** `_buildWorkerSections`. */
-export const WORKER_NOTIF_SECTIONS: NotifSection[] = [
+/** `_trabajador`: not a filter of the above, each role hears about different things. */
+export const WORKER_NOTIF_GROUPS: NotifGroup[] = [
   {
     title: 'Citas',
-    prefs: [
-      { key: NotifKey.workerNewBooking, title: 'Nueva cita asignada', sub: 'Cuando el negocio o un cliente te asigna una nueva reserva.', icon: 'calendar_today', web: true },
-      { key: NotifKey.workerCustomerCancel, title: 'Cliente cancela una cita', sub: 'Cuando un cliente cancela una reserva que tenías asignada.', icon: 'cancel', web: true },
+    icon: 'calendar_month',
+    notices: [
+      { key: NotifKey.workerNewBooking, label: 'Nueva cita asignada', icon: 'calendar_today' },
+      { key: NotifKey.workerCustomerCancel, label: 'Cliente cancela una cita', icon: 'cancel' },
     ],
   },
   {
     title: 'Ausencias',
-    prefs: [
-      { key: NotifKey.workerAbsenceDecided, title: 'Respuesta a solicitud de ausencia', sub: 'Cuando tu negocio aprueba o rechaza una solicitud.', icon: 'check_circle', web: true },
-      { key: NotifKey.workerDirectAbsence, title: 'Ausencia asignada por el negocio', sub: 'Cuando el negocio te registra directamente un periodo de ausencia.', icon: 'beach_access', web: true },
+    icon: 'beach_access',
+    notices: [
+      { key: NotifKey.workerAbsenceDecided, label: 'Respuesta a solicitud de ausencia', icon: 'check_circle' },
+      { key: NotifKey.workerDirectAbsence, label: 'Ausencia asignada por el negocio', icon: 'beach_access' },
     ],
   },
   {
     title: 'Fichaje',
-    prefs: [
-      { key: NotifKey.workerClockReminder, title: 'Recordatorio de fichaje', sub: 'Aviso antes de que empiece o termine tu turno para que no olvides picar.', icon: 'access_alarm', web: false },
-    ],
+    icon: 'timer',
+    notices: [{ key: NotifKey.workerClockReminder, label: 'Recordatorio de fichaje', icon: 'access_alarm' }],
   },
   {
     title: 'Reseñas',
-    prefs: [
-      { key: NotifKey.workerNewReview, title: 'Nueva reseña recibida', sub: 'Cuando un cliente deja una valoración sobre una de tus citas.', icon: 'star', web: true },
-    ],
+    icon: 'star',
+    notices: [{ key: NotifKey.workerNewReview, label: 'Nueva reseña recibida', icon: 'star' }],
   },
+  { title: 'Equipo y resúmenes', icon: 'storefront', notices: COMMON_NOTICES },
 ];
-
-/** `NotifPref.chatMessage`: the inbox is shared, so the same key serves both roles. */
-export const CHAT_NOTIF_SECTION: NotifSection = {
-  title: 'Mensajes',
-  prefs: [
-    { key: NotifKey.chatMessage, title: 'Mensajes', sub: 'Cuando un cliente te escribe.', icon: 'forum', web: true },
-  ],
-};
-
-/**
- * `NotifPref.waitlistState`. The app has the key but no switch for it yet, so
- * the texts here are the panel's own; the key is shared for the same reason
- * as the chat one.
- */
-export const WAITLIST_NOTIF_SECTION: NotifSection = {
-  title: 'Lista de espera',
-  prefs: [
-    { key: NotifKey.waitlistState, title: 'Lista de espera', sub: 'Cuando alguien se apunta a la lista de espera o un hueco se cubre desde ella.', icon: 'hourglass_top', web: true },
-  ],
-};
 
 export type DesktopPermission = NotificationPermission | 'unsupported';
 
 /**
- * The notification preferences of this browser — the web twin of
- * `NotifPrefsController`. Like in the app they belong to the device, not the
- * account: they live in `localStorage`, one map per signed-in user.
+ * What this account wants to hear about — `NotifPrefsController` — plus the one
+ * thing that belongs to this browser.
+ *
+ * The kinds live on the SERVER (`GET|PUT /me/notification-prefs`): only what is
+ * off travels, and anything not in `muted` is on. A preference kept here could
+ * not reach the push, which the phone's system draws without asking anyone.
+ * `notif_web_desktop` and the permission stay local: another browser has its own.
  */
 @Injectable({ providedIn: 'root' })
 export class NotificationPrefs {
+  private readonly api = inject(Api);
   private readonly auth = inject(AuthService);
-
-  /** Bumped on every write, so `state` re-reads the storage. */
-  private readonly version = signal(0);
 
   readonly permission = signal<DesktopPermission>(currentPermission());
 
-  readonly state = computed<Record<string, boolean>>(() => {
-    this.version();
-    return readPrefs(this.storageKey(this.auth.user()?.id));
+  private readonly mutedKeys = signal<ReadonlySet<string>>(new Set());
+  /** Never painted as «all on» on a failure: that would lie about the settings. */
+  readonly status = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  private loadedFor: number | null = null;
+  /** Only the newest write's answer may replace what is on screen. */
+  private lastWrite = 0;
+
+  private readonly desktopVersion = signal(0);
+  /** `notif_web_desktop` of this browser. On unless it was turned off. */
+  readonly desktopEnabled = computed(() => {
+    this.desktopVersion();
+    return readDesktop(this.storageKey()) !== false;
   });
 
   constructor() {
@@ -184,16 +197,67 @@ export class NotificationPrefs {
     }
   }
 
+  /** Idempotent per account, so whoever needs the prefs just asks. */
+  async load(force = false): Promise<void> {
+    const userId = this.auth.user()?.id ?? null;
+    if (userId == null) return;
+    if (!force && this.loadedFor === userId && this.status() !== 'error') return;
+    this.loadedFor = userId;
+    this.status.set('loading');
+    this.mutedKeys.set(new Set());
+    try {
+      const prefs = await this.api.get<NotificationPrefsResponse>('/me/notification-prefs');
+      this.mutedKeys.set(new Set(prefs.muted));
+      this.status.set('ready');
+    } catch {
+      this.status.set('error');
+    }
+  }
+
   isEnabled(key: NotifKeyValue): boolean {
-    return this.state()[key] ?? true;
+    return !this.mutedKeys().has(key);
+  }
+
+  /**
+   * Partial `PUT`, one call for a whole group, painted before the answer because
+   * a switch that takes half a second reads as broken. On failure only these
+   * keys go back and the error is rethrown for the screen to say so: a switch
+   * moving back with no word reads as the panel ignoring you.
+   *
+   * Never the full set: a client that does not know a key would turn it back on.
+   */
+  async setEnabled(keys: readonly NotifKeyValue[], on: boolean): Promise<void> {
+    if (!keys.length) return;
+    const before = new Map(keys.map((key) => [key, this.isEnabled(key)]));
+    this.applyLocally(keys.map((key) => [key, on]));
+    const write = ++this.lastWrite;
+    try {
+      const saved = await this.api.put<NotificationPrefsResponse>('/me/notification-prefs', {
+        prefs: Object.fromEntries(keys.map((key) => [key, on])),
+      });
+      if (write === this.lastWrite) this.mutedKeys.set(new Set(saved.muted));
+    } catch (cause) {
+      this.applyLocally([...before]);
+      throw cause;
+    }
+  }
+
+  private applyLocally(changes: ReadonlyArray<readonly [string, boolean]>): void {
+    const next = new Set(this.mutedKeys());
+    for (const [key, on] of changes) {
+      if (on) next.delete(key);
+      else next.add(key);
+    }
+    this.mutedKeys.set(next);
   }
 
   /** Returns false when the browser would not keep it. */
-  set(key: NotifKeyValue, on: boolean): boolean {
-    const next = { ...this.state(), [key]: on };
+  setDesktopEnabled(on: boolean): boolean {
     try {
-      localStorage.setItem(this.storageKey(this.auth.user()?.id), JSON.stringify(next));
-      this.version.update((v) => v + 1);
+      const key = this.storageKey();
+      const stored = JSON.parse(localStorage.getItem(key) ?? '{}');
+      localStorage.setItem(key, JSON.stringify({ ...(stored && typeof stored === 'object' ? stored : {}), [WEB_DESKTOP_KEY]: on }));
+      this.desktopVersion.update((v) => v + 1);
       return true;
     } catch {
       return false;
@@ -213,8 +277,8 @@ export class NotificationPrefs {
     }
   }
 
-  private storageKey(userId: number | undefined): string {
-    return `bipsy.notif.${userId ?? 0}`;
+  private storageKey(): string {
+    return `bipsy.notif.${this.auth.user()?.id ?? 0}`;
   }
 }
 
@@ -289,6 +353,7 @@ export class DesktopNotifyService {
   private prime(): void {
     if (this.primed) return;
     this.primed = true;
+    void this.prefs.load();
     void this.agenda.bookings.load();
     void this.reviews.load();
     if (this.auth.canUseChat()) void this.inbox.load();
@@ -296,7 +361,7 @@ export class DesktopNotifyService {
     void this.waitlist.load();
     if (this.auth.isWorker()) {
       void this.work.absences.load();
-    } else if (!this.auth.isAutonomous()) {
+    } else if (this.team.enabled()) {
       void this.team.absences.load();
       if (this.auth.clockInEnabled()) void this.team.activeClocks.load();
     }
@@ -491,7 +556,7 @@ export class DesktopNotifyService {
   ): void {
     untracked(() => {
       if (this.prefs.permission() !== 'granted') return;
-      if (!this.prefs.isEnabled(NotifKey.webDesktop) || !this.prefs.isEnabled(key)) return;
+      if (!this.prefs.desktopEnabled() || !this.prefs.isEnabled(key)) return;
       if (inFront()) return;
       try {
         const notification = new Notification(title, { body, tag, icon: '/favicon.ico' });
@@ -537,12 +602,13 @@ function currentPermission(): DesktopPermission {
   }
 }
 
-function readPrefs(key: string): Record<string, boolean> {
+/** Other `notif_*` left in that map by older versions are simply not read. */
+function readDesktop(key: string): boolean | undefined {
   try {
     const parsed = JSON.parse(localStorage.getItem(key) ?? '{}');
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    return parsed?.[WEB_DESKTOP_KEY];
   } catch {
-    return {};
+    return undefined;
   }
 }
 

@@ -118,7 +118,8 @@ export class TeamStore {
   readonly clockedInNow = computed(() => this.activeClocks.value().length);
 
   async load(): Promise<void> {
-    await Promise.all([this.workers.load(), this.invitations.load()]);
+    // Working alone, `/invitations/**` answers 409; the worker list does not.
+    await Promise.all([this.workers.load(), this.enabled() ? this.invitations.load() : null]);
   }
 
   byId(id: number): TeamWorker | undefined {

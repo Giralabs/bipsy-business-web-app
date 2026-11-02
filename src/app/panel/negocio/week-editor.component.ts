@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { ScheduleEntry } from '../core/api/models';
 import { WEEKDAYS } from '../core/util/dates';
+import { PnSelectComponent } from '../ui/select.component';
 
 export interface Range {
   startTime: string;
@@ -21,6 +22,7 @@ export type Week = Range[][];
 @Component({
   selector: 'app-week-editor',
   standalone: true,
+  imports: [PnSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './week-editor.component.html',
   styleUrl: './week-editor.component.css',

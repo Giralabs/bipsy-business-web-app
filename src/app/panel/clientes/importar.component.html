@@ -66,7 +66,7 @@
           <h2>¿No te encaja ninguna?</h2>
         </div>
         <p class="pn-dim im-help">
-          Instala <strong>Bipsy Negocio</strong> en tu móvil y entra en Clientes → Importar
+          Instala <strong>Bipsy Business</strong> en tu móvil y entra en Clientes → Importar
           contactos: la app lee tu agenda directamente, sin archivos ni exportaciones. Lo que
           importes allí aparece aquí al instante.
         </p>
@@ -88,6 +88,10 @@
                           (done.skipped > 0 ? ' · ' + count(done.skipped, 'ya estaba', 'ya estaban') : '')">
           <div class="im-done">
             <a class="pn-btn pn-btn--primary" routerLink="/panel/clientes">Ver mis clientes</a>
+            <button type="button" class="pn-btn pn-btn--secondary" [disabled]="inviting()" (click)="invite()">
+              <span class="material-symbols-rounded">share</span>
+              Invitar a tus contactos
+            </button>
             <button type="button" class="pn-btn pn-btn--secondary" (click)="startOver()">
               Importar más
             </button>

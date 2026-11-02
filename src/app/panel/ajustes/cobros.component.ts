@@ -14,6 +14,7 @@ import { fromInstant } from '../core/util/dates';
 import { money } from '../core/util/format';
 import { PnErrorComponent } from '../ui/controls';
 import { ToastService } from '../ui/toast.service';
+import { CollectSettingsComponent } from './collect-settings.component';
 import { PayoutsFormComponent } from './payouts-form.component';
 import { PayoutRefundDialogComponent, ddmmyyyy } from './payout-refund-dialog.component';
 
@@ -29,6 +30,8 @@ const PAGE_SIZE = 20;
  * - Account open → its state, what Stripe could not verify (`issues[]`) with
  *   «Comprobar de nuevo» (`POST /refresh`), and once it can collect, the
  *   balance and the list of charges with the refund dialog.
+ * - «Cómo cobras» (`app-collect-settings`) with the account open, ready or not:
+ *   greyed out with its reason is how the owner learns those options exist.
  *
  * Dos salidas cuando la cuenta no llega a cobrar, en el mismo orden que la app:
  *
@@ -43,7 +46,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-panel-cobros',
   standalone: true,
-  imports: [RouterLink, PnErrorComponent, PayoutsFormComponent, PayoutRefundDialogComponent],
+  imports: [RouterLink, PnErrorComponent, CollectSettingsComponent, PayoutsFormComponent, PayoutRefundDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
@@ -186,7 +189,11 @@ const PAGE_SIZE = 20;
               @if (detailsError(); as text) {
                 <p class="pn-field__error" role="alert">{{ text }}</p>
               }
+            }
 
+            <app-collect-settings [ready]="canCollect()" />
+
+            @if (canCollect()) {
               <!-- Failed charges are listed on purpose: money that did not arrive is exactly what the owner wants to see. -->
               <div class="pn-group payments">
                 <p class="pn-group__head">Últimos cobros</p>

@@ -22,9 +22,15 @@ import { BIP_RIGS } from '../../components/bip-rig/bip-rigs.data';
         <a routerLink="/" class="auth__brand" aria-label="Bipsy Business, inicio">
           <!-- Los archivos con sufijo _trim y la variante «dark» sobre fondo
                oscuro: los mismos que usa la cabecera de la web informativa.
-               Sin recortar, el logo salía diminuto. -->
-          <img class="theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
-          <img class="theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+               Sin recortar, el logo salía diminuto. En el acceso, solo el
+               símbolo, como la app. -->
+          @if (symbolOnly) {
+            <img class="theme-dark-only" src="assets_bipsy_business/Brand Marks/apricot_dark_symbol_nobackground_trim.webp" alt="Bipsy Business" />
+            <img class="theme-light-only" src="assets_bipsy_business/Brand Marks/apricot_light_symbol_nobackground_trim.webp" alt="Bipsy Business" />
+          } @else {
+            <img class="theme-dark-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_dark_nobackground_trim.webp" alt="Bipsy Business" />
+            <img class="theme-light-only" src="assets_bipsy_business/Combination Marks/combinationmark_horizontal_light_nobackground_trim.webp" alt="Bipsy Business" />
+          }
         </a>
 
         <div class="auth__panel">
@@ -49,6 +55,8 @@ export class AuthLayoutComponent {
   /** Which illustration keeps the visitor company. */
   @Input() bip = 'MB-05';
   @Input() claim = 'Tu agenda se llena sola.';
+  /** Only the lotus: at this height the wordmark says nothing (99aaa7a). */
+  @Input() symbolOnly = false;
 
   /**
    * The animated cut-up of `bip`, when there is one; otherwise the page falls

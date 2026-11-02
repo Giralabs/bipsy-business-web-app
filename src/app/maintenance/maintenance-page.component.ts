@@ -28,7 +28,7 @@ const TITLE = 'En mantenimiento · Bipsy Business';
       heading="Volvemos enseguida"
       lead="Estamos poniendo a punto la web de Bipsy Business. No hace falta que hagas nada: volverá a abrirse sola en cuanto terminemos."
       [message]="state.message()"
-      note="Mientras tanto, la app Bipsy Negocio de tu móvil sigue funcionando con normalidad."
+      note="Mientras tanto, la app Bipsy Business de tu móvil sigue funcionando con normalidad."
     >
       <button actions type="button" class="btn btn--primary btn--lg" [disabled]="state.checking()" (click)="retry()">
         <span class="material-symbols-rounded" [class.is-spinning]="state.checking()">refresh</span>

@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
-import { BookingResponse } from '../core/api/models';
+import { BookingResponse, CollectStatus } from '../core/api/models';
 import {
   STATE_LOOK,
   addressLine,
   canCancel,
+  canCollect,
   canConfirm,
   canMarkNoShow,
   confirmDeadlineText,
@@ -20,6 +21,7 @@ import { duration as durationText, money } from '../core/util/format';
 import { AgendaStore } from '../core/data/agenda.store';
 import { AuthService } from '../core/auth/auth.service';
 import { TeamStore } from '../core/data/team.store';
+import { CollectBookingDialogComponent } from './collect-booking-dialog.component';
 import { PnDialogComponent } from '../ui/dialog.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
@@ -43,7 +45,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-booking-dialog',
   standalone: true,
-  imports: [PnDialogComponent],
+  imports: [PnDialogComponent, CollectBookingDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './booking-dialog.component.html',
   styleUrl: './booking-dialog.component.css',
@@ -61,6 +63,17 @@ export class BookingDialogComponent {
   readonly busy = signal(false);
   readonly reassigning = signal(false);
   readonly candidates = signal<{ id: number; name: string }[]>([]);
+  readonly collecting = signal(false);
+
+  get canCollect(): boolean {
+    return canCollect(this.booking);
+  }
+
+  /** The agenda behind moves now, and going back here has to tell the same. */
+  onCollectChanged(status: CollectStatus): void {
+    this.booking = { ...this.booking, settledOffline: status.settledOffline, prepaidCents: status.paidCents };
+    void this.agenda.bookings.reload();
+  }
 
   get state() {
     return stateOf(this.booking);

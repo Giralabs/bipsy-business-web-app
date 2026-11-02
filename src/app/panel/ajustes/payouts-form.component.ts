@@ -20,6 +20,7 @@ import { AuthService } from '../core/auth/auth.service';
 import { message } from '../core/data/resource';
 import { dayKey } from '../core/util/dates';
 import { ConfirmService } from '../ui/confirm.service';
+import { PnDateComponent } from '../ui/date.component';
 
 /** The legal text the owner accepts. Opened outside the panel, on Stripe's own address. */
 const STRIPE_TERMS_URL = 'https://stripe.com/es/legal/connect-account';
@@ -45,7 +46,7 @@ type Field = 'firstName' | 'lastName' | 'birth' | 'phone' | 'address' | 'city' |
 @Component({
   selector: 'app-payouts-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, PnDateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="pn-grid">
@@ -83,9 +84,8 @@ type Field = 'firstName' | 'lastName' | 'birth' | 'phone' | 'address' | 'city' |
               <div class="two">
                 <label class="pn-field">
                   <span class="pn-field__label">Fecha de nacimiento</span>
-                  <input class="pn-input" type="date" name="birth" autocomplete="bday"
-                         [min]="minBirth" [max]="maxBirth" [class.pn-input--invalid]="bad('birth')"
-                         [(ngModel)]="birth" />
+                  <pn-date name="birth" label="Fecha de nacimiento" placeholder="Elige tu fecha de nacimiento"
+                           [min]="minBirth" [max]="maxBirth" [invalid]="bad('birth')" [(ngModel)]="birth" />
                   @if (bad('birth')) { <span class="pn-field__error">Falta la fecha de nacimiento.</span> }
                 </label>
                 <label class="pn-field">

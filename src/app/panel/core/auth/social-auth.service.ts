@@ -134,7 +134,8 @@ export class SocialAuth {
         idToken: await credential.user.getIdToken(),
         // En minúsculas y sin espacios, que es como lo guarda el servidor.
         email: credential.user.email?.trim().toLowerCase() ?? null,
-        name: credential.user.displayName?.trim() || null,
+        // Some Google accounts hand over the name form-encoded: «José+Manuel».
+        name: credential.user.displayName?.replace(/\+/g, ' ').replace(/\s+/g, ' ').trim() || null,
       };
     } catch (cause) {
       const code = (cause as { code?: string }).code ?? '';

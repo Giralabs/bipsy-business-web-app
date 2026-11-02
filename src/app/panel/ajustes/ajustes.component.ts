@@ -70,12 +70,6 @@ import { CoachService } from '../onboarding/coach.service';
                 <span class="pn-row__main"><span class="pn-row__title">Cobros</span></span>
                 <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
               </a>
-              <a class="pn-row" routerLink="/panel/ajustes/suscripcion">
-                <span class="material-symbols-rounded pn-row__icon">workspace_premium</span>
-                <span class="pn-row__main"><span class="pn-row__title">Mi plan</span></span>
-                <span class="pn-row__value">{{ planName() }}</span>
-                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
-              </a>
             </div>
           </div>
 
@@ -128,24 +122,18 @@ import { CoachService } from '../onboarding/coach.service';
                 </span>
                 <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
               </a>
-              <button type="button" class="pn-row" (click)="coach.start('business')">
+              <button type="button" class="pn-row" (click)="coach.start()">
                 <span class="material-symbols-rounded pn-row__icon">school</span>
                 <span class="pn-row__main"><span class="pn-row__title">Ver el tutorial otra vez</span></span>
               </button>
-              @if (isQuality()) {
-                <button type="button" class="pn-row" (click)="coach.start('quality')">
-                  <span class="material-symbols-rounded pn-row__icon">auto_awesome</span>
-                  <span class="pn-row__main"><span class="pn-row__title">Ver el tutorial de Quality</span></span>
-                </button>
-              }
-              <a class="pn-row" routerLink="/panel/soporte">
-                <span class="material-symbols-rounded pn-row__icon">support_agent</span>
-                <span class="pn-row__main"><span class="pn-row__title">Soporte</span></span>
-                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
-              </a>
               <a class="pn-row" routerLink="/ayuda">
                 <span class="material-symbols-rounded pn-row__icon">help</span>
                 <span class="pn-row__main"><span class="pn-row__title">Centro de ayuda</span></span>
+                <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
+              </a>
+              <a class="pn-row" routerLink="/panel/soporte">
+                <span class="material-symbols-rounded pn-row__icon">support_agent</span>
+                <span class="pn-row__main"><span class="pn-row__title">Soporte</span></span>
                 <span class="material-symbols-rounded pn-row__chev">arrow_forward_ios</span>
               </a>
               <a class="pn-row" routerLink="/legal/aviso-legal">
@@ -168,13 +156,5 @@ export class AjustesComponent {
 
   constructor() {
     void this.customers.load();
-  }
-
-  planName(): string {
-    return this.auth.profile()?.subscription?.planName ?? '—';
-  }
-
-  isQuality(): boolean {
-    return this.auth.hasFeature('UNIQUE_ANIMATIONS');
   }
 }

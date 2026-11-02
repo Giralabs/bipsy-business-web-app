@@ -73,7 +73,10 @@ export class JoinComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly code = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('codigo') ?? '');
+  private readonly params = inject(ActivatedRoute).snapshot.queryParamMap;
+  private readonly carriedEmail = this.params.get('email')?.trim() ?? '';
+
+  readonly code = signal(this.params.get('codigo') ?? '');
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
   readonly waiting = signal(false);
@@ -104,7 +107,10 @@ export class JoinComponent {
     const code = this.code();
     if (code.length !== 6 || this.busy()) return;
     if (!this.waiting()) {
-      await this.router.navigate(['/invitacion', code]);
+      // Only carried: it is the accept screen that saves asking for it again.
+      await this.router.navigate(['/invitacion', code], {
+        queryParams: this.carriedEmail ? { email: this.carriedEmail } : {},
+      });
       return;
     }
     this.busy.set(true);

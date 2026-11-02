@@ -5,6 +5,9 @@ import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
 import { ServicesStore } from '../core/data/services.store';
 import { PnSwitchComponent } from '../ui/controls';
+import { PnNumberComponent } from '../ui/number.component';
+import { PnOption, PnSelectComponent } from '../ui/select.component';
+import { PnSliderComponent } from '../ui/slider.component';
 import { ToastService } from '../ui/toast.service';
 
 /**
@@ -18,7 +21,7 @@ import { ToastService } from '../ui/toast.service';
 @Component({
   selector: 'app-panel-reservas',
   standalone: true,
-  imports: [FormsModule, RouterLink, PnSwitchComponent],
+  imports: [FormsModule, RouterLink, PnSwitchComponent, PnSliderComponent, PnNumberComponent, PnSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reservas.component.html',
   styles: [
@@ -26,14 +29,12 @@ import { ToastService } from '../ui/toast.service';
       :host { display: block; }
       .back { margin: 0 0 14px -12px; text-decoration: none; }
       .field-row { display: flex; align-items: center; gap: 12px; }
-      .field-row input, .field-row select { width: 120px; }
+      .field-row { flex: none; }
       .field-row input[name='ownerName'] { width: 200px; }
-      .unit { font-size: 0.875rem; color: var(--clr-text-3); }
+      .unit-select { width: 118px; }
       .travel { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; }
       .travel__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
       .travel__value { font-weight: 800; }
-      .travel__slider { width: 100%; accent-color: var(--pn-accent); }
-      .travel__slider:disabled { opacity: 0.45; }
     `,
   ],
 })
@@ -44,6 +45,12 @@ export class ReservasComponent {
   readonly auth = inject(AuthService);
 
   readonly busy = signal(false);
+
+  readonly noticeUnits: PnOption<string>[] = [
+    { value: 'min', label: 'min' },
+    { value: 'h', label: 'horas' },
+    { value: 'd', label: 'días' },
+  ];
 
   /**
    * Does this business have a team at all? `teamEnabled` is what the app

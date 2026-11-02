@@ -69,7 +69,7 @@
              one with an effect on what its customer sees when booking. Only
              where a card is asked for, and only with a Bipsy account (same rule
              as banning): the level is resolved per account. -->
-        @if (data.paymentsEnabled && data.customer.linkedCustomerId) {
+        @if (auth.isBusiness() && data.paymentsEnabled && data.customer.linkedCustomerId) {
           <section class="pn-card pn-col-12 cd-trust">
             <span class="material-symbols-rounded pn-row__icon">workspace_premium</span>
             <span class="pn-row__main">
@@ -85,9 +85,14 @@
           <div class="pn-block__head">
             <span class="material-symbols-rounded">sticky_note_2</span>
             <h2>Sobre el cliente</h2>
-            <button type="button" class="pn-block__more pn-btn pn-btn--text pn-btn--sm" (click)="editing.set(true)">
-              Editar
-            </button>
+            <!-- Editing, banning and deleting are the owner's: with the front
+                 desk permission a worker sees the card, and those routes do not
+                 let the role through. -->
+            @if (auth.isBusiness()) {
+              <button type="button" class="pn-block__more pn-btn pn-btn--text pn-btn--sm" (click)="startEdit()">
+                Editar
+              </button>
+            }
           </div>
           @if (data.customer.notes) {
             <p class="cd-notes">{{ data.customer.notes }}</p>
@@ -127,20 +132,54 @@
             </div>
           </div>
 
-          <div class="cd-danger">
-            <button type="button" class="pn-btn pn-btn--danger pn-btn--sm"
-                    [disabled]="!data.customer.linkedCustomerId || data.customer.banned"
-                    [title]="data.customer.linkedCustomerId ? '' : 'Solo se puede vetar a quien tiene cuenta en Bipsy'"
-                    (click)="ban()">Vetar cliente</button>
-            <button type="button" class="pn-btn pn-btn--danger pn-btn--sm" (click)="remove()">Eliminar</button>
-          </div>
-          @if (!data.customer.linkedCustomerId) {
-            <p class="pn-field__hint">
-              Solo se puede vetar a quien tiene cuenta en Bipsy: el veto impide reservar desde la app, y este
-              contacto no la tiene.
-            </p>
+          @if (auth.isBusiness()) {
+            <div class="cd-danger">
+              <button type="button" class="pn-btn pn-btn--danger pn-btn--sm"
+                      [disabled]="!data.customer.linkedCustomerId || data.customer.banned"
+                      [title]="data.customer.linkedCustomerId ? '' : 'Solo se puede vetar a quien tiene cuenta en Bipsy'"
+                      (click)="ban()">Vetar cliente</button>
+              <button type="button" class="pn-btn pn-btn--danger pn-btn--sm" (click)="remove()">Eliminar</button>
+            </div>
+            @if (!data.customer.linkedCustomerId) {
+              <p class="pn-field__hint">
+                Solo se puede vetar a quien tiene cuenta en Bipsy: el veto impide reservar desde la app, y este
+                contacto no la tiene.
+              </p>
+            }
           }
         </section>
+
+        <!-- The message leaves from the shop's own WhatsApp or SMS: Bipsy sends
+             nothing on its behalf. Only the date is kept, so nobody is invited
+             three times without noticing. -->
+        @if (!data.customer.linkedCustomerId) {
+          <section class="pn-card pn-col-12">
+            <div class="pn-block__head">
+              <span class="material-symbols-rounded">person_add</span>
+              <h2>Invítale a Bipsy</h2>
+            </div>
+            <p class="pn-dim cd-invite__text">
+              @if (data.customer.invitedAt; as invited) {
+                Le invitaste el {{ longDate(fromInstant(invited)) }}. Cuando se registre, sus citas aparecerán aquí.
+              } @else {
+                Si se registra podrá reservar contigo y verás sus citas en esta ficha.
+              }
+            </p>
+            @if (data.customer.phone) {
+              <div class="cd-invite__actions">
+                <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="inviteWhatsappHref()" target="_blank"
+                   rel="noopener" (click)="stampInvited()">
+                  <span class="material-symbols-rounded">chat</span>WhatsApp
+                </a>
+                <a class="pn-btn pn-btn--secondary pn-btn--sm" [href]="inviteSmsHref()" (click)="stampInvited()">
+                  <span class="material-symbols-rounded">sms</span>SMS
+                </a>
+              </div>
+            } @else {
+              <p class="pn-field__hint">Añade un teléfono para poder invitarle.</p>
+            }
+          </section>
+        }
       </div>
     }
 
@@ -223,7 +262,9 @@
         @if (!data.paymentsEnabled) {
           <pn-empty icon="credit_card_off" title="No tienes los cobros activados"
                     text="Con los cobros por la app verás aquí lo que te ha pagado cada cliente.">
-            <a class="pn-btn pn-btn--secondary" routerLink="/panel/ajustes/cobros">Ver cobros</a>
+            @if (auth.isBusiness()) {
+              <a class="pn-btn pn-btn--secondary" routerLink="/panel/ajustes/cobros">Ver cobros</a>
+            }
           </pn-empty>
         } @else if (data.payments.length === 0) {
           <pn-empty icon="receipt_long" title="Sin cobros" text="Todavía no te ha pagado nada por la app." />
@@ -243,23 +284,35 @@
 
 @if (editing()) {
   <pn-dialog title="Editar cliente" (closed)="editing.set(false)">
-    <label class="pn-field">
-      <span class="pn-field__label">Nombre</span>
-      <input class="pn-input" type="text" name="name" [(ngModel)]="form.name" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Teléfono</span>
-      <input class="pn-input" type="tel" name="phone" [(ngModel)]="form.phone" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Correo</span>
-      <input class="pn-input" type="email" name="email" [(ngModel)]="form.email" />
-    </label>
-    <label class="pn-field">
-      <span class="pn-field__label">Notas</span>
-      <textarea class="pn-textarea" rows="4" name="notes" [(ngModel)]="form.notes"></textarea>
-      <span class="pn-field__hint">Estas notas solo las ves tú.</span>
-    </label>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Cliente</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Nombre</span>
+          <input class="pn-fg__input" type="text" name="name" [(ngModel)]="form.name" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Teléfono</span>
+          <input class="pn-fg__input" type="tel" name="phone" [(ngModel)]="form.phone" />
+        </label>
+        <label class="pn-fg__row">
+          <span class="pn-fg__label">Correo</span>
+          <input class="pn-fg__input" type="email" name="email" [(ngModel)]="form.email" />
+        </label>
+      </div>
+    </div>
+    <div class="pn-fg cd-notes-fg">
+      <p class="pn-fg__head">Notas</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row pn-fg__row--stack">
+          <textarea class="pn-fg__input" rows="4" name="notes" aria-label="Notas" [(ngModel)]="form.notes"></textarea>
+        </label>
+      </div>
+      <p class="pn-fg__foot">Estas notas solo las ves tú.</p>
+    </div>
+    @if (formError(); as problem) {
+      <p class="pn-field__error cd-error" role="alert">{{ problem }}</p>
+    }
 
     <ng-container dialogActions>
       <button type="button" class="pn-btn pn-btn--secondary" (click)="editing.set(false)">Cancelar</button>

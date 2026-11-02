@@ -26,8 +26,7 @@
               <span class="pn-row__sub">{{ horizonSummary }}</span>
             </span>
             <span class="field-row">
-              <input class="pn-input" type="number" min="1" max="365" name="horizon" [(ngModel)]="horizon" />
-              <span class="unit">días</span>
+              <pn-number name="horizon" label="Antelación máxima en días" [min]="1" [max]="365" unit="días" [(ngModel)]="horizon" />
             </span>
           </div>
 
@@ -37,12 +36,8 @@
               <span class="pn-row__sub">{{ noticeSummary }}</span>
             </span>
             <span class="field-row">
-              <input class="pn-input" type="number" min="0" name="notice" [(ngModel)]="notice" />
-              <select class="pn-select" name="noticeUnit" [(ngModel)]="noticeUnit">
-                <option value="min">min</option>
-                <option value="h">horas</option>
-                <option value="d">días</option>
-              </select>
+              <pn-number name="notice" label="Antelación mínima" [min]="0" [(ngModel)]="notice" />
+              <pn-select class="unit-select" name="noticeUnit" label="Unidad" [options]="noticeUnits" [(ngModel)]="noticeUnit" />
             </span>
           </div>
 
@@ -55,8 +50,7 @@
               </span>
             </span>
             <span class="field-row">
-              <input class="pn-input" type="number" min="5" max="240" step="5" name="slot" [(ngModel)]="slot" />
-              <span class="unit">min</span>
+              <pn-number name="slot" label="Intervalo en minutos" [min]="5" [max]="240" [step]="5" unit="min" [(ngModel)]="slot" />
             </span>
           </div>
 
@@ -89,17 +83,15 @@
                   {{ +travelBuffer === 0 ? 'Sin margen' : travelBuffer + ' min' }}
                 </span>
               </span>
-              <input
-                class="travel__slider"
-                type="range"
+              <pn-slider
                 name="travelBuffer"
-                min="0"
-                max="120"
-                step="5"
-                aria-label="Tiempo de desplazamiento"
+                [min]="0"
+                [max]="120"
+                [step]="5"
+                label="Tiempo de desplazamiento"
                 [disabled]="busy()"
                 [(ngModel)]="travelBuffer"
-                (change)="travelBufferSettled = travelBuffer"
+                (settle)="travelBufferSettled = travelBuffer"
               />
             </div>
           </div>
@@ -191,8 +183,7 @@
                 <span class="pn-row__sub">{{ limitSummary }}</span>
               </span>
               <span class="field-row">
-                <input class="pn-input" type="number" min="1" max="100" name="limit" [(ngModel)]="limit" />
-                <span class="unit">citas</span>
+                <pn-number name="limit" label="Máximo de citas" [min]="1" [max]="100" unit="citas" [(ngModel)]="limit" />
               </span>
             </div>
           }

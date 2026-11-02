@@ -3,7 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from './auth-layout.component';
 import { Api } from '../core/api/api';
+import { newPasswordError } from '../core/auth/password-policy';
 import { message } from '../core/data/resource';
+import { PnPasswordRulesComponent } from '../ui/password-rules.component';
 
 /**
  * `/recuperar-contrasena` — the three phases of `recover_password_screen.dart`:
@@ -16,7 +18,7 @@ import { message } from '../core/data/resource';
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [AuthLayoutComponent, FormsModule, RouterLink],
+  imports: [AuthLayoutComponent, FormsModule, RouterLink, PnPasswordRulesComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './recover.component.html',
   styleUrl: './auth-forms.css',
@@ -67,8 +69,9 @@ export class RecoverComponent {
 
   /** Changing the password closes every session, so we send them to log in. */
   async reset(): Promise<void> {
-    if (this.password.length < 8) {
-      this.error.set('La contraseña necesita al menos ocho caracteres.');
+    const invalid = newPasswordError(this.password);
+    if (invalid) {
+      this.error.set(invalid);
       return;
     }
     await this.run(async () => {

@@ -96,19 +96,43 @@
 
 @if (replying(); as review) {
   <pn-dialog title="Responder a la reseña" (closed)="replying.set(null)">
-    <p class="pn-dim rs-quote">«{{ review.comment }}»</p>
+    <!-- What is being answered, as it reads on the list: who, how many stars
+         and what they wrote. -->
+    <div class="pn-fg">
+      <div class="pn-fg__body rs-quote">
+        <div class="rs-quote__head">
+          <span class="rs__name">{{ review.customerName }}</span>
+          <span class="rs__stars" aria-hidden="true">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <span class="material-symbols-rounded fill" [style.opacity]="review.rating >= star ? 1 : 0.2">star</span>
+            }
+          </span>
+        </div>
+        @if (review.comment) {
+          <p class="rs-quote__text">«{{ review.comment }}»</p>
+        }
+      </div>
+    </div>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Tu respuesta</span>
-      <textarea class="pn-textarea" rows="4" name="reply" [(ngModel)]="draft"
-                placeholder="Gracias por venir…"></textarea>
-      <span class="pn-field__hint">La ve todo el que mire tu ficha, no solo quien escribió la reseña.</span>
-    </label>
+    <div class="pn-fg">
+      <p class="pn-fg__head">Tu respuesta</p>
+      <div class="pn-fg__body">
+        <label class="pn-fg__row pn-fg__row--stack">
+          <textarea class="pn-fg__input" rows="4" name="reply" aria-label="Tu respuesta" [(ngModel)]="draft"
+                    placeholder="Gracias por venir…"></textarea>
+        </label>
+      </div>
+      <p class="pn-fg__foot">La ve todo el que mire tu ficha, no solo quien escribió la reseña.</p>
+    </div>
 
     @if (review.reply) {
-      <button type="button" class="pn-btn pn-btn--danger pn-btn--block" (click)="removeReply(review)">
-        Eliminar mi respuesta
-      </button>
+      <div class="pn-fg">
+        <div class="pn-fg__body">
+          <button type="button" class="pn-row pn-row--danger rs-remove" (click)="removeReply(review)">
+            <span class="pn-row__main"><span class="pn-row__title">Eliminar mi respuesta</span></span>
+          </button>
+        </div>
+      </div>
     }
 
     <ng-container dialogActions>

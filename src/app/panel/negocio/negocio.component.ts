@@ -8,13 +8,17 @@ import { AgendaStore } from '../core/data/agenda.store';
 import { ServicesStore } from '../core/data/services.store';
 import { SetupStore } from '../core/data/setup.store';
 import { ReviewsStore } from '../core/data/reviews.store';
+import { VerificationStore } from '../core/data/verification.store';
 import { message } from '../core/data/resource';
 import { rating } from '../core/util/format';
 import { PnAddressSearchComponent } from '../ui/address-search.component';
 import { PnSwitchComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
 import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
+import { PnPlanMarkComponent } from '../ui/plan-mark.component';
+import { PnSliderComponent } from '../ui/slider.component';
 import { ToastService } from '../ui/toast.service';
+import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
 
 /** «Dónde atiendes», with the app's labels (`service_mode_sheet.dart`). */
 export const SERVICE_MODES: { id: ServiceMode; title: string; sub: string; icon: string }[] = [
@@ -80,6 +84,9 @@ type AreaSource = {
     PnPhotoPickerComponent,
     PnAddressSearchComponent,
     PnSwitchComponent,
+    PnSliderComponent,
+    PnPlanMarkComponent,
+    PnVerifiedBadgeComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './negocio.component.html',
@@ -88,6 +95,7 @@ type AreaSource = {
 export class NegocioComponent {
   readonly auth = inject(AuthService);
   readonly setup = inject(SetupStore);
+  readonly verification = inject(VerificationStore);
   readonly services = inject(ServicesStore);
   readonly reviews = inject(ReviewsStore);
   readonly agenda = inject(AgendaStore);
@@ -151,9 +159,29 @@ export class NegocioComponent {
   constructor() {
     void this.setup.load();
     void this.reviews.load();
+    void this.verification.refresh();
   }
 
   readonly profile = this.auth.profile;
+
+  readonly onQualityPlan = computed(() => this.profile()?.plans?.includes('QUALITY') === true);
+
+  /**
+   * What the customer sees, not the bare status: granted with payments down
+   * carries no seal, so it does not say «Verificado» either.
+   */
+  readonly sealTone = computed<'brand' | 'muted' | 'danger'>(() => {
+    const state = this.verification.state.value();
+    if (state?.verified) return 'brand';
+    return state?.status === 'REJECTED' ? 'danger' : 'muted';
+  });
+
+  readonly verificationLabel = computed(() => {
+    const state = this.verification.state.value();
+    if (state?.verified) return 'Verificado';
+    if (state?.status === 'PENDING') return 'Pendiente';
+    return state?.status === 'REJECTED' ? 'Denegada' : 'Sin verificar';
+  });
 
   readonly hasSchedule = computed(() => this.agenda.schedule.value().length > 0);
 
@@ -186,8 +214,7 @@ export class NegocioComponent {
   /** «Zona: Sevilla, Sevilla» under the street, as the app writes it. */
   get zoneHint(): string {
     if (this.atCustomer) return 'Sirve para que te encuentren los clientes de tu área.';
-    const zone = [this.form.city, this.form.province].filter((part) => part.trim()).join(', ');
-    return zone ? `Zona: ${zone}` : 'Escribe la calle y el número, y elígela de la lista.';
+    return 'Escribe la calle y el número.';
   }
 
   startEdit(): void {
@@ -298,6 +325,7 @@ export class NegocioComponent {
     try {
       await this.api.upload(`/businesses/me/images/${kind}`, file);
       await this.auth.refreshMe();
+      void this.verification.refresh();
       this.toasts.show(kind === 'profile' ? 'Foto de perfil actualizada' : 'Portada actualizada');
     } catch (cause) {
       this.toasts.error(message(cause));
@@ -310,6 +338,7 @@ export class NegocioComponent {
     try {
       await this.api.delete(`/businesses/me/images/${kind}`);
       await this.auth.refreshMe();
+      void this.verification.refresh();
       this.toasts.show('Foto quitada');
     } catch {
       this.toasts.error('No se ha podido quitar.');
@@ -357,7 +386,12 @@ export class NegocioComponent {
       const hasCenter =
         (area.latitude != null && area.longitude != null) || (venueLatitude != null && venueLongitude != null);
       if (limited && !hasCenter) {
-        this.centerError.set('Elige de la lista el sitio del que sales normalmente.');
+        // Only the search brings a point: with it down, the way out is the switch.
+        this.centerError.set(
+          this.placesUp()
+            ? 'Elige de la lista el sitio del que sales normalmente.'
+            : 'Ahora no podemos situar esa dirección en el mapa. Quita el límite de distancia para guardar.',
+        );
         return;
       }
       await this.api.put('/businesses/me', {
@@ -415,6 +449,7 @@ export class NegocioComponent {
       });
       this.editing.set(false);
       this.toasts.show('Ficha guardada');
+      void this.verification.refresh();
       void this.auth.refreshMe().catch(() => undefined);
     } catch (cause) {
       this.formError.set(message(cause));

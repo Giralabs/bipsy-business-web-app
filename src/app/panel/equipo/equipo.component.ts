@@ -5,6 +5,7 @@ import { TeamStore } from '../core/data/team.store';
 import { ServicesStore } from '../core/data/services.store';
 import { AuthService } from '../core/auth/auth.service';
 import { PendingInvitation, TeamWorker } from '../core/api/models';
+import { teamInviteMessage } from '../core/invite-messages';
 import { PnAvatarComponent, PnEmptyComponent, PnSwitchComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
 import { ConfirmService } from '../ui/confirm.service';
@@ -13,9 +14,9 @@ import { ToastService } from '../ui/toast.service';
 /**
  * `/panel/equipo` — `team_screen.dart` plus `worker_settings_screen.dart`.
  *
- * The invitation is a six-digit code that expires in 12 h; the worker types it
- * in the app. On a desk it is also copyable in one click, which is what a shop
- * actually does: copy it into WhatsApp.
+ * The invitation is a six-digit code that expires in 12 h, and travels with the
+ * link that opens the app on the accept screen. On a desk it is copied in one
+ * click, which is what a shop actually does: paste it into WhatsApp.
  */
 @Component({
   selector: 'app-panel-equipo',
@@ -41,6 +42,12 @@ export class EquipoComponent {
 
   /** Working alone nothing here is asked for: the server answers 409. */
   readonly hasTeam = this.team.enabled;
+
+  /** Their name as a professional or, without one, the account's: what the server shows too. */
+  ownerName(): string {
+    const profile = this.auth.profile();
+    return profile?.ownerDisplayName?.trim() || profile?.name || '';
+  }
 
   constructor() {
     if (!this.hasTeam()) return;
@@ -96,6 +103,17 @@ export class EquipoComponent {
       this.toasts.show('Código copiado');
     } catch {
       this.toasts.error('Cópialo a mano: ' + code);
+    }
+  }
+
+  /** The message with its link: whoever gets a bare code has to go and find the app. */
+  async copyInvitation(token: string): Promise<void> {
+    const text = teamInviteMessage(token);
+    try {
+      await navigator.clipboard.writeText(text);
+      this.toasts.show('Invitación copiada');
+    } catch {
+      this.toasts.error('Cópialo a mano: ' + text);
     }
   }
 

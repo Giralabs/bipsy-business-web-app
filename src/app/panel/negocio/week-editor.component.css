@@ -16,7 +16,7 @@
 .we-day__ranges { flex: 1; min-width: 0; }
 
 .we-range { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.we-select { width: 116px; padding: 11px 14px; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.we-select { width: 116px; font-variant-numeric: tabular-nums; }
 .we-range__dash { color: var(--clr-text-3); }
 
 .we-day__actions { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -12px; }

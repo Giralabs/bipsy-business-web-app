@@ -1,0 +1,26 @@
+:host { display: contents; }
+
+.cb-wait { height: 120px; }
+.cb-sub { margin: 0 4px 16px; font-size: 0.9375rem; color: var(--clr-text-2); }
+.pn-fg:last-child { margin-bottom: 0; }
+
+/* The two ways to collect, as rows that act: an icon, the name, a chevron. */
+.cb-way { min-height: 52px; }
+.cb-way:focus-visible { outline-offset: -3px; border-radius: 0; }
+.cb-way:disabled { cursor: default; }
+.cb-way:disabled:hover { background: transparent; }
+.cb-way:disabled:not(.cb-way--done) .pn-fg__choice-title { color: var(--clr-text-3); }
+.cb-way__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  font-size: 21px;
+  color: var(--clr-text-3);
+}
+.cb-way--done .cb-way__icon { color: var(--clr-success); }
+.cb-way__chev { flex: none; font-size: 14px; color: var(--clr-text-3); }
+.cb-way:disabled .cb-way__chev { opacity: 0.4; }
+
+.cb-undo:disabled { cursor: default; opacity: 0.5; }
+.cb-error { margin: 12px 4px 0; }

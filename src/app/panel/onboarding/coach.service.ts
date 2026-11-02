@@ -10,21 +10,26 @@ export interface CoachStep {
   target: string | null;
   /** Where the tour walks before showing the step. */
   route: string;
-  /** The last step of the business tour offers two ways out instead of one. */
+  /** The last step of the tour offers two ways out instead of one. */
   kind?: 'invite';
+  /** Mr. Bip showing over the card, for the steps that do not point at anything. */
+  art?: string;
+  /** Only with a team: working alone that screen has nothing but a switch. */
+  teamOnly?: boolean;
+  /** Its target may rightly not be there (a finished checklist): the step is dropped. */
+  optional?: boolean;
 }
 
 /**
- * The guided tour, ported from `features/welcome/coach_controller.dart`.
+ * The guided tour, grown from `features/welcome/coach_controller.dart`.
  *
- * Same eight steps and same words. Two honest differences from the app:
+ * The app's steps, plus two it does not have because they are newer than its
+ * tour: Cobros and the shareable link. The differences are deliberate:
  *
- * - Step 5 («Tu equipo») really works here. In the app nobody registers the
- *   `nav:team` target, so that step is always skipped; on a desk the section
- *   is an item of the sidebar (`data-coach="nav:<id>"` in the shell) and can
- *   be pointed at.
- * - Step 8 asked to import the phone's contacts. A browser cannot read them,
- *   so it points at the import screen instead.
+ * - «Tu equipo» really points at something here. In the app nobody registers
+ *   the `nav:team` target, so that step is always skipped.
+ * - The last step asked to read the phone's contacts. A browser cannot, so it
+ *   leads to the import screen.
  *
  * Both are written down in `docs/PANEL-SYNC.md`.
  */
@@ -33,18 +38,19 @@ export class CoachService {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
-  private static readonly BUSINESS_STEPS: CoachStep[] = [
+  private static readonly STEPS: CoachStep[] = [
     {
       icon: 'celebration',
       title: '¡Ya estás dentro!',
       body: 'Te enseño el panel por encima en menos de un minuto. Vas a ir viendo las pantallas de verdad, no dibujos.',
       target: null,
       route: '/panel',
+      art: 'MB-05',
     },
     {
       icon: 'calendar_month',
       title: 'Aquí está tu día',
-      body: 'Las reservas entran solas y las ves por semana, por día o en lista. Desde una cita puedes confirmarla, cambiarla de hora o marcar que no se presentó.',
+      body: 'Las reservas entran solas y las ves por semana, por día o en lista. Desde una cita puedes confirmarla, cambiarla de hora, cobrarla o marcar que no se presentó.',
       target: 'nav:agenda',
       route: '/panel/agenda',
     },
@@ -68,6 +74,7 @@ export class CoachService {
       body: 'Invita a tus trabajadores. Cada uno gestiona su horario, sus ausencias y su fichaje, y Bipsy reparte las citas sin solaparlas.',
       target: 'nav:equipo',
       route: '/panel/equipo',
+      teamOnly: true,
     },
     {
       icon: 'storefront',
@@ -77,64 +84,63 @@ export class CoachService {
       route: '/panel/negocio',
     },
     {
+      icon: 'payments',
+      title: 'Tus cobros',
+      body: 'Cobra con tarjeta en tu salón y al reservar. El dinero va directo a tu cuenta bancaria: Bipsy no se queda ninguna comisión.',
+      target: 'nav:ajustes',
+      route: '/panel/ajustes/cobros',
+    },
+    {
+      icon: 'ios_share',
+      title: 'Tu enlace',
+      body: 'Compártelo en Instagram o por WhatsApp, o imprime el cartel con su código QR. Quien lo abre llega directo a tu ficha para pedirte cita.',
+      target: 'enlace:qr',
+      route: '/panel/enlace',
+    },
+    {
       icon: 'checklist',
       title: 'Lo que te falta, aquí',
-      body: 'Esta lista te va tachando lo que ya tienes hecho. Ábrela cuando quieras: es el camino más corto para empezar a recibir reservas.',
+      body: 'Esta lista se va tachando sola con lo que ya tienes hecho. Es el camino más corto para empezar a recibir reservas.',
       target: 'setup:checklist',
       route: '/panel',
+      optional: true,
     },
     {
       icon: 'contact_phone',
       title: '¿Traemos a tus clientes de siempre?',
-      body: 'Los que ya te llaman por teléfono también pueden estar aquí, con su historial y sus notas. Puedes añadirlos a mano o pegar tu lista de una vez.',
+      body: 'Los que ya te llaman por teléfono también pueden estar aquí, con su historial y sus notas. Súbelos desde un archivo o, en el móvil, desde tu agenda.',
       target: null,
       route: '/panel',
       kind: 'invite',
+      art: 'MB-11',
     },
   ];
 
-  /**
-   * The Quality tour, ported from `_qualitySteps` of `coach_controller.dart`.
-   *
-   * Still three steps and still the app's words. What changed on 23/09/2026 is
-   * that neither app nor web has a «Personalización» screen any more, so the
-   * second step no longer walks anywhere special: it stays on «Tu ficha» and
-   * comes out as a loose card, exactly as the app leaves it on `profile`.
-   */
-  private static readonly QUALITY_STEPS: CoachStep[] = [
-    {
-      icon: 'auto_awesome',
-      title: '¡Ya eres Quality!',
-      body: 'A partir de ahora tu negocio puede verse distinto al resto. Te enseño dónde está todo en menos de un minuto.',
-      target: null,
-      route: '/panel/negocio',
-    },
-    {
-      icon: 'palette',
-      title: 'Aquí decides cómo te ven',
-      body: 'Tu color, tu foto y tu portada animadas, los efectos de tu ficha y el orden de tus secciones. Lo vas viendo en vivo mientras eliges.',
-      target: null,
-      route: '/panel/negocio',
-    },
-    {
-      icon: 'photo_library',
-      title: 'Tu portfolio, sin tope',
-      body: 'Con Quality puedes subir todas las fotos de tu trabajo que quieras. Es lo primero que mira un cliente antes de reservar.',
-      target: null,
-      route: '/panel/negocio/portfolio',
-    },
-  ];
+  /** Same rule as `TeamStore.enabled`, which cannot be injected from here without a cycle risk. */
+  private readonly hasTeam = computed(() => {
+    const profile = this.auth.profile();
+    if (profile?.teamEnabled != null) return profile.teamEnabled;
+    return !this.auth.isAutonomous();
+  });
 
-  private steps: CoachStep[] = [];
+  /** A step dropped along the way, so the count and the way back agree with what was seen. */
+  private readonly dropped = signal<ReadonlySet<string>>(new Set());
+
+  private readonly steps = computed(() =>
+    CoachService.STEPS.filter(
+      (step) => (!step.teamOnly || this.hasTeam()) && !this.dropped().has(step.title),
+    ),
+  );
 
   readonly index = signal(0);
   readonly running = signal(false);
 
-  readonly step = computed<CoachStep | null>(() => (this.running() ? (this.steps[this.index()] ?? null) : null));
-  readonly total = computed(() => this.steps.length);
-  readonly isLast = computed(() => this.index() === this.steps.length - 1);
+  readonly step = computed<CoachStep | null>(() => (this.running() ? (this.steps()[this.index()] ?? null) : null));
+  readonly total = computed(() => this.steps().length);
+  readonly isFirst = computed(() => this.index() === 0);
+  readonly isLast = computed(() => this.index() === this.steps().length - 1);
 
-  /** True when this business has never finished (or skipped) the tour. */
+  /** True when this business has never finished (or skipped) the tour in this browser. */
   get pending(): boolean {
     const id = this.auth.user()?.id;
     if (id == null) return false;
@@ -145,11 +151,13 @@ export class CoachService {
     }
   }
 
-  start(tour: 'business' | 'quality' = 'business'): void {
-    this.steps = tour === 'quality' ? CoachService.QUALITY_STEPS : CoachService.BUSINESS_STEPS;
+  /** A worker has no services, team or public page of their own to be shown. */
+  start(): void {
+    if (!this.auth.isBusiness()) return;
+    this.dropped.set(new Set());
     this.index.set(0);
     this.running.set(true);
-    void this.router.navigateByUrl(this.steps[0].route);
+    this.walk();
   }
 
   next(): void {
@@ -158,8 +166,21 @@ export class CoachService {
       return;
     }
     this.index.set(this.index() + 1);
-    const step = this.steps[this.index()];
-    if (step) void this.router.navigateByUrl(step.route);
+    this.walk();
+  }
+
+  back(): void {
+    if (this.isFirst()) return;
+    this.index.set(this.index() - 1);
+    this.walk();
+  }
+
+  /** The current step has nothing to point at: the next one takes its place. */
+  dropCurrent(): void {
+    const step = this.step();
+    if (!step) return;
+    this.dropped.set(new Set([...this.dropped(), step.title]));
+    this.walk();
   }
 
   /** Skipping still counts as seen: nobody wants it again on the next login. */
@@ -176,6 +197,11 @@ export class CoachService {
     } catch {
       // Without storage the tour comes back next time; harmless.
     }
+  }
+
+  private walk(): void {
+    const step = this.step();
+    if (step) void this.router.navigateByUrl(step.route);
   }
 
   private key(actorId: number): string {

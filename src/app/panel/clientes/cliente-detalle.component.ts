@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { CustomersStore } from '../core/data/customers.store';
+import { CustomersStore, customerFormError } from '../core/data/customers.store';
 import { InboxStore } from '../core/data/inbox.store';
+import { message as resourceMessage, serverReason } from '../core/data/resource';
+import { singleCustomerInviteMessage } from '../core/invite-messages';
 import { AuthService } from '../core/auth/auth.service';
 import { BookingResponse, BusinessCustomerDetail, CustomerSource } from '../core/api/models';
-import { STATE_LOOK, stateOf } from '../core/agenda/booking-state';
+import { STATE_LOOK, customerFileStateOf } from '../core/agenda/booking-state';
 import { fromInstant, hhmm, longDate, relativeDay, toDate } from '../core/util/dates';
 import { money, plural } from '../core/util/format';
 import {
@@ -66,6 +68,9 @@ export class ClienteDetalleComponent implements OnInit {
   readonly editing = signal(false);
   readonly busy = signal(false);
   readonly savingTrust = signal(false);
+  readonly formError = signal<string | null>(null);
+  /** Goes in the invitation; read only for someone who can be invited. */
+  private readonly referralCode = signal<string | null>(null);
 
   form = { name: '', phone: '', email: '', notes: '' };
 
@@ -94,6 +99,12 @@ export class ClienteDetalleComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.reload();
+    // Read beforehand and not on the click: the link has to be ready, or the
+    // browser takes the new tab for an unwanted pop-up.
+    const person = this.detail()?.customer;
+    if (person && person.linkedCustomerId == null) {
+      this.referralCode.set(await this.store.referralCode());
+    }
   }
 
   private async reload(): Promise<void> {
@@ -114,7 +125,7 @@ export class ClienteDetalleComponent implements OnInit {
     }
   }
 
-  stateOf = stateOf;
+  stateOf = customerFileStateOf;
 
   count(n: number, one: string, many: string): string {
     return plural(n, one, many);
@@ -165,7 +176,52 @@ export class ClienteDetalleComponent implements OnInit {
     return `mailto:${this.detail()?.customer.email ?? ''}`;
   }
 
+  /** Phone without spaces, and with the country code WhatsApp needs. */
+  private intlPhone(): string {
+    const phone = (this.detail()?.customer.phone ?? '').replace(/\D/g, '');
+    return phone.startsWith('34') ? phone : `34${phone}`;
+  }
+
+  inviteWhatsappHref(): string {
+    return `https://wa.me/${this.intlPhone()}?text=${encodeURIComponent(this.inviteMessage())}`;
+  }
+
+  inviteSmsHref(): string {
+    return `sms:+${this.intlPhone()}?body=${encodeURIComponent(this.inviteMessage())}`;
+  }
+
+  private inviteMessage(): string {
+    return singleCustomerInviteMessage(this.referralCode());
+  }
+
+  /**
+   * Stamped once the message is open. Failing says nothing: the invitation is
+   * already on its way and the only effect is the date. A worker's route does
+   * not reach it, so with the front desk permission nothing is stamped.
+   */
+  async stampInvited(): Promise<void> {
+    const person = this.detail()?.customer;
+    if (!person || !this.auth.isBusiness()) return;
+    try {
+      const { invitedAt } = await this.store.invite(person.id);
+      // Only the date: `trusted` is not reliable in this answer.
+      this.detail.update((detail) =>
+        detail ? { ...detail, customer: { ...detail.customer, invitedAt } } : detail,
+      );
+    } catch {
+      // See above.
+    }
+  }
+
+  startEdit(): void {
+    this.formError.set(null);
+    this.editing.set(true);
+  }
+
   async saveEdit(): Promise<void> {
+    const problem = customerFormError(this.form, false);
+    this.formError.set(problem);
+    if (problem) return;
     this.busy.set(true);
     try {
       await this.store.update(Number(this.id), {
@@ -177,8 +233,8 @@ export class ClienteDetalleComponent implements OnInit {
       await this.reload();
       this.editing.set(false);
       this.toasts.show('Ficha guardada');
-    } catch {
-      this.toasts.error('No se pudo guardar.');
+    } catch (cause) {
+      this.formError.set(resourceMessage(cause));
     } finally {
       this.busy.set(false);
     }
@@ -225,17 +281,17 @@ export class ClienteDetalleComponent implements OnInit {
     }
   }
 
-  /** Nothing is turned off: it offers going where it IS changed, Funcionalidades. */
+  /** Nothing is turned off: it offers going where it IS changed, Cobros. */
   private async explainAutomaticTrust(): Promise<void> {
     const answer = await this.confirm.ask({
       title: 'Lo es por su historial',
       message:
         'Este cliente se ha definido de confianza de forma automática. Si no quieres esto, puedes ' +
-        'desactivar los clientes de confianza automáticos en Funcionalidades.',
-      confirmLabel: 'Ir a Funcionalidades',
+        'desactivar los clientes de confianza automáticos en Cobros.',
+      confirmLabel: 'Ir a Cobros',
       cancelLabel: 'Entendido',
     });
-    if (answer.ok) await this.router.navigateByUrl('/panel/ajustes/funcionalidades');
+    if (answer.ok) await this.router.navigateByUrl('/panel/ajustes/cobros');
   }
 
   async ban(): Promise<void> {
@@ -287,8 +343,7 @@ export class ClienteDetalleComponent implements OnInit {
     } catch (cause) {
       // The server's own message: the likeliest reason is appointments in the
       // history, and it says how many and what to do about them.
-      const detail = (cause as { error?: { message?: string } }).error?.message;
-      this.toasts.error(detail || 'El cliente sigue en tu agenda. Vuelve a intentarlo.');
+      this.toasts.error(serverReason(cause) || 'El cliente sigue en tu agenda. Vuelve a intentarlo.');
     }
   }
 }

@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
-import { CustomersStore } from '../core/data/customers.store';
+import { CustomersStore, customerFormError } from '../core/data/customers.store';
+import { message } from '../core/data/resource';
 import { BusinessCustomer, CustomerOrigin } from '../core/api/models';
 import { relativeDay, toDate } from '../core/util/dates';
 import { plural } from '../core/util/format';
@@ -25,6 +26,9 @@ const ALL = 'ALL';
  * These are not Bipsy accounts: they are the people who call, the regulars,
  * the ones who never book online. The ones who do have an account show a badge
  * so it is obvious who can be messaged and who has to be phoned.
+ *
+ * A worker with the front desk permission sees it too and adds whoever walks
+ * in; dumping a whole address book is the owner's, and the route says so.
  */
 @Component({
   selector: 'app-panel-clientes',
@@ -44,14 +48,16 @@ const ALL = 'ALL';
 })
 export class ClientesComponent {
   readonly store = inject(CustomersStore);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly toasts = inject(ToastService);
+  private readonly router = inject(Router);
 
   readonly relativeDay = relativeDay;
   readonly toDate = toDate;
 
   readonly creating = signal(false);
   readonly busy = signal(false);
+  readonly formError = signal<string | null>(null);
 
   form = { name: '', phone: '', email: '', notes: '' };
 
@@ -112,17 +118,17 @@ export class ClientesComponent {
 
   startCreate(): void {
     this.form = { name: '', phone: '', email: '', notes: '' };
+    this.formError.set(null);
     this.creating.set(true);
   }
 
   async save(): Promise<void> {
-    if (!this.form.name.trim()) {
-      this.toasts.error('Escribe al menos el nombre.');
-      return;
-    }
+    const problem = customerFormError(this.form, true);
+    this.formError.set(problem);
+    if (problem) return;
     this.busy.set(true);
     try {
-      await this.store.create({
+      const created = await this.store.create({
         name: this.form.name.trim(),
         phone: this.form.phone.trim() || null,
         email: this.form.email.trim() || null,
@@ -130,8 +136,10 @@ export class ClientesComponent {
       });
       this.creating.set(false);
       this.toasts.show('Cliente añadido');
-    } catch {
-      this.toasts.error('No se pudo guardar. Revisa tu conexión.');
+      await this.router.navigate(['/panel/clientes', created.id]);
+    } catch (cause) {
+      // The server's own words: the likeliest is a card with that email already.
+      this.formError.set(message(cause));
     } finally {
       this.busy.set(false);
     }

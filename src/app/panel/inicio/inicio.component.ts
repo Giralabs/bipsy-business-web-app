@@ -5,6 +5,7 @@ import { AgendaStore } from '../core/data/agenda.store';
 import { ReviewsStore } from '../core/data/reviews.store';
 import { SetupStore } from '../core/data/setup.store';
 import { TeamStore } from '../core/data/team.store';
+import { VerificationStore } from '../core/data/verification.store';
 import { WaitlistStore } from '../core/data/waitlist.store';
 import { ServicesStore } from '../core/data/services.store';
 import { InboxStore } from '../core/data/inbox.store';
@@ -15,6 +16,7 @@ import { money, plural, rating } from '../core/util/format';
 import { ToastService } from '../ui/toast.service';
 import { PnAvatarComponent, PnEmptyComponent } from '../ui/controls';
 import { PnDeskHeroComponent } from '../ui/desk-hero.component';
+import { PnSetupStepsComponent } from '../ui/setup-steps.component';
 
 /** Algo que pide atención, dicho con palabras y con a dónde ir a resolverlo. */
 interface DeskAlert {
@@ -36,7 +38,7 @@ interface DeskAlert {
 @Component({
   selector: 'app-panel-inicio',
   standalone: true,
-  imports: [RouterLink, PnEmptyComponent, PnAvatarComponent, PnDeskHeroComponent],
+  imports: [RouterLink, PnEmptyComponent, PnAvatarComponent, PnDeskHeroComponent, PnSetupStepsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './inicio.component.html',
   styleUrl: './inicio.component.css',
@@ -45,6 +47,7 @@ export class InicioComponent {
   readonly auth = inject(AuthService);
   readonly agenda = inject(AgendaStore);
   readonly setup = inject(SetupStore);
+  readonly verification = inject(VerificationStore);
   readonly team = inject(TeamStore);
   readonly waitlist = inject(WaitlistStore);
   readonly reviews = inject(ReviewsStore);
@@ -63,12 +66,14 @@ export class InicioComponent {
   readonly who = whoAttends;
 
   constructor() {
+    // Back from completing a step, the guide has to say so.
+    void this.verification.refresh();
     void this.reviews.load();
     void this.waitlist.load();
     void this.services.load();
-    if (!this.auth.isAutonomous()) {
-      void this.team.activeClocks.load();
+    if (this.team.enabled()) {
       void this.team.absences.load();
+      if (this.auth.clockInEnabled()) void this.team.activeClocks.load();
     }
   }
 

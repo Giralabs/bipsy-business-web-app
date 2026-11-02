@@ -13,8 +13,14 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { filter } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
 import { AgendaStore } from '../core/data/agenda.store';
+import { ChatSocketService } from '../core/data/chat-socket.service';
 import { InboxStore } from '../core/data/inbox.store';
 import { SetupStore } from '../core/data/setup.store';
+import { TeamStore } from '../core/data/team.store';
+import { CustomersStore } from '../core/data/customers.store';
+import { ServicesStore } from '../core/data/services.store';
+import { ReviewsStore } from '../core/data/reviews.store';
+import { VerificationStore } from '../core/data/verification.store';
 import { WaitlistStore } from '../core/data/waitlist.store';
 import { SessionEvents } from '../core/auth/session-events';
 import { startDesktopNotifications } from '../core/data/desktop-notify.service';
@@ -23,6 +29,7 @@ import { CoachOverlayComponent } from '../onboarding/coach-overlay.component';
 import { PnAvatarComponent } from '../ui/controls';
 import { PnConfirmHostComponent } from '../ui/confirm.service';
 import { PnToastsComponent } from '../ui/toast.service';
+import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
 import { CommandPaletteComponent, PaletteItem } from './command-palette.component';
 import {
   BUSINESS_DESTINATIONS,
@@ -45,7 +52,8 @@ const RAIL_KEY = 'bipsy.panel.rail';
  * (⌘K / Ctrl+K).
  *
  * Lo que se ve depende de quién entra: el dueño ve el negocio entero y un
- * trabajador solo su día, su fichaje y sus ausencias (`WORKER_SECTIONS`).
+ * trabajador su día, su fichaje, sus ausencias y lo que tenga por permiso
+ * (`WORKER_SECTIONS`).
  */
 @Component({
   selector: 'app-panel-shell',
@@ -56,6 +64,7 @@ const RAIL_KEY = 'bipsy.panel.rail';
     PnAvatarComponent,
     PnToastsComponent,
     PnConfirmHostComponent,
+    PnVerifiedBadgeComponent,
     CoachOverlayComponent,
     CommandPaletteComponent,
   ],
@@ -66,9 +75,15 @@ const RAIL_KEY = 'bipsy.panel.rail';
 export class PanelShellComponent {
   readonly auth = inject(AuthService);
   readonly coach = inject(CoachService);
+  readonly verification = inject(VerificationStore);
   readonly agenda = inject(AgendaStore);
   readonly inbox = inject(InboxStore);
   private readonly waitlist = inject(WaitlistStore);
+  private readonly team = inject(TeamStore);
+  private readonly customers = inject(CustomersStore);
+  private readonly services = inject(ServicesStore);
+  private readonly reviews = inject(ReviewsStore);
+  private readonly socket = inject(ChatSocketService);
   private readonly setup = inject(SetupStore);
   private readonly session = inject(SessionEvents);
   private readonly router = inject(Router);
@@ -92,6 +107,7 @@ export class PanelShellComponent {
       return WORKER_SECTIONS.filter((section) => {
         if (section.id === 'mensajes') return this.auth.canUseChat();
         if (section.id === 'fichar') return this.auth.clockInEnabled();
+        if (section.id === 'clientes') return this.auth.canSeeCustomers();
         return true;
       });
     }
@@ -196,13 +212,26 @@ export class PanelShellComponent {
       if (this.auth.waitlistEnabled()) void this.waitlist.load();
     }
     if (this.auth.canUseChat()) void this.inbox.load();
+    // For the counter on Equipo, from any screen. Alone there is no team (409).
+    if (this.auth.isBusiness() && this.team.enabled()) void this.team.absences.load();
+
+    // First time in the panel, whatever door they came in by: an account born
+    // in the app never went through the web sign-up that used to start it.
+    // Only from the home screen, so a deep link is not walked away from.
+    const url = this.router.url.split(/[?#]/)[0];
+    if (this.auth.isBusiness() && url === '/panel' && !this.coach.running() && this.coach.pending) {
+      setTimeout(() => this.coach.start());
+    }
 
     // Desktop notifications react to the stores; a minute-by-minute re-read
     // of the agenda (the only thing that changes behind the owner's back) is
-    // what makes them fire, and keeps an open panel honest on the till.
+    // what makes them fire, and keeps an open panel honest on the till. It is
+    // also what is left when the socket cannot connect.
     startDesktopNotifications();
-    const refresh = setInterval(() => void this.agenda.bookings.reload(), 60_000);
+    const refresh = setInterval(() => void this.agenda.bookings.refresh(), 60_000);
     inject(DestroyRef).onDestroy(() => clearInterval(refresh));
+
+    this.listenToBookings();
 
     const query = matchMedia('(max-width: 960px)');
     const onMedia = () => this.narrow.set(query.matches);
@@ -220,6 +249,33 @@ export class PanelShellComponent {
         this.drawerOpen.set(false);
         this.menuOpen.set(false);
       });
+  }
+
+  /**
+   * A booking that comes in, is confirmed or gets paid reaches the open agenda,
+   * for the owner and for the worker alike, and moves nothing while it does:
+   * an agenda is open all day and what is read on it are times and names.
+   *
+   * The shell and not the agenda screen because the shell is not remounted: the
+   * list is already up to date when coming back to it. And the socket is the
+   * session's: booking changes do not depend on the chat being on.
+   */
+  private listenToBookings(): void {
+    const destroy = inject(DestroyRef);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const stop = this.socket.listen((event) => {
+      const gap = event.type === 'connected' && this.agenda.bookings.isLoaded;
+      if (event.type !== 'booking.changed' && !gap) return;
+      // One change can ring twice (a reassignment rings both agendas' owners).
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => void this.agenda.bookings.refresh(), 300);
+    });
+    this.socket.connect();
+    destroy.onDestroy(() => {
+      stop();
+      if (timer) clearTimeout(timer);
+      this.socket.disconnect();
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -240,6 +296,9 @@ export class PanelShellComponent {
   badgeOf(section: Section): number {
     if (section.id === 'agenda') return this.agenda.pendingCount();
     if (section.id === 'mensajes') return this.inbox.unread();
+    // On Equipo and not in the agenda: it is resolved there, and it competes
+    // with the appointments to confirm, which are the agenda's.
+    if (section.id === 'equipo') return this.team.pendingAbsences().length;
     return 0;
   }
 
@@ -270,9 +329,31 @@ export class PanelShellComponent {
     this.menuOpen.set(false);
   }
 
+  /**
+   * The pointer over a section is a click on its way: its data starts loading
+   * now, so the page opens filled in instead of on a skeleton. Every store's
+   * `load()` is idempotent, so hovering twice costs nothing.
+   */
+  prefetch(id: string): void {
+    const owner = this.auth.isBusiness();
+    const loads: Record<string, () => unknown> = {
+      agenda: () => this.agenda.load(),
+      mensajes: () => this.auth.canUseChat() && this.inbox.load(),
+      clientes: () => (owner || this.auth.canSeeCustomers()) && this.customers.load(),
+      servicios: () => owner && this.services.load(),
+      equipo: () => owner && this.team.enabled() && this.team.load(),
+      resenas: () => this.reviews.load(),
+    };
+    try {
+      void loads[id]?.();
+    } catch {
+      // A prefetch that fails is retried by the page itself.
+    }
+  }
+
   replayTour(): void {
     this.closeMenu();
-    this.coach.start('business');
+    this.coach.start();
   }
 
   /**
