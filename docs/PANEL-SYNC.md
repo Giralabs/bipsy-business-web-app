@@ -1,17 +1,36 @@
 # Panel web ↔ app Flutter · mapa y protocolo de sincronización
 
-**Última sincronización: 5 de octubre de 2026**, contra `bipsy-mobile-apps/apps/gipsi_business`.
+**Última sincronización: 1 de noviembre de 2026**, contra `bipsy-mobile-apps/apps/gipsi_business`.
 
 | Repo | Adaptado hasta el commit | Fecha del commit |
 |---|---|---|
-| `bipsy-mobile-apps` (`main`) | **`12ecaf4`** — *Merge pull request #113 from Giralabs/feat/booking-for-someone-else* | 03/10/2026 |
-| `bipsy-backend` (`main`) | **`36134dc`** — *Merge pull request #85 from Giralabs/feat/booking-for-someone-else* | 03/10/2026 |
+| `bipsy-mobile-apps` (`main`) | **`92a34ca`** — *Merge pull request #137 from Giralabs/feat/worker-photo-notice* | 30/10/2026 |
+| `bipsy-backend` (`main`) | **`4bbccd0`** — *Merge pull request #100 from Giralabs/feat/business-verification* | 30/10/2026 |
 
 > **Este es el punto de partida de la próxima sincronización**: lo que haya que trasladar es
-> `git log 12ecaf4..HEAD -- apps/gipsi_business packages` en la app y `git log 36134dc..HEAD` en el
-> backend. Al terminar, se cambian aquí los dos hashes. (La anterior se quedó en `5eb26d4` y
-> `3a9da47`, del 25/09/2026.) En esta máquina `git` no está en el PATH: se usa el de GitHub Desktop,
+> `git log 92a34ca..HEAD -- apps/gipsi_business packages` en la app y `git log 4bbccd0..HEAD` en el
+> backend. Al terminar, se cambian aquí los dos hashes. (La anterior se quedó en `12ecaf4` y
+> `36134dc`, del 03/10/2026.) En esta máquina `git` no está en el PATH: se usa el de GitHub Desktop,
 > `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe`.
+
+> **01/11/2026 — cobrar citas, verificación, agenda en vivo y mostrador** (PRs #114–#137 de la app,
+> #86–#100 del backend). Comprobado contra el backend real con una base de datos desechable: todas
+> las pantallas de dueño, trabajador y autónomo, y pulsando en la interfaz cobrar en mano, quitar de
+> la espera con motivo, fichar, el alta por correo y la agenda en vivo.
+> - **Cobrar una cita** (`agenda/collect-booking-dialog`): pedirlo en su app o «Ya cobrada», y estado
+>   «Pendiente de pago» para lo acabado sin saldar.
+> - **Cobros** reúne cómo cobras (`ajustes/collect-settings`); Funcionalidades se queda con lo que se
+>   enciende y se apaga. «Pago por app» y «Marcar como pagadas» se excluyen.
+> - **Verificación** (`negocio/verificacion`) con su insignia, y la guía de configuración pinta los
+>   requisitos del servidor.
+> - **Enlace, QR y cartel** (`panel/enlace/`), y recorte de fotos al subirlas (`ui/image-cropper`).
+> - **Agenda en vivo** por el socket (`booking.changed`), insignia en Pendientes y contador en Equipo.
+> - **Mostrador**: el trabajador con `customersEnabled` ve Clientes y da citas, que son suyas.
+> - **Notificaciones en el servidor**, política de contraseñas, errores por campo, soporte con
+>   adjuntos en el aviso, invitación por enlace y trabajadores con Google o Apple.
+> - **Arreglos generales**: `resource.isLoaded` es reactivo (Cobros se quedaba en el esqueleto para
+>   siempre, también en `main`); un 403 dice su motivo, no «tu sesión ya no vale»; el modo «trabajo
+>   solo» ya no llama a rutas de equipo; `app-bip-slot` reintenta y no enseña códigos en producción.
 
 > **05/10/2026 — domicilio, confianza, cierres, «Dar cita» y entrar por correo** (PRs #107–#113 de
 > la app, #79–#85 del backend).
@@ -214,7 +233,19 @@ backend.
 | `profile/change_password_screen.dart` · `profile/linked_accounts_screen.dart` (solo la fila de Google) | `panel/ajustes/cuenta.component.ts` | `/panel/ajustes/cuenta` |
 | `support/support_screen.dart` · `new_ticket_screen.dart` | `panel/soporte/soporte.component.ts` | `/panel/soporte` |
 | `welcome/coach_controller.dart` · `coach_overlay.dart` | `panel/onboarding/coach.service.ts` · `coach-overlay.component.*` | — |
-| `welcome/welcome_providers.dart` (`setupStepsProvider`) | `panel/core/data/setup.store.ts` | bloque de `/panel` |
+| `welcome/welcome_providers.dart` (`setupStepsProvider`) | `panel/core/data/setup.store.ts` · `ui/setup-steps.component.ts` | bloque de `/panel` |
+| `payments/widgets/collect_booking_sheet.dart` | `panel/agenda/collect-booking-dialog.component.*` | diálogo en `/panel/agenda` |
+| `profile/widgets/collect_settings.dart` · `core/business_settings.dart` | `panel/ajustes/collect-settings.component.ts` | `/panel/ajustes/cobros` |
+| `verification/verification_screen.dart` · `verification_providers.dart` | `panel/negocio/verificacion.component.ts` · `core/data/verification.store.ts` · `ui/verified-badge.component.ts` | `/panel/negocio/verificacion` |
+| `profile/widgets/plan_verification_row.dart` · `subscription/widgets/plan_mark.dart` | `panel/negocio/negocio.component.*` · `ui/plan-mark.component.ts` | `/panel/negocio` |
+| `share_link/share_link_screen.dart` | `panel/enlace/enlace.component.ts` · `core/business-link.ts` · `core/util/share.ts` | `/panel/enlace` |
+| `share_link/poster_screen.dart` · `poster_design.dart` · `poster_export.dart` · `widgets/*` | `panel/enlace/cartel.component.ts` · `poster.ts` · `poster-export.ts` · `qr.component.ts` | `/panel/enlace/cartel` |
+| `gipsi_shared_ui/…/gipsi_image_crop.dart` | `panel/ui/image-cropper.component.ts` (desde `pn-photo-picker`) | — |
+| `core/password_rules.dart` · `GipsiPasswordPolicy` | `panel/core/auth/password-policy.ts` · `ui/password-rules.component.ts` | — |
+| `profile/notification_groups.dart` · `notification_prefs_provider_business.dart` | `panel/core/data/desktop-notify.service.ts` (`*_NOTIF_GROUPS`) · `ajustes/notificaciones.component.ts` | `/panel/ajustes/notificaciones` |
+| `core/invite_messages.dart` | `panel/core/invite-messages.ts` | — |
+| `auth/accept_invitation_screen.dart` (por enlace) | `panel/auth/accept-invite.component.ts` | `/equipo/:token` e `/invitacion/:token` |
+| `gipsi_shared_ui/…/gipsi_new_ticket_screen.dart` | `panel/soporte/soporte.component.ts` | `/panel/soporte` |
 
 ### Datos
 
@@ -244,7 +275,16 @@ que decidir antes de tocar nada.
 | Navegación | Barra inferior de 4 pestañas (3 para un trabajador) | **Barra lateral mínima** con todas las secciones, plegable a carril, y «Ir a…» (⌘/Ctrl K) para lo de segundo nivel | En un escritorio sobra sitio a la izquierda y las secciones se ven siempre, sin volver a un escritorio de bloques. |
 | Pantalla de inicio | Abre directamente en la agenda | Inicio (`/panel`): Mr. Bip, el día, pendientes y avisos; para un trabajador, su día, su fichaje y su disponibilidad | En un móvil cabe una cosa; en un escritorio caben el día y lo pendiente a la vez. |
 | Guardias por rol | Ninguna: las pantallas del dueño se abren y falla el servidor | `panelGuard` manda a un trabajador a `/panel` fuera de `WORKER_PATHS` | En la web se teclea una URL con facilidad. |
-| Entrar con Google o Apple | Solo negocios. Apple únicamente en iOS | Igual, y el login lo dice. Apple **sí sale en la web**: por el navegador el flujo es la misma ventana emergente para todos, no la hoja del sistema | `/auth/{google,apple}/business` rechaza trabajadores. Lo de «solo iOS» era por no meter a Android en una ventana web pudiendo usar Google nativo; en un navegador esa distinción no existe. |
+| Entrar con Google o Apple | Dueños y trabajadores. Apple únicamente en iOS | Dueños y trabajadores. Apple **sí sale en la web**: por el navegador el flujo es la misma ventana emergente para todos, no la hoja del sistema | Lo de «solo iOS» era por no meter a Android en una ventana web pudiendo usar Google nativo; en un navegador esa distinción no existe. |
+| Bloqueo con Face ID, Tap to Pay, push y enlaces profundos | Los tiene | Nada | Son del móvil. Tap to Pay está además apagado en la app (`kTapToPayDisponible`). |
+| Tutorial | 8 pasos que señalan la barra entera; Equipo se salta siempre; arranca al terminar el alta | 10 pasos: los de la app más **Tus cobros** y **Tu enlace**. Señala cada sección, con Atrás, teclado y Mr. Bip. Sin equipo cae ese paso, igual que en la app, y sin lista que tachar, también. Arranca al entrar por primera vez en `/panel` en ese navegador, se haya dado de alta donde se haya dado | Quien se dio de alta en el móvil nunca lo veía, y el recorrido no hablaba de lo más nuevo. El último paso dice lo que hace la web: un archivo, o la agenda en el móvil. |
+| Destino de «clientes de confianza» y aviso de Cancelaciones | El ARB sigue diciendo Funcionalidades | Dicen y llevan a Cobros | Es donde está ahora; el texto de la app se ha quedado viejo. |
+| Barra del trabajador | 5 pestañas; Mi horario y Reseñas se abren desde Perfil | Añade Inicio, Mi horario y Reseñas | En la web no hay un Perfil que las contenga, y la navegación es la barra lateral (fila «Navegación»). |
+| Código de referidos del trabajador | La ruta del dueño le da 403 y sale sin código | `/workers/me/referral` | Lleva el código real. |
+| Registro de trabajador | Paso `step_role` | Enlace «Soy trabajador» dentro del alta | No hace falta una pantalla para una bifurcación. |
+| Guía de configuración y aviso de verificar | En Perfil | En Inicio | Inicio ya hacía de sitio de la guía. |
+| Cartel | Compartir PDF o imagen | Guardar PDF o imagen; imprimir abre el diálogo del navegador | Sin hoja del sistema en escritorio. |
+| Recorte de foto | `image_cropper` nativo | Canvas propio; admite hasta 40 MB antes de recortar | Lo que viaja es ya el recorte, dentro de los 5 MB. |
 | Alta con Google o Apple | El login sin cuenta (404) sigue al registro con la identidad en la mano | Igual, y además los dos botones están **también en `/registro`**: el paso 1 es «escribe tu correo» *o* «tráelo de Google/Apple» | En la app el alta se abre desde el login; en la web se llega a `/registro` por enlace directo desde la portada, y allí no había forma de empezar con un proveedor. Con proveedor no hay contraseña que elegir (`RegisterBusinessRequest`: password, googleIdToken **o** appleIdToken, uno y sólo uno) ni paso de verificación, salvo con el relay de Apple, donde el correo lo escribe el negocio y hay que comprobarlo. |
 | Registro de trabajador sin código | `/register/worker` | No existe: el trabajador entra con código (`/unirse`) | Sin negocio no puede hacer nada; quien ya se registró en la app sin código canjea uno en `/unirse`. |
 | Vetar desde una cita (trabajador) | El botón sale y da 403 | No sale | `/businesses/me/bans/**` es solo BUSINESS. |
@@ -252,15 +292,13 @@ que decidir antes de tocar nada.
 | Acciones sobre una cita | Dos hojas: detalle y acciones | Un solo diálogo con ambas | Quita el problema de «dónde toco» que la app tiene que explicar en la leyenda. |
 | Reasignar trabajador | Solo dentro del resolutor de conflictos | También desde cualquier cita | Mismo endpoint (`PUT /bookings/{id}/reassign`); desde el mostrador es lo natural cuando alguien falla. |
 | Ofrecer hueco a la lista de espera | El endpoint existe pero **ninguna pantalla lo llama** | Botón en el panel de espera | `POST /businesses/me/waitlist/{id}/offer` ya está en el backend y en `WaitlistRepository`. |
-| Paso 5 del tutorial («Tu equipo») | Se salta siempre: nadie registra la diana `nav:team` | Funciona | En la web la sección es una pestaña y se puede señalar. |
-| Importar contactos (paso 8 del tutorial) | `flutter_contacts` lee la agenda del teléfono tras pedir permiso | `/panel/clientes/importar` con dos vías y **ninguna caja de texto**: (1) la **Contact Picker API** (`navigator.contacts.select(['name','tel','email'], {multiple:true})`), que es la agenda de verdad del móvil y solo se ofrece donde existe —Chrome en Android y en https—; (2) un **archivo**: `.vcf` (vCard 2.1/3.0/4.0, con nombres en quoted-printable o base64) o `.csv` de Google Contacts, Outlook o el programa anterior, arrastrado o elegido, detectando delimitador y cabeceras en español e inglés, y también sin cabecera. Todo se interpreta en el navegador (`contacts-source.ts`); si ninguna encaja, un bloque explica que la app del móvil sí lee la agenda. Después, la misma revisión que la app y el mismo `POST /businesses/me/customers/import` | El navegador de un ordenador no tiene agenda que leer, y pedir la lista escrita a mano era lo peor de las dos opciones. El Contact Picker cubre el caso en que el panel se abre desde el móvil; el archivo cubre el escritorio. Los que ya están en la agenda vienen desmarcados (el servidor los descartaría igual) y el tope de 500 es el de `ImportContactsRequest`. |
+| Importar contactos (último paso del tutorial) | `flutter_contacts` lee la agenda del teléfono tras pedir permiso | `/panel/clientes/importar` con dos vías y **ninguna caja de texto**: (1) la **Contact Picker API** (`navigator.contacts.select(['name','tel','email'], {multiple:true})`), que es la agenda de verdad del móvil y solo se ofrece donde existe —Chrome en Android y en https—; (2) un **archivo**: `.vcf` (vCard 2.1/3.0/4.0, con nombres en quoted-printable o base64) o `.csv` de Google Contacts, Outlook o el programa anterior, arrastrado o elegido, detectando delimitador y cabeceras en español e inglés, y también sin cabecera. Todo se interpreta en el navegador (`contacts-source.ts`); si ninguna encaja, un bloque explica que la app del móvil sí lee la agenda. Después, la misma revisión que la app y el mismo `POST /businesses/me/customers/import` | El navegador de un ordenador no tiene agenda que leer, y pedir la lista escrita a mano era lo peor de las dos opciones. El Contact Picker cubre el caso en que el panel se abre desde el móvil; el archivo cubre el escritorio. Los que ya están en la agenda vienen desmarcados (el servidor los descartaría igual) y el tope de 500 es el de `ImportContactsRequest`. |
 | Reordenar (servicios, espera) | Arrastrar con pulsación larga | Flechas arriba/abajo | Más rápido con ratón y accesible con teclado. |
 | Chat | WebSocket con cabecera `Authorization`; adjuntar con cámara, galería o documento | **Mismo socket** (`core/data/chat-socket.service.ts`): `/ws/chat` crudo (sin STOMP), eventos JSON `message.created` · `conversation.read` · `conversation.delivered`, y el token en el subprotocolo `['bipsy-bearer', <jwt>]` porque el navegador no deja poner cabeceras. Si el handshake falla se hace una llamada REST para que el interceptor refresque y se reintenta (2 s → 30 s); mientras está caído, `InboxStore` relee cada 20 s. Adjuntar es un solo botón con selector de archivos, además de pegar y arrastrar; las imágenes se ven en un visor con «Descargar» en vez de «Guardar o compartir» | En un navegador no hay cámara ni hoja de compartir del sistema; pegar y arrastrar es lo natural en un escritorio. |
 | Tema claro/oscuro | Interruptor propio, persistido | Sigue al sistema | Es como funciona el resto de la web informativa. |
 | Suscripción | Compras integradas de Google Play y App Store (IAP) | **Tarjeta con Stripe** (Payment Element de Stripe.js, `panel/ajustes/stripe-checkout.ts`): `GET /subscriptions/config?channel=WEB` → `POST /subscriptions/checkout {planCode, channel:'WEB'}` (SetupIntent) → `stripe.confirmSetup` → `POST /subscriptions/confirm {paymentMethodId}`. Cambio, baja y reactivación en «Mi plan». | Desde un ordenador no hay tienda. `channel: 'WEB'` es el único añadido al backend (22/09/2026): `SubscriptionService` usa `StripeSubscriptionGateway` para la web aunque la pasarela viva sea la de las tiendas, y cada suscripción se gestiona con la pasarela con la que se abrió (`gatewayFor`). Lo contratado en el móvil se gestiona en el móvil. Solo se ofrecen planes `selectable` (`/subscriptions/plans`): el gratis lo regala Bipsy desde bipsy-admin-app. |
 | Subir fotos | Desde la galería del móvil, en una hoja | `pn-photo-picker`: elegir archivo o arrastrar y soltar. Fotos JPEG/PNG/WebP hasta 5 MB (`MediaValidation.MAX_SIZE`); animadas GIF/WebP hasta 8 MB. En el portfolio la descripción y el servicio se piden antes de subir y viajan en el mismo multipart (`caption`, `serviceId`) | En un escritorio no hay galería; arrastrar es lo natural. |
 | **Personalización (Quality)** | Dejó de ser una pantalla: el **orden de la ficha** se mudó a Editar perfil (ya sin plan, backend V86) y la **foto/portada animadas** a la hoja de la foto. Color y efectos no tienen ya dónde tocarse | **Nada. Retirada a propósito el 23/09/2026.** Se borraron `negocio/marca.component.*`, su ruta, su destino en la barra, su enlace en «Tu ficha» y `UpdateBrandingRequest`. Tampoco se ha traído el orden de secciones de Editar perfil | Decisión del dueño: en la web no queda ningún sitio donde escribir marca. `BrandingView` y `ShowcaseSection` **se quedan en `models.ts` solo de lectura** porque la vista previa pinta el color, las animadas y el orden que el backend sigue sirviendo dentro de `BusinessResponse`. Si algún día se quiere el orden de secciones, es `PUT /businesses/me/branding` con el **estado completo** (mandar solo `sectionOrder` borra color y efectos) y puede devolver 402. |
-| Tutorial de Quality | Sigue existiendo (`CoachTour.quality`, 3 pasos), pero ya no señala nada: los tres se quedan en Perfil | Los mismos 3 pasos y las mismas palabras del ARB; el segundo ya no va a `/panel/negocio/marca`, se queda en `/panel/negocio` | La app conserva el texto («tu color… los efectos… lo vas viendo en vivo») aunque no haya dónde tocarlo: se copia literal, como manda §1.3, y describe lo que Quality hace en tu ficha, no dónde se edita. |
 | Redes sociales | Se añaden de una en una: hoja «¿Qué quieres añadir?» y luego otra hoja por red, con el valor y un «Quitar» | Las **seis cajas a la vez** en el diálogo de «Editar tu ficha», en dos columnas; vacía = no la tienes | En un móvil seis campos son seis pantallas de scroll; en un escritorio caben de un vistazo y se rellenan con el tabulador. El contrato es el mismo: las seis claves viajan siempre en `social`, y `''` borra. |
 | Horas por servicio | Lista de días → hoja del día → rueda por hora | Los siete días abiertos a la vez dentro del formulario, con dos `select` por franja | Una hoja dentro de un diálogo sería la tercera capa de modal seguida. Las reglas son idénticas (`service-hours.ts`): las horas salen de `/businesses/me/slot-grid`, el fin incluye el cierre (`última + slotMinutes`), las franjas que se tocan se funden y apagar el interruptor manda `timeWindows: []`. |
 | Dar cita | Pantalla propia (`/agenda/nueva-cita`) con una hoja por campo, desde el botón flotante «Nuevo» | **Un solo diálogo** desde el botón «Dar cita» de la cabecera, o haciendo clic en un hueco libre de la rejilla (rellena día, hora y columna). La hora no aparece hasta elegir servicio; «Nuevo cliente» va dentro, sin notas | Tres capas de modal seguidas no caben en un escritorio. Con un cliente sin app el aviso final dice «Cita enviada por correo»: el de la app («…tiene 10 minutos») no es cierto para un invitado. |
@@ -269,6 +307,8 @@ que decidir antes de tocar nada.
 | Días libres del dueño | Con equipo, «Yo» en Ausencias; el autónomo ya no tiene dónde verlos | Igual, y además: antes de bloquear se consulta `/timeoff/conflicts` y se listan las citas que estorban; los días libres antiguos de un autónomo se ven (solo para quitarlos) al pie de «Días de cierre» | Esos días siguen bloqueando la agenda aunque la app ya no los enseñe. |
 | Quitar una ausencia | Deslizar en el historial | Botón «Quitar» en cada fila, con confirmación | Sin gestos en escritorio. |
 | Filtros de clientes | Botón con hoja de filtros; buscador que se despliega | Segmentado «Todos / Mis contactos / De Bipsy» y chips siempre a la vista; los vetados siguen en su pantalla | Caben, y un filtro activo que no se ve es peor. |
+| Dirección del alta | Buscador de Google (`/places`) y mapa con pin (`location_map_picker.dart`: Google Maps en Android, MapKit en iOS). Se exige el punto | Igual, con **Google Maps JS** (`ui/location-map.component.ts`, `core/places/google-maps.ts`) y la misma clave de navegador que `bipsy-web-app`. Ciudad y código postal siempre a la vista. Si `/places` responde 503 (Google rechaza la clave del servidor), las sugerencias salen de **Photon** (komoot, datos de OpenStreetMap) desde el navegador, limitadas a España y con la provincia sacada del código postal; Google sigue siendo lo primero. Si Google rechaza también el mapa, se deja seguir sin punto | En iOS el mapa no depende de Google, así que la app nunca se queda sin pin; en un navegador no hay alternativa sin Google para el mapa. El respaldo de Photon existe porque la clave local de Google es de un proyecto sin facturación: con una clave buena no se usa. Sin punto el negocio queda fuera de las búsquedas por distancia (`BusinessRepository`, `b.latitude IS NOT NULL`). La clave de navegador tiene que permitir `http://localhost:*` y el dominio del panel. |
+| Nombre del negocio en el alta | `signup_controller.dart` lo rellena con el nombre de la cuenta de Google o Apple, debajo de la categoría | Primer campo del paso 2, **vacío**, con la pregunta «¿Cómo se llama tu negocio?» y su propio aviso si falta | El nombre del proveedor es el de la persona («José Manuel»): se quedaba puesto como nombre del negocio sin que nadie lo eligiera. |
 | Zona de desplazamiento | Hoja con mapa: se mueve el alfiler y se ve el círculo | Sin mapa: interruptor y deslizador de km dentro de «Editar tu ficha»; el centro es el punto guardado, el del local, o una dirección buscada en «Desde dónde sales». Si hay límite y no hay centro que resolver, no deja guardar | La web no tiene mapa (§5.5). Los textos de ese campo no están en el ARB. |
 | Dónde se presta (servicio) | Hoja con tres opciones | Tres tarjetas dentro del formulario del servicio | Misma razón que las horas por servicio. |
 | Horario propio del dueño | `owner_agenda_screen.dart` (`/profile/owner-agenda`), separado del horario del negocio cuando hay empleados | No existe todavía: «Tú y tu horario» guarda `ownerPerforms`, el nombre y la foto, pero el horario personal se edita como el del negocio | Es una pantalla entera y el horario del negocio ya está en `/panel/negocio/horario`. Pendiente en §5. |
@@ -377,6 +417,12 @@ Por orden de lo que más se va a echar en falta:
 10. ~~**Vista previa de la ficha pública**~~ — hecho el 22/09/2026 en `/panel/negocio/vista-previa`:
     `GET /businesses/{id}`, `/services`, `/schedule`, `/portfolio`, `/policies` y
     `/reviews/business/{id}?page=0&size=3&sort=rating,desc`, con `AuthService.businessId()`.
+    Puesta al día el 02/11/2026 con `gipsi_business_detail_body.dart` y `gipsi_service_row.dart`
+    de origin/main: fila de redes (`_SocialRow`, que sí abre los enlaces, como en la app), portada
+    sin foto = `GipsiImagePlaceholder`, sello de 24, nombre del servicio en una línea y nota
+    «También / Solo a domicilio · +recargo». Tablet y móvil de la web se pintan como iPad e iPhone
+    con su Safari y caben en el alto de la ventana. Diferencia a propósito: sobre el hueco de la
+    portada el reloj va en `on-accent` y no en blanco, que ahí no se lee.
 11. ~~**Horas por servicio**~~ — hecho el 23/09/2026: «Solo a ciertas horas» en el formulario de
     servicio (`pn-service-hours`), con la rejilla de `GET /businesses/me/slot-grid` y `timeWindows`
     viajando **siempre** en `POST /services` y `PUT /services/{id}` (lista vacía = sin restricción).
@@ -397,8 +443,11 @@ Por orden de lo que más se va a echar en falta:
 16b. ~~**Sincronización del 05/10/2026**~~ — hecho: ver el resumen de arriba. Queda por **probar contra
     el backend real**: dar cita a un cliente con cuenta y a uno solo con correo, cerrar días con citas
     dentro, la zona de desplazamiento de un negocio solo-domicilio, y el login por correo de cuentas
-    antiguas. Pendientes pequeños: la agenda no se refresca sola (una cita «Esperando al cliente»
-    conserva la cuenta atrás vieja hasta recargar) y `?vista=` solo se lee al montar la agenda.
+    antiguas. Pendiente pequeño: `?vista=` solo se lee al montar la agenda.
+16c. **Sincronización del 01/11/2026**: queda por probar contra **Stripe real** pedir un pago en la app del
+    cliente y la configuración de cobros con la cuenta verificada (sin claves de Stripe el formulario de
+    alta tapa ese bloque); Google, Apple y Web Share en navegadores reales; imprimir el cartel y abrir su
+    PDF en un visor; y que el dominio esté en `CORS_ALLOWED_ORIGINS`, también para el socket.
 17. **Horario personal del dueño** (`owner_agenda_screen.dart`, `/profile/owner-agenda`): cuando hay
     empleados, el dueño tiene un horario propio distinto del horario del negocio. En la web todavía
     se edita solo el del negocio (§4).
@@ -486,6 +535,32 @@ Añadidos el 05/10/2026:
 - **`GET /businesses/{id}/workers` incluye al dueño** (id = id del negocio) cuando `ownerPerforms`, y
   **no** responde 409 en modo «trabajo solo» (lo dicho arriba el 23/09 no era exacto para esta ruta).
   `TeamStore.staff()` es el equipo sin él; `all()` lo conserva para la agenda y los servicios.
+
+Añadidos el 01/11/2026:
+
+- **Cobrar:** `GET /businesses/me/bookings/{id}/collect` da `canRequest` y `reason`. `POST|DELETE …/payment-request`
+  (el POST es idempotente) y `POST|DELETE …/settle-offline`; un 409 trae el motivo escrito. Valen para BUSINESS
+  y WORKER. `request.status === 'SENT'` no basta: hay que mirar `expiresAt` (`Instant`, 2 h), porque el job pasa
+  cada 5 min. «Saldada» es `settledOffline || dueCents <= 0`, y esos campos solo llegan en
+  `/bookings/me/business|worker`: en la ficha de cliente van a false y 0.
+- **Ajustes:** se pinta `paymentRequestIntent` y se guarda como `paymentRequestEnabled`. `autoSettleEnabled` no
+  necesita cuenta, y encender los dos da error, leyendo la intención.
+- **Socket:** `/ws/chat` manda `{type:'booking.changed', bookingId, reason}`, sin `conversationId` y sin la cita:
+  es solo una campana. Se lee `type` primero.
+- **Fichajes:** `GET /timeclock/me?page&size` devuelve `PageResponse`, solo turnos cerrados.
+- **Espera:** `DELETE /businesses/me/waitlist/{id}?reason=` va por query y da 400 sin él o en blanco.
+- **Clientes:** `POST /businesses/me/customers` exige `email`; PUT e import no. WORKER con `customersEnabled`: GET
+  lista y detalle, POST alta y POST `/businesses/me/bookings` (el servidor fuerza su `workerId`); el resto, 403.
+- **Notificaciones:** `PUT /me/notification-prefs {prefs:{clave:bool}}` responde `{muted:[…]}`. Una clave
+  desconocida o no silenciable da 400; lo ausente está encendido.
+- **Soporte:** `POST /support/tickets {deferNotice:true}`, `POST …/{id}/attachments` (campo `file`, máx. 4) y
+  `POST …/{id}/notify`, idempotente. Un barrido manda a los 15 min los que quedaron a medias.
+- **`/me/change-password`** tiene dos 400: con errores por campo es la contraseña nueva, sin ellos la actual. Al
+  cambiarla se cierran todas las sesiones.
+- **Verificación:** `GET /businesses/me/verification` y `POST …/request` son del dueño; el POST da 409 legible. El
+  `verified` de `/me` y `BusinessResponse` ya descuenta cobros caídos: `status` puede ser `VERIFIED` con
+  `verified:false`.
+- **Eliminados:** `POST|DELETE /businesses/me/images/owner` y `ownerImageUrl`.
 
 ## 7. Avisos que vienen de antes
 
