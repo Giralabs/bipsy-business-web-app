@@ -106,7 +106,10 @@ const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
             @if (!identity() && !emailGiven) {
               <label class="pn-field">
                 <span class="pn-field__label">Correo</span>
-                <input class="pn-input" type="email" name="email" autocomplete="email" [(ngModel)]="email" />
+                <!-- The invited address arrives masked (lu***@gmail.com) and must be
+                     typed in full: it is shown as a hint, not filled in. -->
+                <input class="pn-input" type="email" name="email" autocomplete="email" [(ngModel)]="email"
+                       [placeholder]="invitation()?.email ?? ''" />
               </label>
             }
             <label class="pn-field">
@@ -261,9 +264,12 @@ export class AcceptInviteComponent {
         this.problem.set('Este código ha caducado. Pide a tu negocio uno nuevo desde Equipo.');
       } else {
         this.invitation.set(inv);
+        // Never prefill from the invitation: the API returns the invited e-mail
+        // masked and requires the full address to redeem it, so that a guessed
+        // code is useless without knowing who it was sent to.
         this.email = this.emailGiven
           ? (this.route.queryParamMap.get('email')?.trim() ?? '')
-          : (inv.email ?? '');
+          : '';
         if (!this.name) this.name = this.identity()?.name ?? '';
       }
     } catch (cause) {
