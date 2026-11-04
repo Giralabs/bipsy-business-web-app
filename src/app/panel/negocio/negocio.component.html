@@ -198,11 +198,11 @@
         </div>
       </div>
 
-      @if (!isQuality()) {
+      @if (!onQualityPlan()) {
         <div class="pn-card ng-quality">
-          <span class="material-symbols-rounded">auto_awesome</span>
-          <h3>Con Quality, tu ficha es tuya</h3>
-          <p>Tu color, tu foto y tu portada animadas, los efectos de la ficha y el portfolio sin tope.</p>
+          <pn-plan-mark [quality]="true" [size]="44" />
+          <h3>Con Quality, tu negocio destaca</h3>
+          <p>{{ qualityPitch() }}</p>
           <a class="pn-btn pn-btn--primary pn-btn--sm" routerLink="/panel/ajustes/suscripcion">Ver Quality</a>
         </div>
       }

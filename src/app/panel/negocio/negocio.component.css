@@ -120,7 +120,7 @@
 /* ----- QUALITY -------------------------------------------------------- */
 
 .ng-quality { text-align: center; padding: 28px 24px; }
-.ng-quality .material-symbols-rounded { font-size: 32px; color: var(--clr-mint); }
+.ng-quality pn-plan-mark { margin: 0 auto; }
 .ng-quality h3 {
   margin-top: 12px;
   font-family: var(--ff-display);

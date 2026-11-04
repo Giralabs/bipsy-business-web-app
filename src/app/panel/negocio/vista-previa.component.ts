@@ -216,7 +216,8 @@ export class VistaPreviaComponent implements OnDestroy {
     return {
       business: b,
       coverUrl: b.branding?.animatedCoverUrl ?? b.coverImageUrl ?? null,
-      avatarUrl: b.branding?.animatedProfileUrl ?? b.profileImageUrl ?? null,
+      // The animated profile photo left Quality (V128): customers see the still one.
+      avatarUrl: b.profileImageUrl ?? null,
       categoryName: primaryCategoryName(b),
       locationDisplay: locationDisplay(b),
       hasVenue: serviceMode(b) !== 'AT_CUSTOMER',

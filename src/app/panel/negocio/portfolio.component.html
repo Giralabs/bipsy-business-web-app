@@ -50,14 +50,34 @@
     <p class="pn-field__error" role="alert">{{ text }}</p>
   }
 
-  @if (full() && !unlimited()) {
+  @if (hiddenCount() > 0) {
     <div class="pn-notice pn-notice--info pf-full">
-      <span class="material-symbols-rounded">auto_awesome</span>
+      <span class="material-symbols-rounded">lock</span>
       <div>
-        <strong>Has llegado a las 10 fotos de tu plan</strong>
+        <strong>{{ hiddenCount() === 1 ? 'Hay 1 foto guardada que no se ve' : 'Hay ' + hiddenCount() + ' fotos guardadas que no se ven' }}</strong>
         <span class="pn-notice__body">
-          Con Quality subes todas las que quieras. Mientras tanto, quita alguna para subir otra.
+          Tu plan enseña {{ limit() }} fotos. Las demás se guardan y vuelven a verse con Quality.
         </span>
+        <a class="pn-btn pn-btn--secondary pn-btn--sm" routerLink="/panel/ajustes/suscripcion">Ver planes</a>
+      </div>
+    </div>
+  }
+
+  @if (full()) {
+    <div class="pn-notice pn-notice--info pf-full">
+      <span class="material-symbols-rounded">photo_library</span>
+      <div>
+        <strong>Has llegado a las {{ limit() }} fotos de tu plan</strong>
+        <span class="pn-notice__body">
+          @if (upsellLimit(); as more) {
+            Con Quality puedes tener hasta {{ more }}. Mientras tanto, quita alguna para subir otra.
+          } @else {
+            Quita alguna para subir otra.
+          }
+        </span>
+        @if (upsellLimit()) {
+          <a class="pn-btn pn-btn--secondary pn-btn--sm" routerLink="/panel/ajustes/suscripcion">Ver Quality</a>
+        }
       </div>
     </div>
   } @else {
@@ -78,11 +98,14 @@
                 text="Sube fotos de trabajos tuyos y etiquétalas por servicio. Es lo que convence al cliente que todavía no te conoce." />
     </section>
   } @else {
-    <p class="pf-label">En tu ficha · las 10 primeras</p>
+    <p class="pf-label">En tu ficha · las {{ front().length }} primeras</p>
     <div class="pf-grid">
       @for (photo of front(); track photo.id; let first = $first) {
-        <figure class="pf-tile">
+        <figure class="pf-tile" [class.pf-tile--hidden]="photo.hidden">
           <img [src]="photo.url" [alt]="photo.caption ?? ''" />
+          @if (photo.hidden) {
+            <span class="pf-tile__lock"><span class="material-symbols-rounded" aria-hidden="true">lock</span>Se ve con Quality</span>
+          }
           <figcaption class="pf-tile__bar">
             <span class="pf-tile__text">{{ photo.caption || serviceName(photo) }}</span>
             <span class="pf-tile__actions">
@@ -104,8 +127,11 @@
       <p class="pf-label">Galería</p>
       <div class="pf-grid">
         @for (photo of rest(); track photo.id) {
-          <figure class="pf-tile">
+          <figure class="pf-tile" [class.pf-tile--hidden]="photo.hidden">
             <img [src]="photo.url" [alt]="photo.caption ?? ''" />
+            @if (photo.hidden) {
+              <span class="pf-tile__lock"><span class="material-symbols-rounded" aria-hidden="true">lock</span>Se ve con Quality</span>
+            }
             <figcaption class="pf-tile__bar">
               <span class="pf-tile__text">{{ photo.caption || serviceName(photo) }}</span>
               <span class="pf-tile__actions">

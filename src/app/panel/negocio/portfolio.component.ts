@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
 import { InstagramMedia, InstagramStatus, PortfolioImage } from '../core/api/models';
+import { PlansStore } from '../core/data/plans.store';
 import { SetupStore } from '../core/data/setup.store';
 import { message } from '../core/data/resource';
 import { ServicesStore } from '../core/data/services.store';
@@ -13,6 +14,9 @@ import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
 import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { ConfirmService } from '../ui/confirm.service';
 import { ToastService } from '../ui/toast.service';
+
+/** The first photos go in the profile's strip (`_previewLimit`, as in the preview). */
+const STRIP = 10;
 
 /**
  * `/panel/negocio/portfolio` — `portfolio_screen.dart`.
@@ -45,6 +49,7 @@ export class PortfolioComponent {
     return [{ value: null, label: none }, ...this.serviceList()];
   }
   readonly auth = inject(AuthService);
+  private readonly plans = inject(PlansStore);
 
   readonly uploading = signal(false);
   readonly editing = signal<PortfolioImage | null>(null);
@@ -76,6 +81,7 @@ export class PortfolioComponent {
 
   constructor() {
     void this.setup.portfolio.load();
+    void this.plans.load();
     void this.services.load();
     void this.loadInstagram();
   }
@@ -200,14 +206,20 @@ export class PortfolioComponent {
   }
 
   readonly photos = this.setup.portfolio.value;
-  readonly front = computed(() => this.photos().slice(0, 10));
-  readonly rest = computed(() => this.photos().slice(10));
-  readonly unlimited = computed(() => this.auth.hasFeature('PORTFOLIO_UNLIMITED'));
-  readonly limit = computed(() => (this.unlimited() ? Infinity : 10));
-  readonly full = computed(() => this.photos().length >= this.limit());
+  readonly front = computed(() => this.photos().slice(0, STRIP));
+  readonly rest = computed(() => this.photos().slice(STRIP));
+  /** The plan's quota, from the server (20 Business, 100 Quality). Hidden photos count too. */
+  readonly limit = computed(() => this.auth.profile()?.portfolioLimit ?? 0);
+  readonly full = computed(() => this.limit() > 0 && this.photos().length >= this.limit());
+  /** The biggest quota on sale; above ours there is a plan to offer. */
+  readonly upsellLimit = computed(() => {
+    const max = this.plans.maxPortfolioLimit();
+    return max > this.limit() ? max : null;
+  });
+  readonly hiddenCount = computed(() => this.photos().filter((photo) => photo.hidden).length);
 
   limitLabel(): string {
-    return this.unlimited() ? 'sin límite' : '10';
+    return String(this.limit());
   }
 
   serviceName(photo: PortfolioImage): string {
@@ -287,7 +299,8 @@ export class PortfolioComponent {
     const before = this.photos();
     this.setup.portfolio.set([...before].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)));
     try {
-      await this.api.put('/businesses/me/portfolio/order', { imageIds: ids });
+      // The answer carries `hidden` again: moving a photo past the quota hides it.
+      this.setup.portfolio.set(await this.api.put<PortfolioImage[]>('/businesses/me/portfolio/order', { imageIds: ids }));
     } catch {
       this.setup.portfolio.set(before);
       this.toasts.error('No se ha podido cambiar el orden.');

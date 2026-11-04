@@ -1,23 +1,27 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
 import { SubscriptionPlan } from '../core/api/models';
-import { message, resource } from '../core/data/resource';
+import { PlansStore } from '../core/data/plans.store';
+import { message } from '../core/data/resource';
 import { money } from '../core/util/format';
 import { ToastService } from '../ui/toast.service';
+import { PlanOptionComponent } from './plan-option.component';
+import { PLAN_CODES, wallLead, wallTitle } from './plan-terms';
 import { StripeCheckoutComponent, StripeCheckoutService } from './stripe-checkout';
 
 /**
  * `/panel/plan` — el muro de `plan_selection_screen.dart`.
  *
  * Lo decide el servidor (`profile.subscription.blocked`) y la guardia manda
- * aquí todo lo demás. Se paga con tarjeta, con Stripe, sin salir de la página.
+ * aquí todo lo demás. Se paga con Stripe (tarjeta, cuenta bancaria SEPA,
+ * Apple Pay o Google Pay) sin salir de la página. El título dice qué se acabó
+ * (`endedAccess`) y el mes gratis y la oferta solo salen en el primer plan.
  */
 @Component({
   selector: 'app-panel-plan-wall',
   standalone: true,
-  imports: [RouterLink, StripeCheckoutComponent],
+  imports: [RouterLink, StripeCheckoutComponent, PlanOptionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main wall">
@@ -38,37 +42,26 @@ import { StripeCheckoutComponent, StripeCheckoutService } from './stripe-checkou
           <button type="button" class="pn-btn pn-btn--secondary" (click)="recheck()">Volver a comprobar</button>
         </div>
       } @else {
-      <h1>Tu plan no está activo</h1>
-      <p class="wall__lead">
-        Para seguir usando tu agenda, tus clientes y tu equipo hace falta un plan al día. Elige uno y
-        vuelves a entrar en un minuto.
-      </p>
+      <h1>{{ title() }}</h1>
+      <p class="wall__lead">{{ lead() }}</p>
 
       <div class="wall__plans">
         @for (plan of plans(); track plan.code) {
-          <section class="pn-card wall__plan">
-            <h2>{{ plan.name }}</h2>
-            <p class="wall__price pn-tabular">{{ money(plan.priceCents) }}<span>/mes</span></p>
-            <ul>
-              @for (feature of plan.features; track feature.code) {
-                <li><span class="material-symbols-rounded fill">check_circle</span>{{ feature.name }}</li>
-              }
-            </ul>
-            <button type="button" class="pn-btn pn-btn--primary pn-btn--block wall__cta"
-                    [disabled]="busy() !== null" (click)="choose(plan)">
-              @if (busy() === plan.code) {
-                <span class="pn-spinner"></span>
-              } @else {
-                Activar {{ plan.name }}
-              }
-            </button>
-          </section>
+          <app-plan-option
+            [plan]="plan"
+            [status]="status()"
+            [cta]="ctaFor(plan)"
+            [highlighted]="plan.code === recommended"
+            [secondary]="plan.code !== recommended"
+            [busy]="busy() === plan.code"
+            [disabled]="busy() !== null"
+            (choose)="choose($event)" />
         }
       </div>
 
       <p class="wall__safe">
         <span class="material-symbols-rounded">lock</span>
-        Pago seguro con Stripe. Bipsy no ve ni guarda tu tarjeta.
+        Tarjeta, cuenta bancaria, Apple Pay o Google Pay. Pago seguro con Stripe: Bipsy no ve ni guarda tus datos de pago.
       </p>
 
       <div class="wall__actions">
@@ -79,7 +72,7 @@ import { StripeCheckoutComponent, StripeCheckoutService } from './stripe-checkou
     </main>
 
     @if (paying(); as plan) {
-      <app-stripe-checkout [plan]="plan" (closed)="onPaid($event)" />
+      <app-stripe-checkout [plan]="plan" [status]="status()" (closed)="onPaid($event)" />
     }
   `,
   styles: [
@@ -95,14 +88,6 @@ import { StripeCheckoutComponent, StripeCheckoutService } from './stripe-checkou
       }
       .wall__lead { margin: 16px auto 34px; max-width: 52ch; font-size: 1.0625rem; color: var(--clr-text-2); line-height: 1.6; }
       .wall__plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: var(--pn-gap); }
-      .wall__plan { display: flex; flex-direction: column; text-align: left; padding: 28px; }
-      .wall__plan h2 { font-family: var(--ff-display); font-size: 1.375rem; font-weight: 800; letter-spacing: -0.5px; }
-      .wall__price { margin: 8px 0 18px; font-family: var(--ff-display); font-size: 2.25rem; font-weight: 800; letter-spacing: -1.4px; }
-      .wall__price span { font-size: 0.9375rem; font-weight: 600; color: var(--clr-text-3); letter-spacing: 0; }
-      .wall__plan ul { display: grid; gap: 10px; }
-      .wall__plan li { display: flex; gap: 10px; align-items: center; font-size: 0.9375rem; }
-      .wall__plan .material-symbols-rounded { font-size: 20px; color: var(--clr-success); }
-      .wall__cta { margin-top: 24px; }
       .wall__safe {
         display: inline-flex;
         align-items: center;
@@ -112,36 +97,56 @@ import { StripeCheckoutComponent, StripeCheckoutService } from './stripe-checkou
         color: var(--clr-text-3);
       }
       .wall__safe .material-symbols-rounded { font-size: 17px; }
-      .wall__actions { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+      .wall__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
       .wall__actions .pn-btn { text-decoration: none; }
+      @media (max-width: 480px) { .wall__plans { grid-template-columns: 1fr; } }
     `,
   ],
 })
 export class PlanWallComponent {
-  private readonly api = inject(Api);
   readonly auth = inject(AuthService);
   private readonly toasts = inject(ToastService);
-  readonly money = money;
-
+  private readonly store = inject(PlansStore);
   private readonly checkout = inject(StripeCheckoutService);
+
+  /** The design's highlighted plan. */
+  readonly recommended = PLAN_CODES.QUALITY;
 
   /**
    * The blocking paywall offers the whole catalogue on sale — never the free
    * plan, which is not sold: Bipsy grants it from the admin panel.
    */
-  private readonly catalogue = resource<SubscriptionPlan[]>(
-    () => this.api.get<SubscriptionPlan[]>('/subscriptions/plans'),
-    [],
-  );
-  readonly plans = computed(() => this.catalogue.value().filter((plan) => plan.selectable));
+  readonly plans = this.store.selectable;
+  readonly status = computed(() => this.auth.profile()?.subscription ?? null);
   readonly busy = signal<string | null>(null);
   readonly paying = signal<SubscriptionPlan | null>(null);
+  /** Courtesy days, for «se han acabado tus 3 días de prueba». */
+  private readonly welcomeDays = signal<number | null>(null);
+
+  readonly title = computed(() => wallTitle(this.status(), this.welcomeDays()));
+  readonly lead = computed(() => wallLead(this.status()));
 
   constructor() {
     if (this.auth.isBusiness()) {
-      void this.catalogue.load();
+      void this.store.load();
       void this.settleReturn();
+      void this.loadWelcomeDays();
     }
+  }
+
+  private async loadWelcomeDays(): Promise<void> {
+    try {
+      this.welcomeDays.set((await this.checkout.config()).welcomeTrialDays || null);
+    } catch {
+      // The title falls back to «tus días de cortesía»: nothing else depends on it.
+      this.welcomeDays.set(null);
+    }
+  }
+
+  ctaFor(plan: SubscriptionPlan): string {
+    return this.status()?.trialAvailable && (plan.trialMonths ?? 0) > 0
+      ? 'Empezar mes gratis'
+      : `Suscribirme por ${money(plan.priceCents)}`;
   }
 
   /** Back from the bank's page (3-D Secure): close the contract and go in. */

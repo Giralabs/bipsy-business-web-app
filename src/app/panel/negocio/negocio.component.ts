@@ -16,6 +16,7 @@ import { PnSwitchComponent } from '../ui/controls';
 import { PnDialogComponent } from '../ui/dialog.component';
 import { PnPhotoPickerComponent } from '../ui/photo-picker.component';
 import { PnPlanMarkComponent } from '../ui/plan-mark.component';
+import { PlansStore } from '../core/data/plans.store';
 import { PnSliderComponent } from '../ui/slider.component';
 import { ToastService } from '../ui/toast.service';
 import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
@@ -157,11 +158,13 @@ export class NegocioComponent {
   private saved: BusinessDetail | null = null;
 
   constructor() {
+    void this.plans.load();
     void this.setup.load();
     void this.reviews.load();
     void this.verification.refresh();
   }
 
+  private readonly plans = inject(PlansStore);
   readonly profile = this.auth.profile;
 
   readonly onQualityPlan = computed(() => this.profile()?.plans?.includes('QUALITY') === true);
@@ -185,7 +188,12 @@ export class NegocioComponent {
 
   readonly hasSchedule = computed(() => this.agenda.schedule.value().length > 0);
 
-  readonly isQuality = computed(() => this.auth.hasFeature('UNIQUE_ANIMATIONS'));
+  /** Quality's pitch, with the quota the catalogue sells (not a number written here). */
+  readonly qualityPitch = computed(() => {
+    const limit = this.plans.maxPortfolioLimit();
+    const portfolio = limit > 0 ? `un portfolio de ${limit} fotos` : 'un portfolio más grande';
+    return `Portada animada, tu negocio anunciado con prioridad en Destacados y ${portfolio}.`;
+  });
 
   get atCustomer(): boolean {
     return this.form.mode === 'AT_CUSTOMER';

@@ -154,6 +154,8 @@ export interface BusinessProfile {
   onboardingComplete: boolean;
   signupRoute: string | null;
   plans: string[];
+  /** Portfolio photos the plan shows (20, 100, or 0 = no portfolio). */
+  portfolioLimit?: number;
   entitlements: string[];
   superAccess: boolean;
   subscription: SubscriptionStatus | null;
@@ -906,6 +908,42 @@ export type SubscriptionState =
   | 'EXPIRED'
   | 'UNKNOWN';
 
+/** What gave access until it ended, so the plan wall can title with the truth. */
+export type EndedAccess = 'WELCOME_TRIAL' | 'FREE_PLAN' | 'GIFT' | 'PAID' | 'NONE';
+
+/** Who charges what is live now. Null = nothing to charge (courtesy or gift). */
+export type BilledBy = 'APP_STORE' | 'GOOGLE_PLAY' | 'STRIPE';
+
+/**
+ * Aviso de arriba de Ajustes (`SubscriptionService.noticeFor`). It is the only
+ * plan reminder a business with access sees, and the server decides it.
+ */
+export type PlanNotice = 'COURTESY' | 'GIFT_ENDING';
+
+/** `BillingCardDto`. `brand === 'sepa_debit'` is a bank account: last4 of the IBAN, no expiry. */
+export interface BillingMethod {
+  brand: string;
+  last4: string;
+  expMonth: number | null;
+  expYear: number | null;
+}
+
+/** `ScheduledPlanDto`: the plan left ready during a gift; first charge on `startsAt`. */
+export interface ScheduledPlan {
+  planCode: string;
+  planName: string;
+  priceCents: number;
+  startsAt: string;
+}
+
+/** `AppliedOfferDto`: `months` months at `priceCents` until `until`, then the plan price. */
+export interface AppliedOffer {
+  label: string;
+  priceCents: number;
+  months: number;
+  until: string;
+}
+
 export interface SubscriptionStatus {
   state: SubscriptionState;
   blocked: boolean;
@@ -917,13 +955,22 @@ export interface SubscriptionStatus {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   daysLeft: number | null;
+  /** First plan: the free month applies (and, with Stripe, the plan's offer). */
   trialAvailable: boolean;
   canChangePlan: boolean;
   /** Plans worth offering on a voluntary «change plan»; empty = offer all. */
   offeredPlanCodes?: string[];
-  /** WELCOME_TRIAL | FREE_PLAN | PAID | NONE — what gave access until it ended. */
-  endedAccess?: string | null;
-  card?: { brand: string; last4: string; expMonth: number | null; expYear: number | null } | null;
+  /** Null while something is live. With `GIFT`, `planName` is the gift's plan. */
+  endedAccess?: EndedAccess | null;
+  card?: BillingMethod | null;
+  billedBy?: BilledBy | null;
+  /** What is live now is a plan gifted by Bipsy. */
+  gift?: boolean;
+  /** A gift cut short by an App Store purchase; only while that purchase is live. */
+  giftEndedAt?: string | null;
+  scheduled?: ScheduledPlan | null;
+  offer?: AppliedOffer | null;
+  notice?: PlanNotice | null;
 }
 
 /**
@@ -947,7 +994,30 @@ export interface CheckoutResponse {
   externalUrl: string | null;
   productId: string | null;
   planCode: string;
+  /** Only with the free month (not during a gift). */
   trialEndsAt: string | null;
+  /** When the first charge happens: end of the free month, end of the gift, or now. */
+  firstChargeAt: string | null;
+}
+
+/** `POST /subscriptions/portal`: the Stripe customer portal session. */
+export interface PortalResponse {
+  url: string;
+}
+
+/**
+ * `PlanOfferDto`: `months` paid months at `priceCents` after the free month.
+ * Only shown when the status says `trialAvailable` (first plan, Stripe only).
+ */
+export interface PlanOffer {
+  id: number;
+  planCode: string;
+  label: string;
+  priceCents: number;
+  months: number;
+  startsAt: string;
+  endsAt: string;
+  active: boolean;
 }
 
 export interface SubscriptionPlan {
@@ -956,7 +1026,11 @@ export interface SubscriptionPlan {
   description: string | null;
   priceCents: number;
   billingInterval: 'MONTHLY' | 'ONE_TIME';
-  trialDays: number | null;
+  /** Free months of the first plan. Whether THIS business gets them: `SubscriptionStatus.trialAvailable`. */
+  trialMonths: number | null;
+  /** Portfolio photos shown with this plan (20 / 100). */
+  portfolioLimit: number;
+  offer: PlanOffer | null;
   selectable: boolean;
   displayOrder: number;
   addon: boolean;
@@ -972,9 +1046,7 @@ export const FeatureCodes = {
   TIMECLOCK: 'TIMECLOCK',
   CUSTOMERS: 'CUSTOMERS',
   PORTFOLIO: 'PORTFOLIO',
-  PORTFOLIO_UNLIMITED: 'PORTFOLIO_UNLIMITED',
-  BRANDING: 'BRANDING',
-  UNIQUE_ANIMATIONS: 'UNIQUE_ANIMATIONS',
+  ANIMATED_BANNER: 'ANIMATED_BANNER',
 } as const;
 
 // ----- POLICIES, PORTFOLIO, CATEGORIES ----------------------------------
@@ -1005,6 +1077,8 @@ export interface PortfolioImage {
   serviceId: number | null;
   serviceName: string | null;
   displayOrder: number;
+  /** Past the plan's quota: kept, but not shown on the public profile. Only in the owner's list. */
+  hidden?: boolean;
 }
 
 /**

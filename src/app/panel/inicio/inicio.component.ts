@@ -176,19 +176,8 @@ export class InicioComponent {
       });
     }
 
-    const subscription = this.auth.profile()?.subscription;
-    if (subscription?.daysLeft != null && subscription.daysLeft <= 5 &&
-        (subscription.state === 'TRIAL' || subscription.state === 'WELCOME_TRIAL')) {
-      alerts.push({
-        id: 'plan',
-        title: subscription.daysLeft <= 0
-          ? 'Tu prueba termina hoy'
-          : `Te ${subscription.daysLeft === 1 ? 'queda 1 día' : `quedan ${subscription.daysLeft} días`} de prueba`,
-        sub: 'Elige un plan para no perder nada',
-        icon: 'workspace_premium',
-        route: '/panel/ajustes/suscripcion',
-      });
-    }
+    // No plan alert here on purpose: the only plan reminder is the notice at
+    // the top of Ajustes (`status.notice`), as decided for the courtesy days.
 
     return alerts;
   });

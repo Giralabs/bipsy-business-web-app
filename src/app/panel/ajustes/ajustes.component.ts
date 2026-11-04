@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { CustomersStore } from '../core/data/customers.store';
 import { CoachService } from '../onboarding/coach.service';
+import { PlanNoticeComponent } from './plan-notice.component';
 
 /**
  * `/panel/ajustes` — the hub of `profile_screen.dart`, minus the identity card
@@ -13,7 +14,7 @@ import { CoachService } from '../onboarding/coach.service';
 @Component({
   selector: 'app-panel-ajustes',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, PlanNoticeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pn-main">
@@ -23,6 +24,9 @@ import { CoachService } from '../onboarding/coach.service';
           <h1>Ajustes</h1>
         </div>
       </div>
+
+      <!-- The only plan reminder of the panel, decided by the server. -->
+      <app-plan-notice />
 
       <div class="pn-grid">
         <div class="pn-col-6">
