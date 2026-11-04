@@ -4,7 +4,7 @@ import { LEGAL_COMPANY } from '../../data/legal/legal.models';
 import { LEGAL_INDEX } from '../../data/legal/legal.index';
 import { FEATURES } from '../../data/features.data';
 import { BUSINESS_TYPES, FEATURED_TYPE_SLUGS } from '../../data/business-types.data';
-import { HELP_URL, SOCIAL_LINKS, STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
+import { HELP_URL, SOCIAL_LINKS, STORE_LINKS } from '../../data/site.data';
 
 interface FooterLink {
   label: string;
@@ -51,7 +51,6 @@ export class SiteFooterComponent {
   readonly year = new Date().getFullYear();
   readonly stores = STORE_LINKS;
   readonly socials = SOCIAL_LINKS;
-  readonly trialDays = TRIAL_DAYS;
 
   readonly columns: FooterColumn[] = [
     {

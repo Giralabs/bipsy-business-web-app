@@ -1,3 +1,5 @@
+import { BUSINESS_PHOTOS, QUALITY_PHOTOS } from './plans.data';
+
 /**
  * Everything Bipsy Business does, as the website tells it.
  *
@@ -321,7 +323,7 @@ export const FEATURES: Feature[] = [
       'Al darte de alta, tu negocio aparece en Bipsy, la app donde tus clientes buscan, comparan y reservan. Con tus servicios, fotos, reseñas, horario y normas.',
     points: [
       { icon: 'travel_explore', title: 'Te encuentran por zona', text: 'Los clientes buscan por nombre, servicio o categoría, en lista o en el mapa.' },
-      { icon: 'photo_camera', title: 'Portfolio de tus trabajos', text: 'Hasta 10 fotos con su servicio, o sin límite con Quality. También desde Instagram.' },
+      { icon: 'photo_camera', title: 'Portfolio de tus trabajos', text: `Hasta ${BUSINESS_PHOTOS} fotos con su servicio, o ${QUALITY_PHOTOS} con Quality. También desde Instagram.` },
       { icon: 'gavel', title: 'Normas claras', text: '38 normas listas para marcar —cita previa, formas de pago, accesibilidad— o escribe las tuyas.' },
       { icon: 'preview', title: 'Mira cómo te ven', text: 'La vista previa enseña tu ficha exactamente como la ve un cliente.' },
       { icon: 'new_releases', title: 'Insignia de Nuevo', text: 'Los primeros 60 días tu negocio lleva la insignia «Nuevo» en la app.' },
@@ -333,20 +335,17 @@ export const FEATURES: Feature[] = [
     slug: 'plan-quality',
     group: 'escaparate',
     icon: 'auto_awesome',
-    name: 'Personalización Quality',
-    summary: 'Tus colores, portada animada y efectos que solo tiene Quality.',
+    name: 'Plan Quality',
+    summary: 'Portada animada, prioridad en Destacados y un portfolio más grande.',
     headline: 'Destaca en la lista antes de que lean tu nombre',
     intro:
-      'Con Quality tu ficha lleva tu color de marca, una portada y una foto animadas y efectos exclusivos. Además, en Destacados apareces por delante de los negocios de tu misma zona.',
+      `Con Quality tu portada se mueve y tu negocio sale anunciado con prioridad en Destacados de Explorar, por delante de los de tu misma zona. Y tu portfolio crece hasta las ${QUALITY_PHOTOS} fotos.`,
     points: [
-      { icon: 'format_color_fill', title: 'Tu color de marca', text: 'Botones, acentos y detalles de tu ficha con tu color.' },
-      { icon: 'animated_images', title: 'Portada y foto animadas', text: 'Un GIF o WebP en lugar de una imagen fija: tu negocio se mueve en la lista.' },
-      { icon: 'blur_on', title: 'Efectos exclusivos', text: '5 marcos de foto, 9 efectos de portada, 7 para la tarjeta en búsquedas y 6 para tu nombre.' },
-      { icon: 'reorder', title: 'Tu ficha a tu manera', text: 'Ordena galería, servicios y reseñas: primero lo que más vende.' },
-      { icon: 'collections', title: 'Portfolio sin límite', text: 'Todas las fotos que quieras enseñar.' },
-      { icon: 'support_agent', title: 'Solicitudes a Bipsy', text: 'Pide mejoras y cambios en la app. Las leemos una a una y te contestamos.' },
+      { icon: 'animated_images', title: 'Portada animada', text: 'Un GIF o WebP en lugar de una imagen fija: tu negocio se mueve en la lista.' },
+      { icon: 'campaign', title: 'Anuncia tu negocio con prioridad', text: 'Sales antes en Destacados de Explorar.' },
+      { icon: 'collections', title: `Portfolio de ${QUALITY_PHOTOS} fotos`, text: `Cinco veces más que las ${BUSINESS_PHOTOS} de Bipsy Business.` },
     ],
-    facts: ['Prioridad en Destacados', '27 efectos', 'Vista previa antes de contratar'],
+    facts: ['Prioridad en Destacados', `${QUALITY_PHOTOS} fotos de portfolio`, 'Vista previa antes de contratar'],
     screen: 'quality',
     quality: true,
   },

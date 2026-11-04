@@ -1,8 +1,8 @@
-<app-auth-layout bip="MB-03" [claim]="'Dado de alta en cinco pasos. ' + trialDays + ' días gratis.'">
+<app-auth-layout bip="MB-03" [claim]="'Dado de alta en cinco pasos. Y el primer mes, gratis.'">
   <div class="auth-steps">
     <div class="auth-steps__count">
       <span>Paso {{ step() }} de 5</span>
-      <span>{{ trialDays }} días gratis</span>
+      <span>{{ trialLabel }}</span>
     </div>
     <div class="auth-steps__bar">
       <div class="auth-steps__fill" [style.width.%]="progress() * 100"></div>

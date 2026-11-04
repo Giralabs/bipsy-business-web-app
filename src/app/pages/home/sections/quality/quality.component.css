@@ -87,6 +87,9 @@
 
 .q__demo { position: relative; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: #2E343B; overflow: hidden; }
 .q__demo i { position: absolute; inset: 0; }
+.q__demo:not([data-fx]) { display: grid; place-items: center; }
+.q__icon { font-size: 22px; color: var(--clr-mint); }
+.q__diamond { width: 22px; height: 22px; object-fit: contain; }
 
 .q__demo[data-fx='halo'] { border-radius: 50%; overflow: visible; }
 .q__demo[data-fx='halo'] i { border-radius: 50%; background: #8796A8; animation: q-halo 2.4s ease-in-out infinite; }

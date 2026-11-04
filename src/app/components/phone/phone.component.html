@@ -271,16 +271,15 @@
         </div>
       }
 
-      <!-- ----- PERSONALIZACIÓN (Quality) ----- -->
+      <!-- ----- QUALITY ----- -->
       @case ('quality') {
+        <!-- Quality as it sells now (V128): an animated cover, first in
+             Destacados, and a bigger portfolio. No brand colours or effects. -->
         <div class="ph__body ph-enter">
           <div class="ph-nav" style="--i:0">
-            <span class="material-symbols-rounded">chevron_left</span>Personalización<span class="material-symbols-rounded">visibility</span>
+            <span class="material-symbols-rounded">chevron_left</span>Destacados<span class="material-symbols-rounded">tune</span>
           </div>
-          <div class="ph-seg" style="--i:1; --n:2; --at:1">
-            <span class="ph-seg__thumb"></span><span>Tu ficha</span><span>En búsquedas</span>
-          </div>
-          <div class="ph-q" style="--i:2">
+          <div class="ph-q" style="--i:1">
             <div class="ph-q__card">
               <div class="ph-q__cover"></div>
               <div class="ph-q__body">
@@ -296,17 +295,11 @@
               <div class="ph-q__body"><span class="ph-avatar">PL</span><span class="ph-row__main"><b>Peluquería Luna</b><small>★ 4,6 · 1,2 km</small></span></div>
             </div>
           </div>
-          <p class="ph-over" style="--i:3">Efecto de portada · Aurora</p>
-          <div class="ph-fx" style="--i:4">
-            @for (fx of effects; track fx; let fi = $index) {
-              <span [class.ph-fx__on]="fx === 'Aurora'"><i [class]="'ph-fx__anim ph-fx__anim--' + fi"></i>{{ fx }}</span>
-            }
-          </div>
-          <p class="ph-over" style="--i:5">Color de marca</p>
-          <div class="ph-swatches" style="--i:6">
-            @for (c of swatches; track c) {
-              <span [style.background]="c" [class.ph-swatches__on]="c === '#8796A8'"></span>
-            }
+          <p class="ph-over" style="--i:2">Con Quality</p>
+          <div class="ph-group" style="--i:3">
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">animated_images</span></span><span class="ph-row__main"><b>Portada animada</b><small>Tu portada se mueve</small></span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">campaign</span></span><span class="ph-row__main"><b>Con prioridad</b><small>Antes en Destacados</small></span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">photo_library</span></span><span class="ph-row__main"><b>Portfolio</b><small>Hasta {{ qualityPhotos }} fotos</small></span></div>
           </div>
         </div>
       }

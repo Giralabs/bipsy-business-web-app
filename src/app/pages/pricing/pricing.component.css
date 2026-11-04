@@ -66,6 +66,7 @@
 .compare th[scope='row'] small { display: block; font-size: 0.75rem; font-weight: 500; color: var(--clr-text-3); }
 
 .compare thead th { position: sticky; top: 0; padding-block: 24px; background: var(--clr-surface-2); vertical-align: bottom; }
+.compare__diamond { display: block; width: 32px; height: 32px; margin: 0 auto 8px; object-fit: contain; }
 .compare__plan { display: block; font-family: var(--ff-display); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.4px; }
 .compare__price { display: block; margin-top: 4px; font-size: 1rem; font-weight: 800; color: var(--clr-accent-text); }
 .compare__price small { font-size: 0.75rem; font-weight: 600; color: var(--clr-text-3); }

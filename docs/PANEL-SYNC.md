@@ -564,11 +564,13 @@ Añadidos el 01/11/2026:
 
 ## 7. Avisos que vienen de antes
 
-- **`TRIAL_DAYS`** (`src/app/data/site.data.ts`) vale ya **14**, la prueba del plan en el backend
-  (`plan.trial_days = 14`, V37); `WELCOME_DAYS = 5` es la cortesía de `Business.WELCOME_TRIAL_DAYS`
-  al terminar el alta. Se corrigieron también los «30 días» escritos a mano en `index.html`, inicio,
-  «Por qué», funcionalidades, `cta-band` y páginas por oficio. Falta que las ofertas de Play y App
-  Store digan lo mismo (y `PromoBarComponent.trialLabel` en bipsy-web-app).
+- **Planes (V128, 4/11/2026):** ya no hay prueba de 14 días. `TRIAL_MONTHS = 1` (`src/app/data/site.data.ts`)
+  es el primer mes gratis del primer plan (`plan.trial_months`), y `WELCOME_DAYS = 3` la cortesía de
+  `Business.WELCOME_TRIAL_DAYS` al terminar el alta. Precios 19,99 / 29,99 y cupo de portfolio 20 / 100 en
+  `src/app/data/plans.data.ts`. Quality ya no incluye foto de perfil animada, color de marca ni efectos.
+  En el panel, el único aviso de plan es la fila de Ajustes (`status.notice`); las palabras de las
+  pantallas de plan salen de `src/app/panel/ajustes/plan-terms.ts`. Falta que bipsy-web-app
+  (`PromoBarComponent.trialLabel`) diga lo mismo.
 - **Alta**: los negocios verifican el correo por **enlace**, no por código. `RegisterBusinessRequest`
   no acepta `signupToken` (el código de seis cifras de `/auth/signup/*-code` es del alta de
   cliente), así que la web sigue el orden de la app: correo (`email-status`, con «retomar» si hay

@@ -14,7 +14,7 @@ import { RouterLink } from '@angular/router';
 import { FrameSequenceComponent } from '../../../../components/frame-sequence/frame-sequence.component';
 import { BipRigComponent } from '../../../../components/bip-rig/bip-rig.component';
 import { BUSINESS_TYPES } from '../../../../data/business-types.data';
-import { STORE_LINKS, TRIAL_DAYS } from '../../../../data/site.data';
+import { STORE_LINKS, TRIAL_CTA } from '../../../../data/site.data';
 
 /**
  * The hero of the home page: the promise, the two buttons and, on the right,
@@ -35,7 +35,7 @@ export class HeroSectionComponent implements OnInit, OnDestroy {
   readonly words = ['tu barbería', 'tu peluquería', 'tu salón', 'tu estudio', 'tu clínica', 'tu negocio'];
   wordIndex = 0;
 
-  readonly trialDays = TRIAL_DAYS;
+  readonly trialCta = TRIAL_CTA;
   readonly stores = STORE_LINKS;
   /** Twice, so the marquee can loop without a visible seam. */
   readonly marquee = [...BUSINESS_TYPES, ...BUSINESS_TYPES];

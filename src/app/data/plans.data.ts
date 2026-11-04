@@ -1,17 +1,20 @@
-import { TRIAL_DAYS } from './site.data';
+import { WELCOME_DAYS } from './site.data';
 
 /**
  * The plans on sale, as defined in the backend catalogue.
  *
- * Source: V37__subscription_billing.sql (prices), V48__quality_branding.sql
- * (Quality features), V51__iap_subscriptions.sql (store products). The FREE
- * plan exists but is not sold (`selectable = FALSE`), so it is not shown.
+ * Source: V128__subscription_plans_v2.sql (prices 19,99 / 29,99, the free
+ * first month, the portfolio quota per plan and the features Quality lost:
+ * animated profile photo, brand colours, exclusive effects, unlimited
+ * portfolio), V51__iap_subscriptions.sql (store products). Quality's priority
+ * in Destacados is not a feature flag: the Explore ranking reads the plan. The
+ * FREE plan exists but is not sold (`selectable = FALSE`), so it is not shown.
  *
- * ⚠️ Two places charge: Stripe (card, from the web panel — the backend's
- * catalogue price) and Google Play / App Store Connect (from the phone). If any
- * of them changes price, this page must change with it or the site will
- * advertise one number and the checkout charge another. See
- * docs/RELEASE-STORES.md §3.
+ * ⚠️ Two places charge: Stripe (card, SEPA, Apple Pay and Google Pay from the
+ * web panel — the backend's catalogue price) and Google Play / App Store
+ * Connect (from the phone). If any of them changes price, this page must
+ * change with it or the site will advertise one number and the checkout
+ * charge another. See docs/RELEASE-STORES.md §3.
  */
 
 export interface Plan {
@@ -19,6 +22,10 @@ export interface Plan {
   name: string;
   /** Monthly price in euros, as a display string with a decimal comma. */
   price: string;
+  /** Portfolio photos the plan shows (`plan.portfolio_limit`). */
+  portfolioLimit: number;
+  /** The plan's diamond, the same one the panel and the app show. */
+  diamond: string;
   tagline: string;
   description: string;
   /** Title of the feature list. */
@@ -29,11 +36,16 @@ export interface Plan {
   storeProductId: string;
 }
 
+export const BUSINESS_PHOTOS = 20;
+export const QUALITY_PHOTOS = 100;
+
 export const PLANS: Plan[] = [
   {
     code: 'BIPSY',
     name: 'Bipsy Business',
-    price: '18,99',
+    price: '19,99',
+    portfolioLimit: BUSINESS_PHOTOS,
+    diamond: 'assets_bipsy_business/Plans/diamond_business.webp',
     tagline: 'Toda la app para gestionar tu negocio.',
     description: 'Citas, equipo, clientes, reseñas, fichaje y finanzas. Sin funciones escondidas.',
     includesLabel: 'Incluye',
@@ -47,7 +59,7 @@ export const PLANS: Plan[] = [
       'Fichaje del equipo',
       'Finanzas: caja, gastos y comisiones',
       'Lista de espera',
-      'Portfolio de hasta 10 fotos',
+      `Portfolio de ${BUSINESS_PHOTOS} fotos`,
     ],
     recommended: false,
     storeProductId: 'bipsy_business_monthly',
@@ -55,19 +67,16 @@ export const PLANS: Plan[] = [
   {
     code: 'QUALITY',
     name: 'Quality',
-    price: '27,99',
+    price: '29,99',
+    portfolioLimit: QUALITY_PHOTOS,
+    diamond: 'assets_bipsy_business/Plans/diamond_quality.webp',
     tagline: 'Para que tu negocio destaque.',
-    description: 'Foto y portada animadas, tus colores, efectos exclusivos, portfolio sin límite y línea directa para pedir mejoras.',
+    description: `Portada animada, tu negocio anunciado con prioridad en Destacados y un portfolio de ${QUALITY_PHOTOS} fotos.`,
     includesLabel: 'Todo lo de Bipsy Business, y además:',
     features: [
       'Portada animada',
-      'Foto de perfil animada',
-      'Tu color de marca en tu ficha',
-      'Efectos exclusivos: marcos, destellos y auras',
-      'Tu ficha a tu manera',
-      'Portfolio sin límite',
-      'Solicitudes directas a Bipsy',
-      'Por delante en Destacados de tu zona',
+      'Anuncia tu negocio con prioridad en Destacados de Explorar',
+      `Portfolio de ${QUALITY_PHOTOS} fotos`,
     ],
     recommended: true,
     storeProductId: 'bipsy_quality_monthly',
@@ -120,23 +129,20 @@ export const COMPARISON: ComparisonGroup[] = [
     label: 'Escaparate',
     rows: [
       { label: 'Ficha en la app de Bipsy', bipsy: true, quality: true },
-      { label: 'Portfolio de fotos', bipsy: '10 fotos', quality: 'Sin límite' },
-      { label: 'Color de marca', bipsy: false, quality: true },
-      { label: 'Portada y foto animadas', bipsy: false, quality: true },
-      { label: 'Efectos exclusivos', bipsy: false, quality: '27 efectos' },
-      { label: 'Orden de la ficha', bipsy: false, quality: true },
-      { label: 'Prioridad en Destacados de tu zona', bipsy: false, quality: true },
-      { label: 'Solicitudes directas a Bipsy', bipsy: false, quality: true },
+      { label: 'Portfolio de fotos', bipsy: `${BUSINESS_PHOTOS} fotos`, quality: `${QUALITY_PHOTOS} fotos` },
+      { label: 'Portada animada', bipsy: false, quality: true },
+      { label: 'Prioridad en Destacados de Explorar', bipsy: false, quality: true },
     ],
   },
 ];
 
 /** The fine print under the plans. Every line is a real rule of the billing. */
 export const PRICING_NOTES: string[] = [
-  `Los primeros ${TRIAL_DAYS} días son gratis. Si no cancelas antes, la suscripción se renueva cada mes.`,
+  `Al darte de alta tienes ${WELCOME_DAYS} días de prueba para elegir plan, sin poner ningún método de pago.`,
+  'El primer plan de cada negocio tiene el primer mes gratis. Si no cancelas antes, se cobra cada mes por adelantado.',
   'Un solo precio por negocio: tus trabajadores usan la app gratis con tu código de invitación.',
-  'Paga con tarjeta desde el panel web (procesado por Stripe) o desde la app del móvil con Google Play o App Store.',
+  'Paga desde el panel web con tarjeta, cuenta bancaria (SEPA), Apple Pay o Google Pay, procesado por Stripe, o desde la app del móvil con App Store o Google Play.',
   'Antes de confirmar ves el precio final, con los impuestos de tu país.',
-  'Sin permanencia: cancela cuando quieras desde Mi plan (o desde la tienda, si contrataste en el móvil) y mantienes el acceso hasta el final del mes pagado.',
-  'Cambia de plan cuando quieras: la diferencia se prorratea.',
+  'Sin permanencia: cancela cuando quieras desde Mi plan (o desde la tienda, si contrataste en el móvil) y mantienes el acceso hasta el final del mes pagado, también durante el mes gratis.',
+  `Cambia de plan cuando quieras: la diferencia se prorratea. Si bajas a Bipsy Business, las fotos que pasen de ${BUSINESS_PHOTOS} se guardan sin verse y vuelven si subes otra vez.`,
 ];

@@ -1,7 +1,10 @@
 <article class="plan" [class.plan--featured]="plan.recommended">
   <div class="plan__inner">
     <header class="plan__head">
-      <h3 class="plan__name">{{ plan.name }}</h3>
+      <span class="plan__title">
+        <img class="plan__diamond" [src]="plan.diamond" alt="" width="44" height="44" />
+        <h3 class="plan__name">{{ plan.name }}</h3>
+      </span>
       @if (plan.recommended) {
         <span class="pill pill--solid">
           <span class="material-symbols-rounded fill">star</span>
@@ -23,7 +26,7 @@
     <div class="plan__pills">
       <span class="pill pill--success">
         <span class="material-symbols-rounded fill">card_giftcard</span>
-        {{ trialDays }} días gratis
+        {{ trialLabel }}
       </span>
       <span class="pill pill--biz">
         <span class="material-symbols-rounded fill">group</span>
@@ -34,7 +37,7 @@
     <a [routerLink]="session.signedIn() ? '/panel/ajustes/suscripcion' : '/registro'" class="btn btn--lg btn--block plan__cta"
        [class.btn--primary]="plan.recommended" [class.btn--shine]="plan.recommended"
        [class.btn--subtle]="!plan.recommended">
-      {{ session.signedIn() ? 'Elegir en mi panel' : 'Empezar prueba gratis' }}
+      {{ session.signedIn() ? 'Elegir en mi panel' : 'Empezar con el mes gratis' }}
     </a>
 
     <p class="plan__desc">{{ plan.description }}</p>

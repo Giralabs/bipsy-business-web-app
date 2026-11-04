@@ -1,4 +1,5 @@
-import { TRIAL_DAYS, SUPPORT_RESPONSE_TIME } from './site.data';
+import { SUPPORT_RESPONSE_TIME, WELCOME_DAYS } from './site.data';
+import { BUSINESS_PHOTOS, PLANS, Plan } from './plans.data';
 
 /**
  * Frequently asked questions. Every answer describes what the app does today.
@@ -20,6 +21,10 @@ export interface FaqGroup {
   items: FaqItem[];
 }
 
+function priceOf(code: Plan['code']): string {
+  return PLANS.find((plan) => plan.code === code)?.price ?? '';
+}
+
 export const HOME_FAQ: FaqItem[] = [
   {
     q: '¿Qué es Bipsy Business?',
@@ -27,7 +32,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: '¿Cuánto cuesta?',
-    a: `Bipsy Business cuesta 18,99 € al mes y Quality, 27,99 € al mes. Los primeros ${TRIAL_DAYS} días son gratis y no hay permanencia.`,
+    a: `Bipsy Business cuesta ${priceOf('BIPSY')} € al mes y Quality, ${priceOf('QUALITY')} € al mes. Al darte de alta tienes ${WELCOME_DAYS} días de prueba, el primer mes de tu primer plan es gratis y no hay permanencia.`,
   },
   {
     q: '¿Tengo que pagar por cada trabajador?',
@@ -124,15 +129,15 @@ export const HELP_FAQ: FaqGroup[] = [
     items: [
       {
         q: '¿Cómo se paga la suscripción?',
-        a: 'Como prefieras: con tarjeta desde el panel web (el pago lo procesa Stripe) o desde la app del móvil, con tu cuenta de Google Play o App Store. En los dos casos ves el precio final antes de confirmar.',
+        a: 'Como prefieras: desde el panel web con tarjeta, cuenta bancaria (SEPA), Apple Pay o Google Pay (el pago lo procesa Stripe), o desde la app del móvil, con tu cuenta de Google Play o App Store. En los dos casos ves el precio final antes de confirmar.',
       },
       {
         q: '¿Cómo cancelo?',
-        a: 'Si pagas con tarjeta, desde Mi plan en el panel web, con un clic. Si lo contrataste en el móvil, desde las suscripciones de Google Play o App Store; en la app, Mi plan te lleva directo. En los dos casos mantienes el acceso hasta el final del periodo pagado.',
+        a: 'Si pagas desde el panel web, desde Mi plan, con un clic. Si lo contrataste en el móvil, desde las suscripciones de Google Play o App Store; en la app, Mi plan te lleva directo. En los dos casos mantienes el acceso hasta el final del periodo pagado.',
       },
       {
         q: '¿Qué pasa si dejo de pagar?',
-        a: 'No se borra nada. La app te pide elegir un plan para seguir usándola, y tus trabajadores ven que el negocio no tiene suscripción activa. Si pierdes Quality, tu personalización se queda guardada y vuelve al contratarlo.',
+        a: `No se borra nada. La app te pide elegir un plan para seguir usándola, y tus trabajadores ven que el negocio no tiene suscripción activa. Si pasas de Quality a Bipsy Business, las fotos que pasen de ${BUSINESS_PHOTOS} se guardan sin verse y vuelven al contratarlo otra vez.`,
       },
       {
         q: '¿Bipsy emite facturas a mis clientes?',
@@ -151,7 +156,7 @@ export const HELP_FAQ: FaqGroup[] = [
       },
       {
         q: '¿Puedo pedir una función nueva?',
-        a: 'Con el plan Quality tienes «Solicitudes a Bipsy»: pides mejoras y cambios en la app, las leemos una a una y te contestamos.',
+        a: 'Sí, con cualquier plan: desde «Solicitudes a Bipsy» en la app pides mejoras y cambios, las leemos una a una y te contestamos.',
       },
     ],
   },

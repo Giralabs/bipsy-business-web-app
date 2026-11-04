@@ -8,7 +8,6 @@ import { CtaBandComponent } from '../../components/cta-band/cta-band.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { COMPARISON, PLANS, PRICING_NOTES } from '../../data/plans.data';
 import { FaqItem, HELP_FAQ, HOME_FAQ } from '../../data/faq.data';
-import { TRIAL_DAYS } from '../../data/site.data';
 
 /**
  * Pricing page.
@@ -29,7 +28,6 @@ export class PricingComponent {
   readonly plans = PLANS;
   readonly comparison = COMPARISON;
   readonly notes = PRICING_NOTES;
-  readonly trialDays = TRIAL_DAYS;
 
   readonly faq: FaqItem[] = [
     ...HOME_FAQ.filter((q) => /trabajador|comisión/i.test(q.q)),

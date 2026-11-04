@@ -6,8 +6,9 @@ import { RevealDirective } from '../../../../shared/reveal.directive';
 import { PLANS } from '../../../../data/plans.data';
 
 /**
- * The Quality plan, sold the way Quality itself sells: by showing the effects
- * moving. The names are the real ones of `gipsi_branding_catalog.dart`.
+ * The Quality plan as it sells since V128: the animated cover (shown moving,
+ * with the aurora demo), priority in Destacados and the bigger portfolio. The
+ * brand colours and the exclusive effects left the plan, so they are not here.
  */
 @Component({
   selector: 'app-home-quality',
@@ -18,14 +19,15 @@ import { PLANS } from '../../../../data/plans.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QualitySectionComponent {
-  readonly price = PLANS.find((p) => p.code === 'QUALITY')?.price ?? '';
+  private readonly quality = PLANS.find((p) => p.code === 'QUALITY');
+  readonly price = this.quality?.price ?? '';
+  readonly photos = this.quality?.portfolioLimit ?? 0;
+  readonly diamond = this.quality?.diamond ?? '';
 
-  readonly effects = [
-    { name: 'Halo', kind: 'Marco de foto', fx: 'halo' },
-    { name: 'Aurora', kind: 'Portada', fx: 'aurora' },
-    { name: 'Borde luminoso', kind: 'En búsquedas', fx: 'border' },
-    { name: 'Brillo', kind: 'Nombre', fx: 'shine' },
-    { name: 'Chispas', kind: 'Portada', fx: 'sparks' },
-    { name: 'Órbita', kind: 'Marco de foto', fx: 'orbit' },
+  /** `fx` paints a moving demo; without it, the icon. */
+  readonly perks = [
+    { name: 'Portada animada', kind: 'Se mueve en la lista', fx: 'aurora', icon: '' },
+    { name: 'Con prioridad', kind: 'En Destacados', fx: null, icon: 'campaign' },
+    { name: `${this.photos} fotos`, kind: 'En tu portfolio', fx: null, icon: 'photo_library' },
   ];
 }

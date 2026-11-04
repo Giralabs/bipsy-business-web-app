@@ -1,20 +1,23 @@
 /**
  * Site-wide facts: the trial, the store and social links, the contact.
  *
- * `TRIAL_DAYS` is what the web ANNOUNCES and it is the backend's plan trial
- * (`plan.trial_days = 14` in V37, applied at checkout while
- * `trialAvailable`). On top of it, finishing the sign-up gives
- * `Business.WELCOME_TRIAL_DAYS = 5` courtesy days on the Bipsy plan
- * (`WELCOME_DAYS` here) before the plan wall shows up. If either changes in
- * the backend, change it here. The store offers (Play Console, App Store
- * Connect) must match too — see docs/RELEASE-STORES.md and
- * docs/LEGAL-PENDIENTE.md §4. bipsy-web-app announces the same number in
+ * What the web ANNOUNCES about the trial must be what the backend grants:
+ *  - the first plan comes with its first month free (`plan.trial_months = 1`
+ *    in V128, a natural month, only while `trialAvailable`), and the App Store
+ *    products carry the same 1-month introductory offer;
+ *  - finishing the sign-up gives `Business.WELCOME_TRIAL_DAYS = 3` courtesy
+ *    days (`WELCOME_DAYS`) before the plan wall shows up.
+ * If either changes in the backend, change it here. See docs/RELEASE-STORES.md
+ * and docs/LEGAL-PENDIENTE.md §4. bipsy-web-app announces the trial too, in
  * `PromoBarComponent.trialLabel`.
  */
-export const TRIAL_DAYS = 14;
+export const TRIAL_MONTHS = 1;
 /** Courtesy days after the sign-up, before choosing a plan (`Business.WELCOME_TRIAL_DAYS`). */
-export const WELCOME_DAYS = 5;
-export const TRIAL_LABEL = `${TRIAL_DAYS} días gratis`;
+export const WELCOME_DAYS = 3;
+/** The trial as a pill or a headline: «1.er mes gratis». */
+export const TRIAL_LABEL = '1.er mes gratis';
+/** The trial as a call to action. */
+export const TRIAL_CTA = 'Probar el primer mes gratis';
 
 /** Placeholder target for every external link that does not exist yet. */
 const PLACEHOLDER_URL = 'https://www.youtube.com';

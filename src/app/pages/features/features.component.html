@@ -6,7 +6,7 @@
   [crumbs]="[{ label: 'Funcionalidades' }]">
   <ng-container ngProjectAs="[actions]">
     <a [routerLink]="session.signedIn() ? '/panel' : '/registro'" class="btn btn--primary btn--lg btn--shine">
-      {{ session.signedIn() ? 'Ir a tu panel' : 'Probar 14 días gratis' }}
+      {{ session.signedIn() ? 'Ir a tu panel' : 'Probar el primer mes gratis' }}
     </a>
     <a routerLink="/precios" class="btn btn--secondary btn--lg">Ver precios</a>
   </ng-container>
@@ -39,7 +39,7 @@
             <div class="feat__top">
               <span class="icon-tile"><span class="material-symbols-rounded">{{ item.icon }}</span></span>
               @if (item.quality) {
-                <span class="pill pill--accent"><span class="material-symbols-rounded fill">auto_awesome</span>Quality</span>
+                <span class="pill pill--accent"><img class="pill__diamond" src="assets_bipsy_business/Plans/diamond_quality.webp" alt="" width="16" height="16" />Quality</span>
               }
               <span class="feat__go material-symbols-rounded">arrow_outward</span>
             </div>

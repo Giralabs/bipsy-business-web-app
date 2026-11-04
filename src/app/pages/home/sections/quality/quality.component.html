@@ -5,18 +5,20 @@
       <div class="q__aura q__aura--2" aria-hidden="true"></div>
 
       <div class="q__copy">
-        <span class="q__eyebrow"><span class="material-symbols-rounded fill">auto_awesome</span>Plan Quality</span>
+        <span class="q__eyebrow"><img class="q__diamond" [src]="diamond" alt="" width="22" height="22" />Plan Quality</span>
         <h2 class="display q__title">Que te vean antes de leer tu nombre</h2>
         <p class="lead q__lead">
-          Portada y foto animadas, tu color de marca y efectos que solo tiene Quality. Además, en Destacados
-          apareces por delante de los negocios de tu zona.
+          Una portada que se mueve y tu negocio anunciado con prioridad: en Destacados apareces por delante de
+          los negocios de tu zona. Y un portfolio de {{ photos }} fotos.
         </p>
 
         <div class="q__effects">
-          @for (e of effects; track e.name; let i = $index) {
+          @for (perk of perks; track perk.name; let i = $index) {
             <div class="q__fx" [style.--i]="i">
-              <span class="q__demo" [attr.data-fx]="e.fx" aria-hidden="true"><i></i></span>
-              <span class="q__fx-text"><b>{{ e.name }}</b><small>{{ e.kind }}</small></span>
+              <span class="q__demo" [attr.data-fx]="perk.fx" aria-hidden="true">
+                @if (perk.fx) { <i></i> } @else { <span class="material-symbols-rounded q__icon">{{ perk.icon }}</span> }
+              </span>
+              <span class="q__fx-text"><b>{{ perk.name }}</b><small>{{ perk.kind }}</small></span>
             </div>
           }
         </div>
@@ -26,7 +28,7 @@
             Descubrir Quality
             <span class="material-symbols-rounded">arrow_forward</span>
           </a>
-          <span class="q__price">{{ price }} € al mes · 27 efectos</span>
+          <span class="q__price">{{ price }} € al mes · 1.er mes gratis</span>
         </div>
       </div>
 

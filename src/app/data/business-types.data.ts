@@ -1,3 +1,5 @@
+import { QUALITY_PHOTOS } from './plans.data';
+
 /**
  * The kinds of business the site speaks to, one page each.
  *
@@ -377,7 +379,7 @@ export const BUSINESS_TYPES: BusinessType[] = [
     headline: 'Tu estudio de fotografía, con sesiones reservadas y portfolio a la vista',
     intro: 'Sesiones de estudio y exteriores, con un portfolio que vende y reservas que no dependen de responder mensajes.',
     pains: [
-      { title: 'El portfolio lo es todo', text: 'Tus mejores fotos en tu ficha, sin límite con Quality.' },
+      { title: 'El portfolio lo es todo', text: `Tus mejores fotos en tu ficha: hasta ${QUALITY_PHOTOS} con Quality.` },
       { title: 'Sesiones largas', text: 'Tarjeta al reservar para no perder una tarde de estudio.' },
       { title: 'Detalles de la sesión', text: 'Ideas y referencias por el chat de la cita.' },
     ],

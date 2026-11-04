@@ -435,6 +435,7 @@ button { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .pill .material-symbols-rounded { font-size: 14px; }
+.pill__diamond { width: 16px; height: 16px; object-fit: contain; }
 .pill--accent { background: var(--clr-accent-dim); color: var(--clr-accent-text); }
 .pill--success { background: rgba(95, 185, 138, 0.16); color: var(--clr-success); }
 .pill--warn { background: rgba(232, 182, 87, 0.18); color: var(--clr-warn-text); }

@@ -2,15 +2,14 @@ import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core
 import { SiteSession } from '../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { Plan } from '../../data/plans.data';
-import { TRIAL_DAYS } from '../../data/site.data';
+import { TRIAL_LABEL } from '../../data/site.data';
 
 /**
- * A plan, drawn like `_PlanCard` of the app's plan selection screen: name with
- * its pill, the price in the accent colour, the trial pill in green and the
- * feature list with filled check icons.
+ * A plan, drawn like `_PlanCard` of the app's plan selection screen: the
+ * plan's diamond and name with its pill, the price in the accent colour, the
+ * free month pill in green and the feature list with filled check icons.
  *
- * The recommended plan gets the animated border of Quality's «Borde animado»
- * card effect: the plan that sells effects shows one.
+ * The recommended plan gets an animated border, only to point at it.
  */
 @Component({
   selector: 'app-plan-card',
@@ -28,7 +27,7 @@ export class PlanCardComponent {
   /** Shows the full feature list; the home teaser only needs the first few. */
   @Input() maxFeatures = 99;
 
-  readonly trialDays = TRIAL_DAYS;
+  readonly trialLabel = TRIAL_LABEL;
 
   get euros(): string {
     return this.plan.price.split(',')[0];

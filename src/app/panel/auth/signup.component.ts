@@ -23,7 +23,7 @@ import { PnNumberComponent } from '../ui/number.component';
 import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { scheduleToApi } from '../core/api/schedule';
 import { message, serverReason } from '../core/data/resource';
-import { TRIAL_DAYS } from '../../data/site.data';
+import { TRIAL_LABEL } from '../../data/site.data';
 import { CoachService } from '../onboarding/coach.service';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -70,7 +70,7 @@ export class SignupComponent {
   private readonly pending = inject(PendingSocial);
   private readonly social = inject(SocialAuth);
 
-  readonly trialDays = TRIAL_DAYS;
+  readonly trialLabel = TRIAL_LABEL;
 
   readonly step = signal<Step>(1);
   readonly busy = signal(false);
