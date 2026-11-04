@@ -1,5 +1,8 @@
 import { LegalDocument, LEGAL_COMPANY } from './legal.models';
-import { TRIAL_DAYS } from '../site.data';
+import { TRIAL_MONTHS, WELCOME_DAYS } from '../site.data';
+import { BUSINESS_PHOTOS, PLANS, QUALITY_PHOTOS } from '../plans.data';
+
+const priceOf = (code: 'BIPSY' | 'QUALITY') => PLANS.find((plan) => plan.code === code)?.price ?? '';
 
 /**
  * The two documents that only concern businesses.
@@ -19,8 +22,8 @@ const SUBSCRIPTION: LegalDocument = {
   slug: 'condiciones-suscripcion',
   title: 'Condiciones de suscripción',
   subtitle: 'Los planes de pago de Bipsy Business: prueba, renovación, cambios y baja',
-  version: '0.1 · borrador',
-  updatedAt: '13 de septiembre de 2026',
+  version: '0.2 · borrador',
+  updatedAt: '4 de noviembre de 2026',
   sections: [
     {
       id: 'ambito',
@@ -37,44 +40,46 @@ const SUBSCRIPTION: LegalDocument = {
         'Hoy se ofrecen dos planes de pago mensual:',
       ],
       bullets: [
-        'Bipsy Business, 18,99 € al mes: agenda y reservas, servicios, equipo, clientes, mensajes, reseñas, fichaje, finanzas, lista de espera y un portfolio de hasta 10 fotos.',
-        'Quality, 27,99 € al mes: todo lo anterior y además personalización de la ficha, portada y foto animadas, efectos exclusivos, portfolio sin límite, solicitudes directas a Bipsy y prioridad dentro de su franja de distancia en la fila de Destacados.',
+        `Bipsy Business, ${priceOf('BIPSY')} € al mes: agenda y reservas, servicios, equipo, clientes, mensajes, reseñas, fichaje, finanzas, lista de espera y un portfolio de hasta ${BUSINESS_PHOTOS} fotos.`,
+        `Quality, ${priceOf('QUALITY')} € al mes: todo lo anterior y además portada animada, prioridad dentro de su franja de distancia en la fila de Destacados y un portfolio de hasta ${QUALITY_PHOTOS} fotos.`,
       ],
       closingParagraphs: [
         'El precio es por negocio. Los trabajadores que el negocio añade con su código de invitación usan la aplicación sin coste adicional.',
-        'El importe final, con los impuestos que correspondan a tu país, es el que se muestra antes de confirmar la contratación —en el panel web si pagas con tarjeta, o en Google Play o App Store si contratas desde el móvil— y es el que se cobra.',
+        'El importe final, con los impuestos que correspondan a tu país, es el que se muestra antes de confirmar la contratación —en el panel web si pagas con Stripe, o en Google Play o App Store si contratas desde el móvil— y es el que se cobra.',
       ],
     },
     {
       id: 'prueba',
-      title: '3. Periodo de prueba',
+      title: '3. Días de prueba y primer mes gratis',
       paragraphs: [
-        `Cada negocio puede disfrutar de un único periodo de prueba gratuito de ${TRIAL_DAYS} días, sea cual sea el plan con el que empiece. Durante la prueba tienes acceso a todas las funciones del plan elegido.`,
-        'Al empezar la prueba se te pide un método de pago (la tarjeta, si contratas desde el panel web, o el de tu cuenta de la tienda, si lo haces desde el móvil), pero no se cobra nada durante la prueba. Si no cancelas antes de que termine, la suscripción pasa a ser de pago y se cobra el primer mes.',
+        `Al terminar el alta, cada negocio tiene ${WELCOME_DAYS} días de prueba para elegir plan, sin necesidad de dar ningún método de pago. Pasados esos días, la aplicación del negocio queda bloqueada hasta que elija uno.`,
+        `El primer plan que contrata cada negocio incluye ${TRIAL_MONTHS === 1 ? 'el primer mes' : `los primeros ${TRIAL_MONTHS} meses`} gratis, contado como mes natural desde el día de la contratación. Al contratarlo se pide un método de pago, pero no se cobra nada hasta que termina ese periodo; si no cancelas antes, se cobra el primer mes y después cada mes por adelantado. No hay periodo gratuito si el negocio ya tuvo antes un plan de pago o un plan regalado por Bipsy.`,
+        'Bipsy puede ofrecer, por tiempo limitado, un precio rebajado durante los primeros meses de pago del primer plan. Cuando la hay, la oferta se muestra antes de contratar, con su duración y el precio que se cobra después, y solo se aplica a lo que se contrata desde el panel web.',
+        'Si Bipsy te regala un plan, al terminar el regalo no hay mes gratis. Durante el regalo puedes dejar guardado un método de pago desde el panel web para seguir con ese plan sin cortes: no se cobra nada hasta el día en que termina el regalo.',
       ],
     },
     {
       id: 'pago',
       title: '4. Pago y renovación automática',
       paragraphs: [
-        'La suscripción se puede contratar y pagar de dos maneras: con tarjeta desde el panel web de Bipsy Business, en cuyo caso el pago lo procesa Stripe Payments Europe, Ltd.; o desde la aplicación móvil, a través de Google Play (Android) o App Store (iPhone) con la cuenta de la tienda del dispositivo, en cuyo caso la tienda procesa el pago y aplica sus propias condiciones. En ninguno de los dos casos Bipsy recibe ni guarda los datos completos de la tarjeta con la que pagas la suscripción.',
-        'La suscripción se renueva automáticamente cada mes por el mismo precio, salvo que la canceles antes del final del periodo en curso. Si pagas con tarjeta, basta con cancelarla antes de esa fecha; si la contrataste en una tienda, cada tienda fija el plazo mínimo para que la cancelación evite la siguiente renovación (en App Store es de al menos 24 horas antes).',
+        'La suscripción se puede contratar y pagar de dos maneras: desde el panel web de Bipsy Business, con tarjeta, adeudo en cuenta bancaria (SEPA), Apple Pay o Google Pay, en cuyo caso el pago lo procesa Stripe Payments Europe, Ltd.; o desde la aplicación móvil, a través de Google Play (Android) o App Store (iPhone) con la cuenta de la tienda del dispositivo, en cuyo caso la tienda procesa el pago y aplica sus propias condiciones. En ninguno de los dos casos Bipsy recibe ni guarda los datos completos de la tarjeta o de la cuenta con la que pagas la suscripción.',
+        'La suscripción se renueva automáticamente cada mes por el precio del plan (o el de la oferta, mientras dure), salvo que la canceles antes del final del periodo en curso. Si pagas desde el panel web, basta con cancelarla antes de esa fecha; si la contrataste en una tienda, cada tienda fija el plazo mínimo para que la cancelación evite la siguiente renovación (en App Store es de al menos 24 horas antes).',
       ],
     },
     {
       id: 'cambios-plan',
       title: '5. Cambiar de plan',
       paragraphs: [
-        'Puedes cambiar de Bipsy Business a Quality, o al revés, desde la sección Mi plan. Si pagas con tarjeta, el cambio se hace en el panel web y la diferencia se prorratea por los días que queden del periodo en curso; si contrataste en el móvil, el cambio se tramita en la tienda, que es quien calcula y muestra la diferencia de precio antes de confirmarlo.',
+        'Puedes cambiar de Bipsy Business a Quality, o al revés, desde la sección Mi plan. Si pagas desde el panel web, el cambio se hace en el panel web y la diferencia se prorratea por los días que queden del periodo en curso; si contrataste en el móvil, el cambio se tramita en la tienda, que es quien calcula y muestra la diferencia de precio antes de confirmarlo.',
       ],
     },
     {
       id: 'cancelacion',
       title: '6. Cancelación y reembolsos',
       paragraphs: [
-        'Si pagas con tarjeta, puedes darte de baja en cualquier momento desde Mi plan en el panel web. Si contrataste en el móvil, ten en cuenta que ninguna tienda permite que el vendedor cancele una suscripción en nombre del cliente: entra en las suscripciones de tu cuenta de Google Play o App Store; la aplicación te lleva hasta allí desde Mi plan.',
+        'Si pagas desde el panel web, puedes darte de baja en cualquier momento desde Mi plan en el panel web. Si contrataste en el móvil, ten en cuenta que ninguna tienda permite que el vendedor cancele una suscripción en nombre del cliente: entra en las suscripciones de tu cuenta de Google Play o App Store; la aplicación te lleva hasta allí desde Mi plan.',
         'Al cancelar mantienes el acceso hasta el final del periodo ya pagado. No hay permanencia ni penalización por cancelar.',
-        'Los reembolsos de cobros realizados por una tienda se rigen por la política de esa tienda y se solicitan a ella; los de cobros con tarjeta se solicitan a Bipsy. Si crees que se te ha cobrado por error, escríbenos a ' +
+        'Los reembolsos de cobros realizados por una tienda se rigen por la política de esa tienda y se solicitan a ella; los de cobros desde el panel web se solicitan a Bipsy. Si crees que se te ha cobrado por error, escríbenos a ' +
           `${LEGAL_COMPANY.email} y te ayudaremos a tramitarlo.`,
       ],
     },
@@ -83,7 +88,7 @@ const SUBSCRIPTION: LegalDocument = {
       title: '7. Qué pasa cuando termina la suscripción',
       paragraphs: [
         'Si la suscripción termina y no contratas otro plan, la aplicación del negocio queda bloqueada hasta que elijas uno. Mientras tanto no podrás gestionar la agenda y tus trabajadores verán que el negocio no tiene suscripción activa.',
-        'Terminar la suscripción no borra tus datos. Si pierdes el plan Quality, la personalización de tu ficha se conserva y deja de mostrarse a los clientes hasta que vuelvas a contratarlo.',
+        `Terminar la suscripción no borra tus datos. Si pasas de Quality a Bipsy Business, las fotos de tu portfolio que superen las ${BUSINESS_PHOTOS} del plan se conservan sin mostrarse a los clientes, y vuelven a verse si contratas Quality de nuevo.`,
         'Si quieres que se eliminen los datos de tu negocio, puedes pedir la baja de la cuenta en los términos de la Política de privacidad.',
       ],
     },

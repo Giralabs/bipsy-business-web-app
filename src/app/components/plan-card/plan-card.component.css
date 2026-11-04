@@ -36,6 +36,8 @@
 }
 
 .plan__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.plan__title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.plan__diamond { width: 44px; height: 44px; flex: none; object-fit: contain; }
 
 .plan__name {
   font-family: var(--ff-display);

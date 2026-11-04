@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
-import { STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
+import { STORE_LINKS } from '../../data/site.data';
 
 /**
  * Temporary destination of "Probar gratis" and "Iniciar sesión" until sign-up
@@ -19,7 +19,6 @@ import { STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
 export class SoonComponent implements OnInit {
   kind: 'signup' | 'login' = 'signup';
   readonly stores = STORE_LINKS;
-  readonly trialDays = TRIAL_DAYS;
 
   constructor(private readonly route: ActivatedRoute) {}
 

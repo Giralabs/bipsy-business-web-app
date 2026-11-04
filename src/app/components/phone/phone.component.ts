@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
 import { ScreenId } from '../../data/features.data';
 import { SampleService } from '../../data/business-types.data';
+import { PLANS } from '../../data/plans.data';
 
 type BookingState = 'pendiente' | 'confirmada' | 'porCobrar' | 'cobrada' | 'pasada' | 'cancelada' | 'noVino';
 
@@ -74,6 +75,8 @@ export class PhoneComponent implements OnChanges {
   bookings: MockBooking[] = [];
   serviceList: SampleService[] = DEFAULT_SERVICES;
 
+  /** Quality's portfolio quota, from the plans the site sells. */
+  readonly qualityPhotos = PLANS.find((plan) => plan.code === 'QUALITY')?.portfolioLimit ?? 0;
   readonly customers = [
     { letter: 'A', people: [{ name: 'Alba Moreno', meta: 'Última cita: 2 sep' }, { name: 'Andrés Gil', meta: 'Próxima: hoy, 12:30' }] },
     { letter: 'C', people: [{ name: 'Carla Ruiz', meta: 'Próxima: hoy, 11:00' }, { name: 'Carlos Vega', meta: 'Última cita: 28 ago' }] },
@@ -108,8 +111,6 @@ export class PhoneComponent implements OnChanges {
     { t: '17:30', off: false }, { t: '18:00', off: false }, { t: '19:00', off: true },
   ];
 
-  readonly effects = ['Destello', 'Partículas', 'Aurora', 'Foco', 'Bokeh', 'Chispas'];
-  readonly swatches = ['#C0EED3', '#8796A8', '#E8B657', '#E67676', '#7FB2C7', '#B39DDB', '#F48FB1', '#FFB020'];
 
   ngOnChanges(): void {
     const s = this.services?.length ? this.services : DEFAULT_SERVICES;

@@ -2,7 +2,7 @@
   eyebrow="Precios"
   icon="sell"
   title="Un plan por negocio. Tu equipo, gratis."
-  [lead]="'Sin comisión por reserva, sin coste por trabajador y sin permanencia. Pruébalo ' + trialDays + ' días gratis y decide después.'"
+  lead="Sin comisión por reserva, sin coste por trabajador y sin permanencia. El primer mes es gratis: pruébalo y decide después."
   [crumbs]="[{ label: 'Precios' }]" />
 
 <section class="section section--tight plans-wrap">
@@ -61,6 +61,7 @@
             <th scope="col"><span class="sr-only">Función</span></th>
             @for (plan of plans; track plan.code) {
               <th scope="col" [class.compare__featured]="plan.recommended">
+                <img class="compare__diamond" [src]="plan.diamond" alt="" width="32" height="32" />
                 <span class="compare__plan">{{ plan.name }}</span>
                 <span class="compare__price">{{ plan.price }} €<small>/mes</small></span>
               </th>

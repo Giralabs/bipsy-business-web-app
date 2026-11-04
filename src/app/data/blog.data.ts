@@ -244,7 +244,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         heading: 'Antes de publicarla, mírala como un cliente',
         paragraphs: [
-          'La vista previa de la app enseña tu ficha exactamente como la ve un cliente. Y si quieres destacar todavía más, con Quality añades tu color, portada animada y efectos que llaman la atención en la lista.',
+          'La vista previa de la app enseña tu ficha exactamente como la ve un cliente. Y si quieres destacar todavía más, con Quality tu portada se mueve y sales anunciado con prioridad en Destacados.',
         ],
       },
     ],

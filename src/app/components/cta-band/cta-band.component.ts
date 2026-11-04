@@ -3,7 +3,7 @@ import { SiteSession } from '../../shared/site-session.service';
 import { RouterLink } from '@angular/router';
 import { BipRigComponent } from '../bip-rig/bip-rig.component';
 import { RevealDirective } from '../../shared/reveal.directive';
-import { STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
+import { STORE_LINKS, TRIAL_LABEL } from '../../data/site.data';
 
 /**
  * The closing call to action that ends most pages: headline, the two buttons
@@ -21,9 +21,9 @@ import { STORE_LINKS, TRIAL_DAYS } from '../../data/site.data';
 export class CtaBandComponent {
   /** Signed in: the call to action goes to the panel, not to sign-up. */
   readonly session = inject(SiteSession);
-  @Input() title = 'Empieza hoy. Los primeros 14 días corren de nuestra cuenta.';
+  @Input() title = 'Empieza hoy. El primer mes corre de nuestra cuenta.';
   @Input() text = 'Date de alta en cinco pasos, añade a tu equipo gratis y recibe tu primera reserva esta misma semana.';
 
-  readonly trialDays = TRIAL_DAYS;
+  readonly trialLabel = TRIAL_LABEL;
   readonly stores = STORE_LINKS;
 }

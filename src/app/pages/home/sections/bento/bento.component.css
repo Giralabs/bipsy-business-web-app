@@ -228,3 +228,4 @@
   .tile--wide { grid-column: auto; }
   .tile { min-height: 0; }
 }
+.tile__diamond { width: 28px; height: 28px; object-fit: contain; }
