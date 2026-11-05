@@ -177,6 +177,7 @@ export class SignupComponent {
   requiresCard = false;
 
   constructor() {
+    this.social.warmUp();
     this.adoptPendingSocial();
     this.resume(this.route.snapshot.queryParamMap.get('paso'));
     void this.loadCategories();

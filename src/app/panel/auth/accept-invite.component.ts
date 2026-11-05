@@ -246,6 +246,7 @@ export class AcceptInviteComponent {
   password = '';
 
   constructor() {
+    this.social.warmUp();
     void this.load();
   }
 

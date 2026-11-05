@@ -227,6 +227,10 @@ export class CuentaComponent {
 
   readonly appleAvailable = this.social.appleAvailable;
 
+  constructor() {
+    this.social.warmUp();
+  }
+
   /**
    * Abre la ventana del proveedor y manda el idToken de Firebase.
    *
