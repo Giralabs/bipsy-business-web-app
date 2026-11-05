@@ -57,6 +57,11 @@ export class LoginComponent {
   readonly socialBusy = signal<SocialProvider | null>(null);
   readonly error = signal<string | null>(null);
 
+  constructor() {
+    // Para que la ventana de Google o Apple se abra al primer clic.
+    this.social.warmUp();
+  }
+
   async signInWith(provider: SocialProvider): Promise<void> {
     if (this.busy()) return;
     this.busy.set(true);

@@ -49,6 +49,11 @@ export class SocialSignInUnavailable extends Error {
   }
 }
 
+interface FirebaseAuthKit {
+  auth: typeof import('firebase/auth');
+  firebaseAuth: import('firebase/auth').Auth;
+}
+
 /** Códigos de Firebase que significan "ha cerrado la ventana". */
 const CANCELLED = [
   'auth/popup-closed-by-user',
@@ -77,9 +82,9 @@ const NOT_CONFIGURED = [
  * de Google a secas: `FirebaseTokenVerifier` lo habría rechazado porque el
  * `aud` no es el del proyecto.
  *
- * El SDK se carga **en diferido**, sólo cuando alguien pulsa un botón: son unos
- * cuantos kilobytes que no tiene por qué descargarse quien entra con su
- * contraseña, que es la mayoría.
+ * El SDK se carga **en diferido**, sólo en las pantallas que tienen los botones
+ * (ver [warmUp]): son unos cuantos kilobytes que no tiene por qué descargarse
+ * quien ya está dentro del panel.
  */
 @Injectable({ providedIn: 'root' })
 export class SocialAuth {
@@ -96,20 +101,47 @@ export class SocialAuth {
     return this.isAvailable('apple');
   }
 
+  /** Firebase ya cargado e inicializado. Se pide una vez y se reutiliza. */
+  private firebase?: Promise<FirebaseAuthKit>;
+
+  /**
+   * Carga Firebase de antemano. Lo llaman las pantallas con los botones de
+   * Google y Apple al aparecer.
+   *
+   * ⚠️ No es una optimización: sin esto el primer clic fallaba. La ventana
+   * tiene que abrirse en respuesta directa al clic, y si antes hay que
+   * descargar Firebase, el navegador ya no lo cuenta como tal y la bloquea
+   * como emergente. El segundo clic funcionaba porque el código ya estaba
+   * descargado. Mismo arreglo que `SocialAuthService` en la web de clientes.
+   */
+  warmUp(): void {
+    if (this.googleAvailable || this.appleAvailable) {
+      void this.loadFirebase().catch(() => {
+        // Si no carga ahora, el clic lo vuelve a intentar y ahí se cuenta.
+        this.firebase = undefined;
+      });
+    }
+  }
+
+  private loadFirebase(): Promise<FirebaseAuthKit> {
+    this.firebase ??= Promise.all([import('firebase/app'), import('firebase/auth')]).then(
+      ([{ initializeApp, getApps }, auth]) => {
+        const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+        const firebaseAuth = auth.getAuth(app);
+        // La ventana del proveedor sale en el idioma del navegador y no en inglés.
+        firebaseAuth.useDeviceLanguage();
+        return { auth, firebaseAuth };
+      },
+    );
+    return this.firebase;
+  }
+
   /** Abre la ventana del proveedor y devuelve el ID token de Firebase. */
   async obtainIdentity(provider: SocialProvider): Promise<SocialIdentity> {
     if (!this.isAvailable(provider)) throw new SocialSignInUnavailable(provider);
 
-    const [{ initializeApp, getApps }, auth] = await Promise.all([
-      import('firebase/app'),
-      import('firebase/auth'),
-    ]);
-    const { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup } = auth;
-
-    const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
-    const firebaseAuth = getAuth(app);
-    // La ventana del proveedor sale en el idioma del navegador y no en inglés.
-    firebaseAuth.useDeviceLanguage();
+    const { auth, firebaseAuth } = await this.loadFirebase();
+    const { GoogleAuthProvider, OAuthProvider, signInWithPopup } = auth;
 
     let authProvider;
     if (provider === 'apple') {
