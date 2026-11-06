@@ -552,6 +552,11 @@ export class SignupComponent {
         ...(hasVenue && postalCode ? { postalCode } : {}),
         ...(hasVenue && resolved?.placeId ? { placeId: resolved.placeId } : {}),
         ...(hasVenue && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
+        // Without a venue, the centre of their area is their city. Until
+        // 6/11/2026 no point was sent, and in Explore these businesses always
+        // went last: there was nothing to measure the distance from. The
+        // backend falls back to the city as well, for older clients.
+        ...(!hasVenue && pin ? { serviceAreaLatitude: pin.latitude, serviceAreaLongitude: pin.longitude } : {}),
       });
       // The guard reads the pending step from the profile: without this it
       // still believes the location is missing.
