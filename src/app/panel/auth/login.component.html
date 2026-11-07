@@ -24,47 +24,75 @@
     </div>
   }
 
-  <form (ngSubmit)="submit()">
-    <label class="pn-field">
-      <span class="pn-field__label">Correo</span>
-      <input
-        class="pn-input"
-        type="email"
-        name="email"
-        autocomplete="email"
-        placeholder="tu@email.com"
-        [(ngModel)]="email"
-      />
-    </label>
+  @if (pendingDeletion(); as pending) {
+    <!-- Entrar ya no reactiva el negocio por sí solo: se pregunta. Mientras
+         se pregunta no hay sesión, así que «Salir» solo cierra esto. -->
+    <div class="pn-notice pn-notice--warn auth-notice" role="alertdialog"
+         aria-labelledby="deletion-title" aria-describedby="deletion-body">
+      <span class="material-symbols-rounded">delete_forever</span>
+      <div>
+        <strong id="deletion-title">Tu negocio está dado de baja</strong>
+        <span id="deletion-body" class="pn-notice__body">{{ deletionText(pending) }}</span>
+        @if (error(); as text) {
+          <p class="pn-field__error auth-error auth-deletion__error" role="alert">{{ text }}</p>
+        }
+        <div class="auth-deletion__actions">
+          <button type="button" class="pn-btn pn-btn--primary" [disabled]="busy()" (click)="reactivate()">
+            @if (busy()) {
+              <span class="pn-spinner"></span>
+            } @else {
+              Reactivar
+            }
+          </button>
+          <button type="button" class="pn-btn pn-btn--secondary" [disabled]="busy()" (click)="leave()">
+            Salir
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <form (ngSubmit)="submit()">
+      <label class="pn-field">
+        <span class="pn-field__label">Correo</span>
+        <input
+          class="pn-input"
+          type="email"
+          name="email"
+          autocomplete="email"
+          placeholder="tu@email.com"
+          [(ngModel)]="email"
+        />
+      </label>
 
-    <label class="pn-field">
-      <span class="pn-field__label">Contraseña</span>
-      <input
-        class="pn-input"
-        type="password"
-        name="password"
-        autocomplete="current-password"
-        placeholder="••••••••"
-        [(ngModel)]="password"
-      />
-    </label>
+      <label class="pn-field">
+        <span class="pn-field__label">Contraseña</span>
+        <input
+          class="pn-input"
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          [(ngModel)]="password"
+        />
+      </label>
 
-    @if (error(); as text) {
-      <p class="pn-field__error auth-error" role="alert">{{ text }}</p>
-    }
-
-    <button type="submit" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block" [disabled]="busy()">
-      @if (busy()) {
-        <span class="pn-spinner"></span>
-      } @else {
-        Iniciar sesión
+      @if (error(); as text) {
+        <p class="pn-field__error auth-error" role="alert">{{ text }}</p>
       }
-    </button>
 
-    <a routerLink="/recuperar-contrasena" class="auth-link">He olvidado mi contraseña</a>
-  </form>
+      <button type="submit" class="pn-btn pn-btn--primary pn-btn--lg pn-btn--block" [disabled]="busy()">
+        @if (busy()) {
+          <span class="pn-spinner"></span>
+        } @else {
+          Iniciar sesión
+        }
+      </button>
 
-  @if (socialEnabled) {
+      <a routerLink="/recuperar-contrasena" class="auth-link">He olvidado mi contraseña</a>
+    </form>
+  }
+
+  @if (socialEnabled && !pendingDeletion()) {
     <div class="auth-divider"><span>o</span></div>
 
     <!-- Botones propios: ni el logotipo de Google ni el de Apple se pueden

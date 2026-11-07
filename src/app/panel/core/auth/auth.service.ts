@@ -27,6 +27,19 @@ export class WrongRoleError extends Error {
 }
 
 /**
+ * Se ha entrado bien, pero el negocio tiene la baja pedida y el servidor no ha
+ * abierto sesión (`ACCOUNT_DELETION_PENDING`). Entrar ya no la anula por sí
+ * solo: se pregunta si reactivarlo y, si dice que sí, se repite el mismo
+ * acceso con `reactivate`. Devuelve cuándo se borra, o null si no es eso.
+ */
+export function deletionPending(cause: unknown): { deletesAt: Date | null } | null {
+  const failure = cause as { status?: number; error?: { error?: string; deletesAt?: string } };
+  if (failure?.status !== 409 || failure.error?.error !== 'ACCOUNT_DELETION_PENDING') return null;
+  const deletesAt = failure.error.deletesAt ? new Date(failure.error.deletesAt) : null;
+  return { deletesAt: deletesAt && !isNaN(deletesAt.getTime()) ? deletesAt : null };
+}
+
+/**
  * The session and everything the panel derives from it — the web twin of
  * `authControllerProvider` plus the flag providers in
  * `apps/gipsi_business/lib/core/providers.dart`.
@@ -118,9 +131,13 @@ export class AuthService {
   /**
    * Correo y contraseña: el usuario dejó de existir con la V105. En qué app se
    * entra no va en el cuerpo, lo dice la cabecera de ámbito del interceptor.
+   *
+   * `reactivate` anula la baja del negocio al entrar; sin él, un negocio en
+   * baja falla con [deletionPending].
    */
-  async login(email: string, password: string): Promise<void> {
-    await this.adopt(await this.api.post<AuthResponse>('/auth/login', { email, password }));
+  async login(email: string, password: string, reactivate = false): Promise<void> {
+    const body = reactivate ? { email, password, reactivate } : { email, password };
+    await this.adopt(await this.api.post<AuthResponse>('/auth/login', body));
   }
 
   /**
@@ -135,8 +152,9 @@ export class AuthService {
    * `idToken` es el de **Firebase**, no el del proveedor: es lo que verifica
    * `FirebaseTokenVerifier` en el backend.
    */
-  async loginWithProvider(provider: SocialProvider, idToken: string): Promise<void> {
-    await this.adopt(await this.api.post<AuthResponse>(businessSignInPath(provider), { idToken }));
+  async loginWithProvider(provider: SocialProvider, idToken: string, reactivate = false): Promise<void> {
+    const body = reactivate ? { idToken, reactivate } : { idToken };
+    await this.adopt(await this.api.post<AuthResponse>(businessSignInPath(provider), body));
   }
 
   /** Atajo de siempre para Google. Ver [loginWithProvider]. */
