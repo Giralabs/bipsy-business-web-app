@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from './auth-layout.component';
-import { AuthService, WrongRoleError } from '../core/auth/auth.service';
+import { AuthService, WrongRoleError, deletionPending } from '../core/auth/auth.service';
 import { PendingSocial } from '../core/auth/pending-social';
 import {
   SocialAuth,
@@ -12,6 +12,24 @@ import {
   SocialSignInUnavailable,
 } from '../core/auth/social-auth.service';
 import { message } from '../core/data/resource';
+import { ToastService } from '../ui/toast.service';
+
+/** El negocio en baja: cuándo se borra y cómo repetir el acceso reactivándolo. */
+interface PendingDeletion {
+  deletesAt: Date | null;
+  reactivate: () => Promise<void>;
+}
+
+/**
+ * Días de calendario hasta el borrado: hoy es 0 y mañana 1, sea la hora que
+ * sea. Por fechas y no por horas, igual que `daysUntilDeletion` en la app: con
+ * horas, «el 16 de noviembre» podía salir junto a «en 8 días» siendo hoy el 7.
+ */
+export function daysUntilDeletion(deletesAt: Date, now = new Date()): number {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = new Date(deletesAt.getFullYear(), deletesAt.getMonth(), deletesAt.getDate());
+  return Math.max(0, Math.round((day.getTime() - today.getTime()) / 86_400_000));
+}
 
 /**
  * `/acceder` — the web twin of `login_screen.dart`, including the notice for
@@ -42,6 +60,7 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly social = inject(SocialAuth);
   private readonly pending = inject(PendingSocial);
+  private readonly toasts = inject(ToastService);
 
   readonly expired = this.route.snapshot.queryParamMap.has('expirada');
   readonly changed = this.route.snapshot.queryParamMap.has('cambiada');
@@ -56,6 +75,8 @@ export class LoginComponent {
   /** Cuál de los dos botones está girando. Null si ninguno. */
   readonly socialBusy = signal<SocialProvider | null>(null);
   readonly error = signal<string | null>(null);
+  /** El negocio tiene la baja pedida y se está preguntando qué hacer. */
+  readonly pendingDeletion = signal<PendingDeletion | null>(null);
 
   constructor() {
     // Para que la ventana de Google o Apple se abra al primer clic.
@@ -81,6 +102,10 @@ export class LoginComponent {
       await this.goOn();
     } catch (cause) {
       if (cause instanceof SocialSignInCancelled) return;
+      const idToken = identity?.idToken;
+      if (this.askIfPending(cause, () => this.auth.loginWithProvider(provider, idToken!, true))) {
+        return;
+      }
       if (cause instanceof SocialSignInUnavailable) {
         this.error.set(cause.message);
         return;
@@ -114,6 +139,9 @@ export class LoginComponent {
       await this.auth.login(this.email.trim(), this.password);
       await this.goOn();
     } catch (cause) {
+      const email = this.email.trim();
+      const password = this.password;
+      if (this.askIfPending(cause, () => this.auth.login(email, password, true))) return;
       const status = (cause as { status?: number }).status;
       this.error.set(
         cause instanceof WrongRoleError
@@ -127,6 +155,51 @@ export class LoginComponent {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  /** El texto de la pregunta: cuánto queda y qué no vuelve. */
+  deletionText(pending: PendingDeletion): string {
+    const tail = '¿Quieres reactivarlo? Las citas que se cancelaron no se recuperan.';
+    if (!pending.deletesAt) return `Se borrará pronto. ${tail}`;
+    const days = daysUntilDeletion(pending.deletesAt);
+    const when = days === 0 ? 'Se borra hoy' : days === 1 ? 'Se borra mañana' : `Se borra en ${days} días`;
+    const date = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' }).format(pending.deletesAt);
+    return `${when}, el ${date}. ${tail}`;
+  }
+
+  /** Repite el acceso pidiendo reactivar el negocio. */
+  async reactivate(): Promise<void> {
+    const pending = this.pendingDeletion();
+    if (!pending || this.busy()) return;
+    this.busy.set(true);
+    this.error.set(null);
+    try {
+      await pending.reactivate();
+      this.pendingDeletion.set(null);
+      this.toasts.show('Negocio reactivado. Vuelve a aceptar reservas.');
+      await this.goOn();
+    } catch (cause) {
+      this.error.set(message(cause));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  /** «Salir»: el negocio sigue en baja y no se llegó a abrir sesión. */
+  leave(): void {
+    this.pendingDeletion.set(null);
+    this.password = '';
+  }
+
+  /**
+   * Si el fallo es un negocio en baja, se pregunta en vez de pintar un error.
+   * [retry] es el mismo acceso, pidiendo reactivar.
+   */
+  private askIfPending(cause: unknown, retry: () => Promise<void>): boolean {
+    const pending = deletionPending(cause);
+    if (!pending) return false;
+    this.pendingDeletion.set({ deletesAt: pending.deletesAt, reactivate: retry });
+    return true;
   }
 
   /**

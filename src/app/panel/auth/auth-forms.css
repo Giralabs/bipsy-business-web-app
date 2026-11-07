@@ -26,6 +26,8 @@
 
 .auth-notice { margin-bottom: 16px; }
 .auth-error { margin: -4px 0 14px; }
+.auth-deletion__error { margin: 12px 0 0; }
+.auth-deletion__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 
 /* La escala propia del acceso. Sólo afecta a estas páginas: la hoja está
    encapsulada en el componente. */
