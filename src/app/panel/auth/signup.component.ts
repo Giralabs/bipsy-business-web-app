@@ -24,6 +24,7 @@ import { PnOption, PnSelectComponent } from '../ui/select.component';
 import { scheduleToApi } from '../core/api/schedule';
 import { message, serverReason } from '../core/data/resource';
 import { TRIAL_LABEL } from '../../data/site.data';
+import { TERMS_VERSION } from '../../data/legal/legal.models';
 import { CoachService } from '../onboarding/coach.service';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -411,6 +412,9 @@ export class SignupComponent {
         autonomous: this.autonomous,
         categoryId: this.categoryId,
         acceptedTerms: true,
+        // Qué versión aceptó: sin ella el backend guardaba la fecha pero no el
+        // texto, y no habría forma de probar qué condiciones se aceptaron.
+        termsVersion: TERMS_VERSION,
         marketingOptIn: this.marketingOptIn,
       });
       // The server has just e-mailed the link: the countdown starts now, so
