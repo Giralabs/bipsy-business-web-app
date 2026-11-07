@@ -15,6 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import { MAP_STYLE_DARK, MAP_STYLE_LIGHT, loadGoogleMaps, googleMapsRefused, onGoogleMapsRefused } from '../core/places/google-maps';
+import { loadOpenMap, openMapStyle } from '../core/places/open-map';
 
 declare const google: any;
 
@@ -32,8 +33,13 @@ const SPAIN: MapPoint = { latitude: 40.4168, longitude: -3.7038 };
  * The pin can be dragged, and a click anywhere on the map moves it there.
  * Usually it is not needed: picking an address already drops it in place.
  * Google Maps, as the app's Android map and the client web. If Google refuses
- * it (no billing, key not allowed here) `available` emits `false` and the
- * screen stops asking for a pin it cannot offer.
+ * it (no billing, key not allowed here) the same pin goes on an OpenStreetMap
+ * map (`open-map.ts`), and only if that fails too does `available` emit
+ * `false` and the screen stop asking for a pin it cannot offer.
+ *
+ * Either way what is saved is the same latitude and longitude (WGS84), which
+ * the apps draw on Google Maps (Android) and Apple Maps (iPhone) at the very
+ * same door: the coordinates do not depend on whose map placed them.
  */
 @Component({
   selector: 'pn-location-map',
@@ -86,6 +92,10 @@ export class PnLocationMapComponent implements AfterViewInit, OnChanges, OnDestr
   private marker?: any;
   private stopListening?: () => void;
   private stopObserving?: () => void;
+  /** The OpenStreetMap fallback, when Google refused: map and pin. */
+  private open?: { map: any; marker: any };
+  private fallingBack = false;
+  private destroyed = false;
 
   async ngAfterViewInit(): Promise<void> {
     this.stopListening = onGoogleMapsRefused(() => this.zone.run(() => this.fail()));
@@ -149,6 +159,16 @@ export class PnLocationMapComponent implements AfterViewInit, OnChanges, OnDestr
   }
 
   ngOnChanges(): void {
+    if (this.open) {
+      this.open.marker.setDraggable(!this.disabled);
+      if (!this.point) return;
+      const here = this.open.marker.getLngLat();
+      if (here.lat === this.point.latitude && here.lng === this.point.longitude) return;
+      const at: [number, number] = [this.point.longitude, this.point.latitude];
+      this.open.marker.setLngLat(at);
+      this.open.map.jumpTo({ center: at, zoom: Math.max(this.open.map.getZoom(), 16) });
+      return;
+    }
     if (!this.map || !this.marker) return;
     this.marker.setDraggable(!this.disabled);
     if (!this.point) return;
@@ -161,16 +181,80 @@ export class PnLocationMapComponent implements AfterViewInit, OnChanges, OnDestr
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.stopListening?.();
     this.stopObserving?.();
+    this.open?.map.remove();
   }
 
+  /**
+   * Google said no: the pin moves to an OpenStreetMap map in the same box.
+   * Only if that cannot load either is the map given up.
+   */
   private fail(): void {
-    if (this.failed()) return;
+    if (this.failed() || this.fallingBack || this.open) return;
     this.stopObserving?.();
-    this.failed.set(true);
-    this.available.emit(false);
-    this.cdr.markForCheck();
+    this.fallingBack = true;
+    void this.fallBack();
+  }
+
+  private async fallBack(): Promise<void> {
+    const host = this.canvas?.nativeElement;
+    try {
+      if (!host) throw new Error('Sin lienzo');
+      const lib = await loadOpenMap();
+      if (this.destroyed) return;
+      // Google may have drawn its greyed-out map in the box: start clean.
+      host.replaceChildren();
+      const at = this.point ?? SPAIN;
+      const center: [number, number] = [at.longitude, at.latitude];
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      const map = new lib.Map({
+        container: host,
+        style: openMapStyle(dark),
+        center,
+        zoom: this.point ? 16 : 4.5,
+        attributionControl: { compact: true },
+        cooperativeGestures: true,
+      });
+      // Los nombres en español cuando OpenStreetMap los tiene («España», no
+      // «Spain»); si no, el del sitio.
+      map.on('style.load', () => {
+        for (const layer of map.getStyle().layers ?? []) {
+          if (layer.type === 'symbol' && map.getLayoutProperty(layer.id, 'text-field')) {
+            map.setLayoutProperty(layer.id, 'text-field', ['coalesce', ['get', 'name:es'], ['get', 'name']]);
+          }
+        }
+      });
+      map.addControl(new lib.NavigationControl({ showCompass: false }), 'top-right');
+      // Grafito sobre el mapa claro y menta sobre el oscuro, donde el grafito se perdía.
+      const marker = new lib.Marker({ color: dark ? '#C0EED3' : '#2E343B', draggable: !this.disabled })
+        .setLngLat(center)
+        .addTo(map);
+      marker.on('dragend', () => this.zone.run(() => this.emitOpen(marker.getLngLat())));
+      map.on('click', (event: any) =>
+        this.zone.run(() => {
+          if (this.disabled) return;
+          marker.setLngLat(event.lngLat);
+          this.emitOpen(event.lngLat);
+        }),
+      );
+      this.open = { map, marker };
+      this.map = undefined;
+      this.marker = undefined;
+      this.available.emit(true);
+    } catch {
+      this.failed.set(true);
+      this.available.emit(false);
+    } finally {
+      this.fallingBack = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  /** Same shape as the Google pin: what is saved does not know whose map it was. */
+  private emitOpen(at: { lat: number; lng: number }): void {
+    this.moved.emit({ latitude: at.lat, longitude: at.lng });
   }
 
   private emit(at: any): void {
