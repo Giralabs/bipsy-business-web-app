@@ -4,18 +4,16 @@
 @if (!promoDismissed && !session.signedIn()) {
   <aside class="promo" aria-label="Oferta">
     <div class="promo__inner">
+      <!-- Toda la tira es el enlace: el botón de la derecha solo lo señala. -->
       <a routerLink="/registro" class="promo__link">
-        <span class="promo__gift material-symbols-rounded fill">redeem</span>
         <span class="promo__text">
-          <strong>{{ trialLabel }}</strong>
-          <span class="promo__sep" aria-hidden="true">·</span>
-          <span class="promo__extra">sin permanencia</span>
-          <span class="promo__sep" aria-hidden="true">·</span>
-          <span class="promo__extra">tu equipo, gratis</span>
+          <strong class="promo__wide">Tu primer mes, gratis.</strong>
+          <strong class="promo__narrow">Primer mes gratis</strong>
+          <span class="promo__extra">Sin permanencia y con todo tu equipo incluido.</span>
         </span>
         <span class="promo__go">
-          Empezar
-          <span class="material-symbols-rounded">arrow_forward</span>
+          Empezar<span class="promo__wide">&nbsp;gratis</span>
+          <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
         </span>
       </a>
       <button type="button" class="promo__close" (click)="dismissPromo()" aria-label="Ocultar el aviso">
@@ -140,7 +138,8 @@
                 <!-- The help centre is a site of its own, so it needs an href
                      rather than a route. -->
                 <a class="drop__item" [style.--i]="ri"
-                   [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null">
+                   [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null"
+                   [attr.target]="r.external ? '_blank' : null" [attr.rel]="r.external ? 'noopener' : null">
                   <span class="drop__icon material-symbols-rounded fill">{{ r.icon }}</span>
                   <span>
                     <span class="drop__title">{{ r.title }}</span>
@@ -156,8 +155,9 @@
 
     <div class="nav__actions">
       <!-- The help centre is its own site (bipsy-help-app), so this leaves
-           the app rather than routing inside it. -->
-      <a [href]="helpUrl" class="nav__help" aria-label="Centro de ayuda">
+           the app rather than routing inside it, and in a new tab: whoever
+           looks something up is usually halfway through the page or a sign-up. -->
+      <a [href]="helpUrl" target="_blank" rel="noopener" class="nav__help" aria-label="Centro de ayuda (se abre en otra pestaña)">
         <span class="material-symbols-rounded">help</span>
         <span class="nav__help-label">Ayuda</span>
       </a>
@@ -234,14 +234,15 @@
           <div class="mobile__sub">
             @for (r of resources; track r.link) {
               <a class="mobile__link"
-                 [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null">
+                 [routerLink]="r.external ? null : r.link" [href]="r.external ? r.link : null"
+                 [attr.target]="r.external ? '_blank' : null" [attr.rel]="r.external ? 'noopener' : null">
                 <span class="material-symbols-rounded">{{ r.icon }}</span>{{ r.title }}
               </a>
             }
           </div>
         </details>
 
-        <a [href]="helpUrl" class="mobile__top">Ayuda</a>
+        <a [href]="helpUrl" target="_blank" rel="noopener" class="mobile__top">Ayuda</a>
       </nav>
 
       <div class="mobile__actions">
