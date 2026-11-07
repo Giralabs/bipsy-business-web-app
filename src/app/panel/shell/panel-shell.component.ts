@@ -30,6 +30,7 @@ import { PnAvatarComponent } from '../ui/controls';
 import { PnConfirmHostComponent } from '../ui/confirm.service';
 import { PnToastsComponent } from '../ui/toast.service';
 import { PnVerifiedBadgeComponent } from '../ui/verified-badge.component';
+import { DESKTOP_APP_URL, PnDesktopAppPromptComponent, desktopAppOffered } from '../ui/desktop-app.component';
 import { CommandPaletteComponent, PaletteItem } from './command-palette.component';
 import {
   BUSINESS_DESTINATIONS,
@@ -65,6 +66,7 @@ const RAIL_KEY = 'bipsy.panel.rail';
     PnToastsComponent,
     PnConfirmHostComponent,
     PnVerifiedBadgeComponent,
+    PnDesktopAppPromptComponent,
     CoachOverlayComponent,
     CommandPaletteComponent,
   ],
@@ -73,6 +75,9 @@ const RAIL_KEY = 'bipsy.panel.rail';
   styleUrl: './panel-shell.component.css',
 })
 export class PanelShellComponent {
+  /** La app de Windows se ofrece en el menú de la cuenta (ver PnDesktopAppPromptComponent). */
+  readonly desktopApp = desktopAppOffered();
+  readonly desktopAppUrl = DESKTOP_APP_URL;
   readonly auth = inject(AuthService);
   readonly coach = inject(CoachService);
   readonly verification = inject(VerificationStore);

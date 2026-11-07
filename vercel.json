@@ -1,4 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!descargas/).*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/descargas/(.*)\\.exe",
+      "headers": [
+        { "key": "Content-Type", "value": "application/vnd.microsoft.portable-executable" },
+        { "key": "Content-Disposition", "value": "attachment; filename=\"BipsyBusiness.exe\"" },
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    }
+  ]
 }
