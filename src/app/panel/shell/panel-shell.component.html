@@ -144,6 +144,12 @@
             <a class="sb__menu-row" role="menuitem" routerLink="/ayuda" (click)="closeMenu()">
               <span class="material-symbols-rounded">help</span> Centro de ayuda
             </a>
+            <!-- La entrada fija de la app de Windows: el aviso solo sale una vez. -->
+            @if (desktopApp) {
+              <a class="sb__menu-row" role="menuitem" [href]="desktopAppUrl" download="BipsyBusiness.exe" (click)="closeMenu()">
+                <span class="material-symbols-rounded">desktop_windows</span> Descargar la app para Windows
+              </a>
+            }
             <span class="sb__menu-sep" aria-hidden="true"></span>
             <button type="button" class="sb__menu-row sb__menu-row--danger" role="menuitem" (click)="logout()">
               <span class="material-symbols-rounded">logout</span> Cerrar sesión
@@ -184,6 +190,9 @@
         </button>
       </div>
     }
+
+    <!-- La app de Windows: una tira que se quita con la ✕, no un diálogo. -->
+    <pn-desktop-app-prompt />
 
     <div id="contenido-panel" tabindex="-1">
       <router-outlet />

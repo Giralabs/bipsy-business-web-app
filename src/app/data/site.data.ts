@@ -14,8 +14,11 @@
 export const TRIAL_MONTHS = 1;
 /** Courtesy days after the sign-up, before choosing a plan (`Business.WELCOME_TRIAL_DAYS`). */
 export const WELCOME_DAYS = 3;
-/** The trial as a pill or a headline: «1.er mes gratis». */
-export const TRIAL_LABEL = '1.er mes gratis';
+/**
+ * The trial as a pill or a headline. Spelt out: «1.er mes gratis» read like an
+ * abbreviation in a hurry, and José asked for it to go.
+ */
+export const TRIAL_LABEL = 'Primer mes gratis';
 /** The trial as a call to action. */
 export const TRIAL_CTA = 'Probar el primer mes gratis';
 

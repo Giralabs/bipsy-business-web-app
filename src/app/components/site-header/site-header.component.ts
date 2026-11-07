@@ -17,7 +17,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/ro
 import { Subscription, filter } from 'rxjs';
 import { FEATURE_GROUPS, Feature, FeatureGroup, featuresOf } from '../../data/features.data';
 import { BUSINESS_TYPES } from '../../data/business-types.data';
-import { HELP_URL, TRIAL_CTA, TRIAL_LABEL } from '../../data/site.data';
+import { HELP_URL, TRIAL_CTA } from '../../data/site.data';
 
 type MenuId = 'features' | 'types' | 'resources';
 
@@ -64,7 +64,6 @@ export class SiteHeaderComponent implements OnInit, OnDestroy {
   }));
   readonly types = BUSINESS_TYPES;
   readonly resources = RESOURCES;
-  readonly trialLabel = TRIAL_LABEL;
   readonly trialCta = TRIAL_CTA;
   readonly helpUrl = HELP_URL;
   /** Signed in: the header shows «Tu panel» instead of the guest buttons. */

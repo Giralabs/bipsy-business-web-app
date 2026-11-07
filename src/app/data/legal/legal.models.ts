@@ -63,11 +63,10 @@ export interface LegalDocument {
  * denominación completa con su forma jurídica ("Giralabs S.L.", p. ej.); si se
  * opera como autónomo, el nombre y apellidos de la persona física.
  *
- * A 2026-09-02 no hay alta ninguna: ni sociedad ni autónomo. Mientras siga así
- * NO se puede publicar un aviso legal válido (no hay prestador al que
- * identificar) ni cobrar nada —ni las tarifas de cancelación, que ya están en
- * el código, ni las suscripciones—: Stripe pide identificación fiscal para
- * dejar de estar en modo prueba. Ver docs/LEGAL-PENDIENTE.md.
+ * Para COBRAR las suscripciones el titular tiene que estar dado de alta como
+ * empresario (autónomo o sociedad) y emitir factura por cada cobro: identificarse
+ * aquí no basta. Esto no lo puede comprobar el código; ver el informe de la
+ * revisión legal del 7/11/2026.
  */
 export const LEGAL_COMPANY = {
   /** Nombre comercial, el que ve el usuario. */
@@ -83,6 +82,18 @@ export const LEGAL_COMPANY = {
   email: 'soporte@bipsy.es',
   privacyEmail: 'soporte@bipsy.es',
 } as const;
+
+/**
+ * Versión vigente de los Términos y condiciones. El alta del panel la manda al
+ * backend (`RegisterBusinessRequest.termsVersion`), que la guarda en
+ * `actor.terms_version` junto a la fecha: es la prueba de QUÉ aceptó cada
+ * negocio. Las Condiciones de suscripción y el Encargo del tratamiento forman
+ * parte de esa misma aceptación.
+ *
+ * ⚠️ Va a la par que `LegalLinks.currentVersion` de la app de negocio y que la
+ * de bipsy-web-app: si se sube aquí, se sube allí.
+ */
+export const TERMS_VERSION = '2.1';
 
 /** True mientras falte algún dato obligatorio del prestador. */
 export const LEGAL_COMPANY_INCOMPLETE =

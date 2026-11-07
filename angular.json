@@ -53,6 +53,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "{maplibre-gl.css,maplibre-gl-worker.mjs}",
+                "input": "node_modules/maplibre-gl/dist",
+                "output": "vendor/maplibre"
               }
             ],
             "styles": [

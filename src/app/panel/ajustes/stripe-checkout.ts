@@ -176,7 +176,7 @@ function paymentMethodOf(result: SetupIntentResult): string | null {
             @if (offer; as o) {
               <p class="pn-dim sc-plan__line">{{ o.label }} · {{ offerTerm(o, !!freeUntil()) }}</p>
             } @else if (freeUntil()) {
-              <p class="pn-dim sc-plan__line">1.er mes gratis</p>
+              <p class="pn-dim sc-plan__line">Primer mes gratis</p>
             }
           </div>
           <p class="sc-plan__price pn-tabular">
@@ -200,6 +200,14 @@ function paymentMethodOf(result: SetupIntentResult): string | null {
           </p>
         } @else if (!loading() && !error()) {
           <p class="sc-note">Se cobra hoy y cada mes por adelantado.</p>
+        }
+        <!-- LSSI-CE art. 27: las condiciones, a mano ANTES de contratar, no solo en el alta. -->
+        @if (!saving) {
+          <p class="sc-note sc-legal">
+            Al pulsar «{{ actionLabel() }}» contratas una suscripción mensual que se renueva sola hasta que la
+            canceles, según las
+            <a href="/legal/condiciones-suscripcion" target="_blank" rel="noopener">condiciones de suscripción</a>.
+          </p>
         }
 
         @if (error(); as text) {
@@ -241,6 +249,8 @@ function paymentMethodOf(result: SetupIntentResult): string | null {
       .sc-plan__price span { font-size: 0.8125rem; font-weight: 600; color: var(--clr-text-3); }
       .sc-plan__price s { font-size: 0.9375rem; font-weight: 600; color: var(--clr-text-3); }
       .sc-note { margin-top: 14px; font-size: 0.8125rem; color: var(--clr-text-2); line-height: 1.5; }
+      .sc-legal { margin-top: 8px; color: var(--clr-text-3, var(--clr-text-2)); }
+      .sc-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
       .sc-element { min-height: 190px; }
       .sc-element--hidden { position: absolute; opacity: 0; pointer-events: none; }
       .sc-safe { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 0.8125rem; color: var(--clr-text-3); }

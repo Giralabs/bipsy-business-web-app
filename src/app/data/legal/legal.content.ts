@@ -1,4 +1,4 @@
-import { LegalDocument, LEGAL_COMPANY } from './legal.models';
+import { LegalDocument, LEGAL_COMPANY, TERMS_VERSION } from './legal.models';
 
 /**
  * Los cuatro documentos legales publicados.
@@ -8,9 +8,15 @@ import { LegalDocument, LEGAL_COMPANY } from './legal.models';
  * cookies, las claves que escribe `TokenStorageService`. Si cambia el
  * comportamiento, cambia el documento en el mismo cambio o pasa a ser falso.
  *
- * No los ha revisado un abogado. Cubren lo que exigen la LSSI-CE, el RGPD, el
- * Reglamento de Servicios Digitales y el Reglamento P2B, pero conviene que los
- * lea uno en cuanto sea asumible.
+ * Revisados el 7/11/2026 contra la LSSI-CE, el RGPD y la LOPDGDD, el
+ * Reglamento de Servicios Digitales y el Reglamento P2B, y contra lo que hace de
+ * verdad el backend (cobros directos en la cuenta de Stripe del negocio, baja en
+ * dos tiempos, proveedores reales). Esa revisión no sustituye a la de un abogado
+ * colegiado antes de publicar.
+ *
+ * ⚠️ Esta web publica su propia versión: la de bipsy-web-app era una copia y en
+ * la 2.1 se separan (cookies distintas, más proveedores, el encargo del
+ * tratamiento). Lo común —términos, privacidad— hay que llevarlo también allí.
  *
  * ⚠️ El texto se pinta TAL CUAL en un <p>: no hay markdown. Un `**negrita**`
  * sale con los asteriscos a la vista. Si algún día hace falta destacar algo,
@@ -30,8 +36,11 @@ const TERMS: LegalDocument = {
   // resultados, contenidos ilicitos y el preaviso de baja a los negocios—.
   // Quien acepto la 1.1-borrador no acepto nada de eso, asi que sube entera.
   // LegalLinks.currentVersion (app de negocio) tiene que ir a la par.
-  version: '2.0',
-  updatedAt: '2 de septiembre de 2026',
+  // 2.1: los cobros de las tarifas los hace el negocio en su cuenta de Stripe
+  // (no Bipsy), la baja del negocio en dos tiempos, los datos a los que accede
+  // cada parte y el cauce de reclamaciones de los negocios.
+  version: TERMS_VERSION,
+  updatedAt: '7 de noviembre de 2026',
   sections: [
     {
       id: 'titular',
@@ -55,8 +64,12 @@ const TERMS: LegalDocument = {
           'clases particulares y peluquería canina, entre otros.',
         'Bipsy es un intermediario tecnológico. El servicio contratado lo presta el negocio, no Bipsy, ' +
           'y es el negocio quien responde de su calidad, sus precios y su cumplimiento.',
-        'Usar Bipsy como cliente es gratuito. Los negocios pueden contratar un plan de pago, que se ' +
-          'describe dentro de la aplicación Bipsy Business antes de contratarlo.',
+        'Usar Bipsy como cliente es gratuito. Los negocios usan Bipsy Business (aplicaciones móviles, ' +
+          'panel web y aplicación de escritorio) con un plan de pago.',
+        'Si te das de alta como negocio, además de estos Términos aceptas las Condiciones de ' +
+          'suscripción, que regulan el plan de pago, y el Encargo del tratamiento, que regula cómo ' +
+          'tratamos por tu cuenta los datos de tus clientes y de tu equipo. Los tres documentos forman ' +
+          'el contrato, y puedes consultarlos y guardarlos en cualquier momento en esta web.',
       ],
     },
     {
@@ -101,11 +114,13 @@ const TERMS: LegalDocument = {
         'El cobro se realiza sobre la tarjeta que tengas guardada, sin necesidad de que hagas nada más, y ' +
           'queda registrado en el apartado «Pagos» de la aplicación. Si el cargo es rechazado por tu ' +
           'entidad, la cancelación se mantiene igualmente y el intento queda reflejado como fallido.',
-        'El cobro lo realiza Bipsy, que actúa como quien percibe el importe frente a ti, y liquida al ' +
-          'negocio lo que le corresponda conforme a su relación con nosotros.',
-        'A fecha de hoy la pasarela de pago está desactivada y no se realiza ningún cobro: ningún negocio ' +
-          'puede exigir tarjeta ni cobrar una penalización. Este apartado describe cómo funcionará cuando ' +
-          'se active, y avisaremos antes de que ocurra.',
+        'Quien te cobra es el negocio, no Bipsy. Para poder pedir tarjeta o cobrar por la aplicación, el ' +
+          'negocio abre su propia cuenta de cobros en Stripe, aceptando el acuerdo de cuenta conectada de ' +
+          'Stripe, y los importes se cargan directamente en esa cuenta, a su nombre: es el negocio quien ' +
+          'aparece en el extracto de tu tarjeta. Bipsy solo retiene, de cada cobro, la comisión que Stripe ' +
+          'le factura por procesarlo.',
+        'Todo esto solo se aplica si el negocio lo tiene activado. Si no exige tarjeta ni fija una tarifa, ' +
+          'cancelar o no presentarte no tiene coste a través de Bipsy.',
       ],
     },
     {
@@ -153,8 +168,15 @@ const TERMS: LegalDocument = {
           'hojas de reclamaciones cuando procedan.',
       ],
       closingParagraphs: [
-        'Puedes descargar en cualquier momento los datos de tu ficha, tu catálogo y tus citas desde la ' +
-          'aplicación Bipsy Business, y llevártelos si dejas de usar Bipsy.',
+        'Qué datos ve cada parte: el negocio accede a los datos que sus clientes facilitan al reservar ' +
+          '(nombre, contacto y citas con ese negocio) y a las valoraciones que recibe; no accede a las ' +
+          'citas que sus clientes tengan con otros negocios. Bipsy accede a todos los datos de la ' +
+          'plataforma solo en la medida necesaria para prestar el servicio, y no los cede a terceros.',
+        `Puedes exportar tus registros de Finanzas a una hoja de cálculo desde Bipsy Business y, si dejas ` +
+          `de usar Bipsy, pedirnos en ${LEGAL_COMPANY.email} una copia del resto de datos de tu negocio ` +
+          '(ficha, servicios, clientes y citas) en un formato estructurado y de uso común.',
+        'Nada en estas condiciones te impide ofrecer tus servicios por otros canales, ni hacerlo en ' +
+          'condiciones o precios distintos de los que publicas en Bipsy.',
       ],
     },
     {
@@ -169,6 +191,13 @@ const TERMS: LegalDocument = {
         'La moderación se hace de forma manual, a partir de los avisos que recibimos y de las revisiones ' +
           'que hacemos por nuestra cuenta. No usamos sistemas automáticos que decidan por sí solos retirar ' +
           'contenido ni cerrar cuentas.',
+        'Los clientes pueden bloquear a un negocio y denunciarlo, y los negocios pueden denunciar a un ' +
+          'cliente desde el chat o desde una valoración. Las denuncias las revisa una persona.',
+        'La insignia de negocio verificado se concede de forma automática cuando el negocio completa su ' +
+          'ficha según los requisitos que se le muestran en Bipsy Business (cobros configurados, correo ' +
+          'verificado, foto, portada, descripción, servicios, horario y equipo con foto). Indica que la ' +
+          'ficha está completa, no que hayamos comprobado la calidad del servicio, y no altera el orden ' +
+          'de los resultados.',
       ],
     },
     {
@@ -212,8 +241,18 @@ const TERMS: LegalDocument = {
       id: 'baja',
       title: '10. Suspensión, restricción y baja',
       paragraphs: [
-        'Puedes darte de baja cuando quieras desde tu perfil. La baja no cancela por sí sola las citas ya ' +
-          'confirmadas: gestiónalas antes o quedarán sujetas a la política de cancelación del negocio.',
+        'Si eres cliente, puedes darte de baja cuando quieras desde tu perfil. La baja no cancela por sí ' +
+          'sola las citas ya confirmadas: gestiónalas antes o quedarán sujetas a la política de ' +
+          'cancelación del negocio.',
+        'Si eres un negocio, puedes pedir la baja desde Bipsy Business. Desde ese momento tu negocio deja ' +
+          'de aparecer en Bipsy y de aceptar reservas, se cancelan tus citas futuras con la devolución ' +
+          'íntegra de lo que hubieran pagado tus clientes, a los que avisamos, y se avisa a tu equipo. ' +
+          'Tienes catorce días para arrepentirte: si vuelves a entrar en ese plazo, la baja se anula, ' +
+          'aunque las citas canceladas no se recuperan. Pasado ese plazo, la cuenta se elimina en los ' +
+          'términos de la Política de privacidad. La suscripción se gestiona como explican las ' +
+          'Condiciones de suscripción.',
+        'Los trabajadores de un negocio pueden eliminar su cuenta en cualquier momento desde la ' +
+          'aplicación, con efecto inmediato.',
         'Si somos nosotros quienes restringimos, suspendemos o cerramos una cuenta, lo hacemos con estas ' +
           'garantías:',
       ],
@@ -227,6 +266,11 @@ const TERMS: LegalDocument = {
       ],
       closingParagraphs: [
         'Salvo que el incumplimiento sea grave, avisaremos antes y daremos margen para corregirlo.',
+        `Reclamaciones de los negocios: si tienes un negocio en Bipsy y no estás de acuerdo con una ` +
+          `decisión nuestra (una restricción, la retirada de un contenido, el orden de los resultados, un ` +
+          `cobro de tu plan) o con cualquier otro aspecto del servicio, escríbenos a ${LEGAL_COMPANY.email} ` +
+          'con el asunto «Reclamación». Es gratuito, lo estudia una persona, y te responderemos por escrito ' +
+          'y de forma motivada en un plazo razonable, que procuraremos que no supere los treinta días.',
       ],
     },
     {
@@ -279,7 +323,8 @@ const TERMS: LegalDocument = {
         'Estas condiciones se rigen por la legislación española.',
         'Para las controversias con usuarios que actúen como consumidores serán competentes los juzgados ' +
           'que determine la normativa de consumidores, que con carácter general son los del domicilio del ' +
-          'consumidor. Para el resto, los juzgados y tribunales del domicilio del titular.',
+          'consumidor. Para el resto, incluidos los negocios, que contratan como profesionales, los ' +
+          'juzgados y tribunales del domicilio del titular.',
       ],
     },
   ],
@@ -292,15 +337,24 @@ const PRIVACY: LegalDocument = {
   // 2.0 a la vez que los terminos: cambia quien es el responsable —ya no es
   // un marcador de posicion, es una persona identificada—. El backend solo
   // registra la version de los TERMINOS, asi que esto no pide aceptar nada.
-  version: '2.0',
-  updatedAt: '2 de septiembre de 2026',
+  // 2.1: proveedores que faltaban (Apple, tiendas, Crashlytics, Instagram,
+  // Google Fonts), el papel de encargado frente a los negocios y los plazos
+  // reales de la baja.
+  version: '2.1',
+  updatedAt: '7 de noviembre de 2026',
   sections: [
     {
       id: 'responsable',
       title: '1. Responsable del tratamiento',
       paragraphs: [
-        `${LEGAL_COMPANY.legalName}, CIF ${LEGAL_COMPANY.taxId}, con domicilio en ${LEGAL_COMPANY.address}.`,
-        `Para cualquier cuestión sobre tus datos escribe a ${LEGAL_COMPANY.privacyEmail}.`,
+        `${LEGAL_COMPANY.legalName}, NIF ${LEGAL_COMPANY.taxId}, con domicilio en ${LEGAL_COMPANY.address}.`,
+        `Para cualquier cuestión sobre tus datos escribe a ${LEGAL_COMPANY.privacyEmail}, con el asunto ` +
+          '«Privacidad».',
+        'Somos responsables de los datos de las cuentas de Bipsy (clientes, negocios y trabajadores) y de ' +
+          'lo que hacemos con ellos para prestar el servicio. En cambio, cuando un negocio gestiona en Bipsy ' +
+          'Business los datos de sus propios clientes y de su equipo (su agenda, sus notas, sus fichajes), ' +
+          'el responsable es el negocio y nosotros tratamos esos datos por su cuenta, como encargados del ' +
+          'tratamiento, en los términos del Encargo del tratamiento publicado en la web de Bipsy Business.',
       ],
     },
     {
@@ -308,22 +362,38 @@ const PRIVACY: LegalDocument = {
       title: '2. Qué datos tratamos',
       paragraphs: ['Tratamos únicamente los datos necesarios para que el servicio funcione:'],
       bullets: [
-        'Identificación y contacto: nombre, correo electrónico y teléfono.',
-        'Datos de la cuenta: contraseña cifrada y preferencias de la app.',
-        'Datos del negocio: nombre comercial, CIF, dirección y ubicación exacta si la facilitas.',
-        'Actividad: reservas, valoraciones y mensajes de soporte.',
-        'Datos técnicos: identificador de dispositivo para las notificaciones push.',
+        'Identificación y contacto: nombre, correo electrónico y, si lo das, teléfono.',
+        'Datos de la cuenta: contraseña cifrada, o el identificador de Google o Apple si entras con ' +
+          'ellos, y las preferencias de la aplicación.',
+        'Datos del negocio: nombre comercial, NIF o CIF si lo facilitas, dirección, ubicación, horarios, ' +
+          'servicios, precios y fotografías.',
+        'Datos del equipo de un negocio: nombre, correo, horarios, ausencias y registros de fichaje.',
+        'Actividad: reservas, valoraciones, mensajes del chat, denuncias, bloqueos y mensajes de soporte.',
+        'Pagos: un identificador de la tarjeta guardada y el resultado de cada cobro. El número de la ' +
+          'tarjeta, y los datos que un negocio facilita para abrir su cuenta de cobros (fecha de ' +
+          'nacimiento, documento de identidad, dirección e IBAN), van directamente a Stripe; Bipsy solo ' +
+          'guarda el identificador de esa cuenta y su estado.',
+        'Suscripción del negocio: plan, fechas y estado, y el identificador de la compra si la hace en ' +
+          'Google Play o App Store.',
+        'Datos técnicos: identificador del dispositivo para las notificaciones, la dirección IP de cada ' +
+          'petición (para la seguridad del servicio) y, en las aplicaciones móviles, los informes de ' +
+          'fallos, que incluyen el modelo del dispositivo y la versión del sistema.',
       ],
     },
     {
       id: 'finalidad',
       title: '3. Para qué los usamos y con qué base legal',
       paragraphs: [
-        'Ejecución del contrato: gestionar tu cuenta, las reservas y la comunicación con el negocio.',
-        'Obligación legal: conservar la facturación y atender requerimientos de las autoridades.',
-        'Interés legítimo: prevenir el fraude y el abuso de la plataforma, y mejorar el servicio.',
+        'Ejecución del contrato: gestionar tu cuenta, las reservas, los cobros que se hacen a través de ' +
+          'Bipsy, la suscripción de los negocios, el chat y las notificaciones de tus citas.',
+        'Obligación legal: conservar la facturación y atender los requerimientos de las autoridades y los ' +
+          'avisos de contenido ilícito.',
+        'Interés legítimo: proteger la plataforma frente al fraude y el abuso (incluidos los registros de ' +
+          'IP y las denuncias), corregir fallos a partir de los informes de error y mejorar el servicio. ' +
+          'Puedes oponerte escribiéndonos.',
         'Consentimiento: envío de comunicaciones comerciales sobre Bipsy o Giralabs, que es opcional y ' +
-          'puedes retirar en cualquier momento sin que afecte al resto del servicio.',
+          'puedes retirar en cualquier momento sin que afecte al resto del servicio; y las notificaciones ' +
+          'y la ubicación del dispositivo, que tu dispositivo te pide autorizar.',
       ],
     },
     {
@@ -332,6 +402,9 @@ const PRIVACY: LegalDocument = {
       paragraphs: [
         'Si eres un negocio con local, puedes indicar su ubicación exacta para que tus clientes lo ' +
           'encuentren. Esa ubicación es pública dentro de la app.',
+        'Si eres cliente y autorizas la ubicación de tu dispositivo, la usamos en ese momento para ' +
+          'ordenar los negocios por cercanía; en la web, si no la autorizas, usamos una ubicación ' +
+          'aproximada, de ciudad, deducida de tu conexión. No guardamos un historial de tus posiciones.',
         'No rastreamos tu posición en segundo plano en ningún momento.',
       ],
     },
@@ -344,16 +417,25 @@ const PRIVACY: LegalDocument = {
       ],
       bullets: [
         'IONOS — servidor y base de datos, en la Unión Europea.',
-        'Vercel — alojamiento de esta web pública.',
+        'Vercel — alojamiento de las webs.',
         'Cloudflare R2 — almacenamiento de las imágenes y de los archivos que adjuntas a un ticket.',
         'Resend — envío del correo transaccional (verificación, avisos de cita).',
-        'Google Firebase — notificaciones push y, si lo eliges, el acceso con cuenta de Google.',
-        'Google Maps — mapas y búsqueda por zona. Solo se carga al abrir un mapa.',
-        'Stripe — procesamiento de pagos, cuando el negocio exija tarjeta. Los datos de la tarjeta ' +
-          'los recoge Stripe directamente y Bipsy nunca llega a verlos.',
+        'Google Firebase — notificaciones push, informes de fallos de las aplicaciones móviles ' +
+          '(Crashlytics) y, si lo eliges, el acceso con cuenta de Google o de Apple.',
+        'Google Maps Platform — mapas, búsqueda por zona y autocompletado de direcciones.',
+        'Google Fonts — las tipografías de las webs se descargan de los servidores de Google, que ' +
+          'reciben la dirección IP de tu navegador al cargar la página. No instalan cookies.',
+        'Stripe — procesamiento de los pagos con tarjeta y de las suscripciones que se pagan desde el ' +
+          'panel web. Los datos de la tarjeta los recoge Stripe directamente y Bipsy nunca llega a verlos.',
       ],
       closingParagraphs: [
-        'No cedemos tus datos a nadie más, ni los vendemos, ni los usamos para publicidad de terceros.',
+        'Otras entidades tratan datos como responsables independientes, porque eres tú quien se relaciona ' +
+          'con ellas: Apple, si entras con tu cuenta de Apple o contratas un plan en App Store; Google, si ' +
+          'entras con tu cuenta de Google o contratas en Google Play; Stripe, en la cuenta de cobros que ' +
+          'abre cada negocio, que se rige por el acuerdo que el negocio acepta con Stripe; y Meta ' +
+          '(Instagram), solo si un negocio decide conectar su cuenta para importar fotos a su portfolio.',
+        'Cuando reservas, el negocio recibe los datos necesarios para atenderte. No cedemos tus datos a ' +
+          'nadie más, ni los vendemos, ni los usamos para publicidad de terceros.',
       ],
     },
     {
@@ -375,6 +457,11 @@ const PRIVACY: LegalDocument = {
       paragraphs: [
         'Mientras tu cuenta esté activa. Al eliminarla, anonimizamos tus datos personales y conservamos ' +
           'solo lo que exige la ley durante los plazos legales de prescripción.',
+        'La cuenta de un cliente o de un trabajador se anonimiza en el momento en que la elimina. La de ' +
+          'un negocio, catorce días después de que su titular pida la baja, que es el plazo que tiene para ' +
+          'arrepentirse; durante esos días el negocio ya no es visible ni acepta reservas.',
+        'La facturación y los justificantes de los cobros se conservan bloqueados durante los plazos que ' +
+          'exigen la normativa mercantil y tributaria, con carácter general seis años.',
         'Los mensajes de soporte y sus archivos adjuntos se conservan mientras el caso siga abierto y, ' +
           'después, el tiempo necesario para acreditar cómo se resolvió.',
       ],
@@ -392,8 +479,8 @@ const PRIVACY: LegalDocument = {
       id: 'cookies',
       title: '9. Cookies y almacenamiento local',
       paragraphs: [
-        'Esta web usa únicamente almacenamiento técnico imprescindible: guardamos en tu navegador la sesión ' +
-          'iniciada para no pedirte la contraseña en cada página.',
+        'Esta web usa únicamente almacenamiento técnico y de preferencias: la sesión iniciada y que has ' +
+          'cerrado un aviso, por ejemplo. El detalle, clave por clave, está en la Política de cookies.',
         'No usamos cookies de publicidad ni de analítica de terceros, así que no necesitamos pedirte ' +
           'consentimiento para ellas. Si eso cambiara, te lo pediríamos antes de instalarlas.',
         'Las aplicaciones móviles no usan cookies: guardan la sesión en el almacenamiento seguro del ' +
@@ -447,8 +534,8 @@ const NOTICE: LegalDocument = {
   slug: 'aviso-legal',
   title: 'Aviso legal',
   subtitle: 'Quién presta este servicio y en qué condiciones se accede a él',
-  version: '1.0',
-  updatedAt: '2 de septiembre de 2026',
+  version: '1.1',
+  updatedAt: '7 de noviembre de 2026',
   sections: [
     {
       id: 'identificacion',
@@ -462,14 +549,15 @@ const NOTICE: LegalDocument = {
         `NIF: ${LEGAL_COMPANY.taxId}.`,
         `Domicilio: ${LEGAL_COMPANY.address}.`,
         `Correo electrónico de contacto: ${LEGAL_COMPANY.email}.`,
-        'Sitio web: bipsy.es.',
+        'Sitios web: bipsy.es (para clientes) y business.bipsy.es (para negocios).',
         'Actividad: explotación de una plataforma de intermediación para la reserva de servicios ' +
           'prestados con cita previa (bienestar y cuidado personal, salud no sanitaria, deporte, formación ' +
           'y servicios profesionales, entre otros).',
       ],
       closingParagraphs: [
         `«Bipsy» y «Giralabs» son nombres comerciales bajo los que ${LEGAL_COMPANY.legalName} presta el ` +
-          'servicio, tanto en este sitio web como en las aplicaciones móviles Bipsy y Bipsy Business. ' +
+          'servicio, tanto en estos sitios web como en las aplicaciones Bipsy y Bipsy Business (móviles y ' +
+          'de escritorio). ' +
           'Cuando estos documentos dicen «Bipsy» se están refiriendo a esa persona.',
         `El correo ${LEGAL_COMPANY.email} es además el punto de contacto único para las autoridades y ` +
           'para los usuarios, y el idioma de comunicación es el español. Cómo avisar de un contenido ' +
@@ -482,9 +570,11 @@ const NOTICE: LegalDocument = {
       paragraphs: [
         'Este aviso legal regula el acceso, la navegación y el uso de este sitio web y de las aplicaciones ' +
           'móviles de Bipsy, con independencia de que llegues a contratar algo a través de ellos.',
-        'Las condiciones de contratación de las reservas están en los Términos y condiciones; el tratamiento ' +
-          'de tus datos, en la Política de privacidad; y lo que se guarda en tu navegador, en la Política de ' +
-          'cookies. Los cuatro documentos se complementan y ninguno sustituye a los otros.',
+        'Las condiciones de uso y de las reservas están en los Términos y condiciones; las del plan de pago ' +
+          'de los negocios, en las Condiciones de suscripción; el tratamiento de los datos, en la Política ' +
+          'de privacidad y, para los datos que los negocios gestionan en Bipsy Business, en el Encargo del ' +
+          'tratamiento; y lo que se guarda en tu navegador, en la Política de cookies. Los documentos se ' +
+          'complementan y ninguno sustituye a los otros.',
       ],
     },
     {
@@ -590,8 +680,11 @@ const COOKIES: LegalDocument = {
   slug: 'cookies',
   title: 'Política de cookies',
   subtitle: 'Qué se guarda en tu navegador, para qué y cómo quitarlo',
-  version: '1.0',
-  updatedAt: '2 de septiembre de 2026',
+  // 1.1-business: la de bipsy-web-app era una copia con SUS claves. Esta lista
+  // las de business.bipsy.es, que son otras, y Google Fonts, que sí se carga al
+  // entrar. Si se añade una clave a localStorage, va aquí.
+  version: '1.1',
+  updatedAt: '7 de noviembre de 2026',
   sections: [
     {
       id: 'que-son',
@@ -603,9 +696,10 @@ const COOKIES: LegalDocument = {
           'la ley las trata igual.',
         `El responsable de lo que se guarda desde este sitio es ${LEGAL_COMPANY.legalName}, cuyos datos ` +
           'completos están en el Aviso legal.',
-        'Esta política se refiere a la web. Las aplicaciones móviles de Bipsy no usan cookies: guardan la ' +
-          'sesión en el almacenamiento seguro del dispositivo y el identificador de notificaciones en su ' +
-          'propio espacio privado.',
+        'Esta política se refiere a la web de Bipsy Business (business.bipsy.es) y a su panel. Las ' +
+          'aplicaciones móviles no usan cookies: guardan la sesión en el almacenamiento seguro del ' +
+          'dispositivo. La aplicación de escritorio para Windows abre este mismo panel y guarda lo mismo ' +
+          'que se describe aquí, en su propia carpeta del equipo.',
       ],
     },
     {
@@ -613,54 +707,59 @@ const COOKIES: LegalDocument = {
       title: '2. Resumen',
       paragraphs: [
         'Bipsy no usa cookies de publicidad, de analítica ni de seguimiento entre sitios. No verás un banner ' +
-          'de consentimiento porque no hay nada que consentir: todo lo que guardamos es imprescindible para ' +
-          'prestar el servicio que pides, y la normativa exime a ese uso del consentimiento previo.',
-        'Lo que sí conviene que sepas es que dos funciones concretas —el mapa y el pago con tarjeta— cargan ' +
-          'código de Google y de Stripe, y esos proveedores guardan cosas por su cuenta. Se detallan abajo.',
+          'de consentimiento porque no hay nada que consentir: todo lo que guardamos es necesario para ' +
+          'prestar el servicio que pides o para recordar una preferencia que tú has elegido, y la normativa ' +
+          'exime a esos usos del consentimiento previo.',
+        'Lo que sí conviene que sepas es que algunas funciones cargan código de terceros (Google y Stripe), ' +
+          'y esos proveedores pueden guardar cosas por su cuenta. Se detallan abajo.',
       ],
     },
     {
       id: 'propias',
-      title: '3. Almacenamiento propio (imprescindible)',
+      title: '3. Almacenamiento propio',
       paragraphs: [
         'Todo lo siguiente se guarda en el almacenamiento local de tu navegador. No viaja en cada petición ' +
           'como una cookie clásica y no se comparte con nadie. Permanece hasta que cierras sesión o borras ' +
           'los datos del navegador:',
       ],
       bullets: [
-        'bipsy_auth_token — el testigo que acredita tu sesión. Sin él habría que pedirte la contraseña en ' +
-          'cada página.',
-        'bipsy_refresh_token — permite renovar la sesión cuando el anterior caduca, sin volver a pedirte ' +
-          'las credenciales.',
-        'bipsy_role y bipsy_actor_id — si entras como cliente o como negocio, y a qué cuenta corresponde la ' +
-          'sesión. Determinan qué pantallas se te muestran.',
-        'bipsy_promo_business y bipsy_app_banner — recuerdan que has cerrado el aviso superior o la tira ' +
-          'que ofrece la aplicación, para no volver a mostrártelos. Son preferencias de interfaz: no ' +
-          'identifican a nadie ni se envían a ningún sitio.',
+        'bipsy_business_session — la sesión de tu cuenta: el testigo que la acredita y el que permite ' +
+          'renovarla sin volver a pedirte la contraseña. Imprescindible para usar el panel.',
+        'bipsy.maintenance.state y bipsy.maintenance.token — si la web está en mantenimiento y, solo para ' +
+          'el equipo de Bipsy, el pase que permite entrar mientras tanto. Técnicas.',
+        'bipsy.business_tour_seen.<cuenta> — que ya has visto el tutorial de bienvenida, para no ' +
+          'repetírtelo.',
+        'bipsy.panel.rail — si has plegado la barra lateral del panel.',
+        'notif_web_desktop — si quieres recibir avisos de escritorio en este navegador.',
+        'bipsy_business_promo, bipsy_desktop_app_prompt y gipsi.business_verification_banner_dismissed.<cuenta> ' +
+          '— que has cerrado el aviso de la oferta, el de la aplicación para Windows o el de la ' +
+          'verificación, para no volver a mostrártelos.',
       ],
       closingParagraphs: [
-        'Si bloqueas este almacenamiento podrás navegar y consultar negocios, pero no mantener la sesión ' +
-          'iniciada: no podrás reservar, ver tus citas ni escribir al negocio.',
+        'Salvo la sesión y las dos claves de mantenimiento, todas son preferencias de interfaz que eliges ' +
+          'tú: no identifican a nadie ni se envían a ningún sitio. Si bloqueas este almacenamiento podrás ' +
+          'ver la web, pero no mantener la sesión iniciada en el panel.',
       ],
     },
     {
       id: 'terceros',
       title: '4. Servicios de terceros',
       paragraphs: [
-        'Ninguno de estos servicios se carga al entrar en la web. Cada uno se descarga solo cuando usas la ' +
-          'función que lo necesita, y hasta entonces no guarda nada:',
+        'Las tipografías se cargan al entrar en cualquier página. El resto de servicios se descarga solo ' +
+          'cuando usas la función que lo necesita, y hasta entonces no guarda nada:',
       ],
       bullets: [
-        'Google Maps (Google Ireland Limited) — se carga al abrir un mapa, en la búsqueda por zona y en la ' +
-          'ficha de un negocio. Google guarda preferencias del propio mapa y, al servirse desde sus ' +
-          'dominios, puede leer las cookies que ya tengas de tu cuenta de Google.',
-        'Stripe (Stripe Payments Europe, Ltd.) — se carga solo al guardar o usar una tarjeta. Instala las ' +
-          'cookies __stripe_mid y __stripe_sid, que sirven para detectar el fraude y para que el pago no se ' +
-          'pierda a mitad. Son necesarias para poder pagar: sin ellas Stripe rechaza la operación.',
-        'Firebase Authentication (Google) — solo si eliges «Continuar con Google». Guarda en el navegador el ' +
-          'estado de esa autenticación mientras dura.',
-        'Firebase Cloud Messaging (Google) — solo si autorizas las notificaciones. Registra un trabajador de ' +
-          'servicio y un identificador de dispositivo para poder avisarte de tus citas.',
+        'Google Fonts (Google Ireland Limited) — sirve las tipografías y los iconos de la web. Google ' +
+          'recibe la dirección IP de tu navegador al descargarlas, pero no instala cookies.',
+        'Google Maps (Google Ireland Limited) — se carga al abrir un mapa o al buscar una dirección en el ' +
+          'panel. Google guarda preferencias del propio mapa y, al servirse desde sus dominios, puede leer ' +
+          'las cookies que ya tengas de tu cuenta de Google.',
+        'Stripe (Stripe Payments Europe, Ltd.) — se carga solo al contratar un plan, guardar un método de ' +
+          'pago o configurar los cobros. Instala las cookies __stripe_mid y __stripe_sid, que sirven para ' +
+          'detectar el fraude y para que el pago no se pierda a mitad. Son necesarias para poder pagar: sin ' +
+          'ellas Stripe rechaza la operación.',
+        'Firebase Authentication (Google) — solo si eliges entrar con Google o con Apple. Guarda en el ' +
+          'navegador el estado de esa autenticación mientras dura.',
       ],
       closingParagraphs: [
         'Estos proveedores actúan como encargados del tratamiento o, en lo que hacen por cuenta propia, como ' +
@@ -932,8 +1031,8 @@ const CONTACT: LegalDocument = {
   slug: 'contacto',
   title: 'Contacto',
   subtitle: 'Por dónde escribirnos y qué esperar',
-  version: '1.0',
-  updatedAt: '2 de septiembre de 2026',
+  version: '1.1',
+  updatedAt: '7 de noviembre de 2026',
   sections: [
     {
       id: 'donde',
@@ -949,6 +1048,7 @@ const CONTACT: LegalDocument = {
         '«Seguridad» — has encontrado un fallo. Cómo hacerlo, en la página de Seguridad.',
         '«Contenido» — quieres avisarnos de una ficha, una foto o una valoración que no debería estar ahí.',
         '«Negocios» — tienes un local y quieres darte de alta o preguntar por los planes.',
+        '«Reclamación» — no estás de acuerdo con una decisión nuestra o con un cobro de tu plan.',
       ],
     },
     {

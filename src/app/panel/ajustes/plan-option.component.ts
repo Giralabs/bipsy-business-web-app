@@ -36,7 +36,7 @@ import {
             @if (offer; as o) {
               <span class="po__pill po__pill--offer">{{ o.label }}</span>
             } @else if (freeMonth) {
-              <span class="po__pill">1.er mes gratis</span>
+              <span class="po__pill">Primer mes gratis</span>
             }
           </span>
         </div>
