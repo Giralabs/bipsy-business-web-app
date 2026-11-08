@@ -25,16 +25,20 @@
           </div>
         </div>
 
-        <div class="footer__social-wrap">
-          <p class="footer__mini-title">Síguenos</p>
-          <div class="footer__socials">
-            @for (social of socials; track social.id) {
-              <a [href]="social.url" target="_blank" rel="noopener" class="footer__social" [attr.aria-label]="social.label">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
-              </a>
-            }
+        <!-- Only once a profile exists: «Síguenos» over no icons, or icons
+             that lead somewhere else, is what makes a footer look like a demo. -->
+        @if (socials.length) {
+          <div class="footer__social-wrap">
+            <p class="footer__mini-title">Síguenos</p>
+            <div class="footer__socials">
+              @for (social of socials; track social.id) {
+                <a [href]="social.url" target="_blank" rel="noopener" class="footer__social" [attr.aria-label]="social.label">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
+                </a>
+              }
+            </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- ----- LINK COLUMNS ----- -->

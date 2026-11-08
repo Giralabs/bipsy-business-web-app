@@ -22,18 +22,46 @@ export const TRIAL_LABEL = 'Primer mes gratis';
 /** The trial as a call to action. */
 export const TRIAL_CTA = 'Probar el primer mes gratis';
 
-/** Placeholder target for every external link that does not exist yet. */
-const PLACEHOLDER_URL = 'https://www.youtube.com';
-
 export interface ExternalLink {
   label: string;
   url: string;
 }
 
-// TODO: point to the real store listings once the apps are published.
+/** The customer-facing web (bipsy-web-app). */
+export const CLIENT_WEB_URL = 'https://bipsy.es';
+
+/**
+ * Where the store badges lead. Every external link used to point at
+ * youtube.com, left over from a template: a badge that looks right and lands
+ * somewhere else.
+ *
+ * The listings exist but are not published yet (bipsy-web-app,
+ * `data/app-links.ts`, which holds the App Store ids). Until they are, the
+ * badges go to the download page on bipsy.es, which hands out the right store
+ * per device and says «muy pronto» meanwhile. A store link that answers «not
+ * available» is worse than none. When the apps are published, point these at
+ * the listings:
+ *   business: https://apps.apple.com/es/app/id6828380398 ·
+ *             https://play.google.com/store/apps/details?id=com.gipsi.gipsi_business
+ *   customer: https://apps.apple.com/es/app/id6828380156 ·
+ *             https://play.google.com/store/apps/details?id=com.gipsi.gipsi
+ */
+const BUSINESS_DOWNLOAD_URL = `${CLIENT_WEB_URL}/descargar/negocio`;
+const CLIENT_DOWNLOAD_URL = `${CLIENT_WEB_URL}/descargar`;
+
+const PLAY_BADGE = 'assets_apps/donwload_play_store.webp';
+const APP_STORE_BADGE = 'assets_apps/download_app_store.webp';
+
+/** Bipsy Business, the app this site sells. */
 export const STORE_LINKS = {
-  googlePlay: { label: 'Consíguelo en Google Play', url: PLACEHOLDER_URL, image: 'assets_apps/donwload_play_store.webp' },
-  appStore: { label: 'Descárgalo en el App Store', url: PLACEHOLDER_URL, image: 'assets_apps/download_app_store.webp' },
+  googlePlay: { label: 'Consíguelo en Google Play', url: BUSINESS_DOWNLOAD_URL, image: PLAY_BADGE },
+  appStore: { label: 'Descárgalo en el App Store', url: BUSINESS_DOWNLOAD_URL, image: APP_STORE_BADGE },
+} as const;
+
+/** Bipsy, the customers' app: only the page that presents it links to it. */
+export const CLIENT_STORE_LINKS = {
+  googlePlay: { label: 'Consigue Bipsy en Google Play', url: CLIENT_DOWNLOAD_URL, image: PLAY_BADGE },
+  appStore: { label: 'Descarga Bipsy en el App Store', url: CLIENT_DOWNLOAD_URL, image: APP_STORE_BADGE },
 } as const;
 
 export interface SocialLink extends ExternalLink {
@@ -42,27 +70,28 @@ export interface SocialLink extends ExternalLink {
   path: string;
 }
 
-// TODO: point to the real profiles once they exist.
-export const SOCIAL_LINKS: SocialLink[] = [
-  {
+/**
+ * Bipsy's own profiles. None exists yet, so the footer shows no «Síguenos»
+ * (it hides itself while this list is empty). When one is created, add it
+ * here with its real URL; the icons are kept for that day.
+ */
+export const SOCIAL_LINKS: SocialLink[] = [];
+
+/** Icons ready for when the profiles exist. */
+export const SOCIAL_ICONS: Record<SocialLink['id'], Omit<SocialLink, 'url'>> = {
+  instagram: {
     id: 'instagram',
     label: 'Bipsy en Instagram',
-    url: PLACEHOLDER_URL,
     path:
       'M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4Zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8Zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z',
   },
-  {
+  linkedin: {
     id: 'linkedin',
     label: 'Bipsy en LinkedIn',
-    url: PLACEHOLDER_URL,
     path:
       'M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2ZM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2ZM7.1 20.5H3.5V9h3.6v11.5Z',
   },
-];
-
-/** The customer-facing web (bipsy-web-app). */
-// TODO: replace with the production domain of bipsy-web-app when it is deployed.
-export const CLIENT_WEB_URL = PLACEHOLDER_URL;
+};
 
 /**
  * The help centre, which is its own site (bipsy-help-app, in Astro) on its
