@@ -11,7 +11,14 @@ import { MaintenanceService } from './maintenance/maintenance.service';
  * Routes that are the product, not the brochure: they bring their own chrome.
  * `/error` is here too because it has to stand on its own.
  */
-const APP_ROUTES = ['/acceder', '/registro', '/recuperar-contrasena', '/error'];
+const APP_ROUTES = ['/acceder', '/registro', '/unirse', '/recuperar-contrasena', '/error'];
+
+/**
+ * A worker's invitation link, `/equipo/:token` or `/invitacion/:token`: the
+ * same sign-in screens as `/unirse`, one segment deep. Only one: `/equipo/a/b`
+ * matches no route and keeps the chrome around its «not found».
+ */
+const INVITE_ROUTE = /^\/(equipo|invitacion)\/[^/]+$/;
 
 const pathOf = (url: string) => url.split(/[?#]/)[0];
 
@@ -22,7 +29,12 @@ const pathOf = (url: string) => url.split(/[?#]/)[0];
  */
 function bringsOwnChrome(url: string): boolean {
   const path = pathOf(url);
-  return path === '/panel' || path.startsWith('/panel/') || APP_ROUTES.includes(path);
+  return (
+    path === '/panel' ||
+    path.startsWith('/panel/') ||
+    APP_ROUTES.includes(path) ||
+    INVITE_ROUTE.test(path)
+  );
 }
 
 @Component({
