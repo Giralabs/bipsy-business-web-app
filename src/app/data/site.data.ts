@@ -87,14 +87,15 @@ export interface SocialLink {
 }
 
 /**
- * Bipsy's own profiles. None exists yet, so each icon is a button that says
- * «Próximamente en …». When one is created, put its address in `url`.
+ * Bipsy's own profiles. Instagram exists (@bipsy_es); LinkedIn does not yet,
+ * so its icon is a button that says «Próximamente en LinkedIn». When it is
+ * created, put its address in `url`.
  */
 export const SOCIAL_LINKS: SocialLink[] = [
   {
     id: 'instagram',
     label: 'Bipsy en Instagram',
-    url: '',
+    url: 'https://www.instagram.com/bipsy_es/',
     soon: SOON.instagram,
     path:
       'M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4Zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8Zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z',
