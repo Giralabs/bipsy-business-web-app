@@ -15,6 +15,7 @@ import { FrameSequenceComponent } from '../../../../components/frame-sequence/fr
 import { BipRigComponent } from '../../../../components/bip-rig/bip-rig.component';
 import { BUSINESS_TYPES } from '../../../../data/business-types.data';
 import { STORE_LINKS, TRIAL_CTA } from '../../../../data/site.data';
+import { ComingSoonDirective } from '../../../../shared/coming-soon';
 
 /**
  * The hero of the home page: the promise, the two buttons and, on the right,
@@ -23,7 +24,7 @@ import { STORE_LINKS, TRIAL_CTA } from '../../../../data/site.data';
 @Component({
   selector: 'app-home-hero',
   standalone: true,
-  imports: [RouterLink, FrameSequenceComponent, BipRigComponent],
+  imports: [RouterLink, FrameSequenceComponent, BipRigComponent, ComingSoonDirective],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

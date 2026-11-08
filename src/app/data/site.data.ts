@@ -1,3 +1,5 @@
+import { SOON } from '../shared/coming-soon';
+
 /**
  * Site-wide facts: the trial, the store and social links, the contact.
  *
@@ -22,47 +24,90 @@ export const TRIAL_LABEL = 'Primer mes gratis';
 /** The trial as a call to action. */
 export const TRIAL_CTA = 'Probar el primer mes gratis';
 
-/** Placeholder target for every external link that does not exist yet. */
-const PLACEHOLDER_URL = 'https://www.youtube.com';
-
 export interface ExternalLink {
   label: string;
   url: string;
 }
 
-// TODO: point to the real store listings once the apps are published.
+/** The customer-facing web (bipsy-web-app). */
+export const CLIENT_WEB_URL = 'https://bipsy.es';
+
+/**
+ * Whether the apps are published in the stores. Until they are, every store
+ * badge says «Próximamente…» when clicked (shared/coming-soon.ts) instead of
+ * going anywhere. They used to point at youtube.com, left over from a
+ * template: a badge that looks right and lands somewhere else.
+ *
+ * The day they are published: set this to true. The URLs below are already
+ * the real listings (the App Store ids are the «Apple ID» in App Store
+ * Connect; the Play ones come from each app's `applicationId`).
+ */
+export const STORE_LINKS_READY = false;
+
+const PLAY_BADGE = 'assets_apps/donwload_play_store.webp';
+const APP_STORE_BADGE = 'assets_apps/download_app_store.webp';
+
+export interface StoreLink extends ExternalLink {
+  image: string;
+  /** What a click says while the listing is not published; null once it is. */
+  soon: string | null;
+}
+
+const store = (label: string, url: string, image: string, soon: string): StoreLink => ({
+  label,
+  url,
+  image,
+  soon: STORE_LINKS_READY ? null : soon,
+});
+
+/** Bipsy Business, the app this site sells. */
 export const STORE_LINKS = {
-  googlePlay: { label: 'Consíguelo en Google Play', url: PLACEHOLDER_URL, image: 'assets_apps/donwload_play_store.webp' },
-  appStore: { label: 'Descárgalo en el App Store', url: PLACEHOLDER_URL, image: 'assets_apps/download_app_store.webp' },
+  googlePlay: store('Consíguelo en Google Play',
+    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi_business', PLAY_BADGE, SOON.googlePlay),
+  appStore: store('Descárgalo en el App Store',
+    'https://apps.apple.com/es/app/id6828380398', APP_STORE_BADGE, SOON.appStore),
 } as const;
 
-export interface SocialLink extends ExternalLink {
+/** Bipsy, the customers' app: only the page that presents it links to it. */
+export const CLIENT_STORE_LINKS = {
+  googlePlay: store('Consigue Bipsy en Google Play',
+    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi', PLAY_BADGE, SOON.googlePlay),
+  appStore: store('Descarga Bipsy en el App Store',
+    'https://apps.apple.com/es/app/id6828380156', APP_STORE_BADGE, SOON.appStore),
+} as const;
+
+export interface SocialLink {
   id: 'instagram' | 'linkedin';
+  label: string;
+  /** The profile. Empty while it does not exist: then the icon says «Próximamente». */
+  url: string;
+  soon: string;
   /** SVG path in a 24×24 box, painted with currentColor. */
   path: string;
 }
 
-// TODO: point to the real profiles once they exist.
+/**
+ * Bipsy's own profiles. None exists yet, so each icon is a button that says
+ * «Próximamente en …». When one is created, put its address in `url`.
+ */
 export const SOCIAL_LINKS: SocialLink[] = [
   {
     id: 'instagram',
     label: 'Bipsy en Instagram',
-    url: PLACEHOLDER_URL,
+    url: '',
+    soon: SOON.instagram,
     path:
       'M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4Zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8Zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z',
   },
   {
     id: 'linkedin',
     label: 'Bipsy en LinkedIn',
-    url: PLACEHOLDER_URL,
+    url: '',
+    soon: SOON.linkedin,
     path:
       'M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2ZM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2ZM7.1 20.5H3.5V9h3.6v11.5Z',
   },
 ];
-
-/** The customer-facing web (bipsy-web-app). */
-// TODO: replace with the production domain of bipsy-web-app when it is deployed.
-export const CLIENT_WEB_URL = PLACEHOLDER_URL;
 
 /**
  * The help centre, which is its own site (bipsy-help-app, in Astro) on its

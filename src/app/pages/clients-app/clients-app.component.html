@@ -6,8 +6,8 @@
   [split]="true"
   [crumbs]="[{ label: 'Bipsy para tus clientes' }]">
   <ng-container ngProjectAs="[actions]">
-    <a [href]="stores.googlePlay.url" target="_blank" rel="noopener" class="store"><img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" /></a>
-    <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="store"><img [src]="stores.appStore.image" [alt]="stores.appStore.label" /></a>
+    <a [href]="stores.googlePlay.url" [comingSoon]="stores.googlePlay.soon" target="_blank" rel="noopener" class="store"><img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" /></a>
+    <a [href]="stores.appStore.url" [comingSoon]="stores.appStore.soon" target="_blank" rel="noopener" class="store"><img [src]="stores.appStore.image" [alt]="stores.appStore.label" /></a>
     <a [href]="clientWeb" target="_blank" rel="noopener" class="btn btn--secondary">
       <span class="material-symbols-rounded">language</span>Reservar desde la web
     </a>

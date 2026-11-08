@@ -19,3 +19,11 @@
 @if (maintenance.bypass()) {
   <app-maintenance-badge />
 }
+
+<!-- «Web en desarrollo», on every page while Bipsy Business is being finished. -->
+@if (!showMaintenance()) {
+  <app-dev-notice [raised]="maintenance.bypass()" />
+}
+
+<!-- «Próximamente…» for the store badges and the social icons. -->
+<app-coming-soon-toast />
