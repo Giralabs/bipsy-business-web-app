@@ -16,10 +16,10 @@
         <div class="footer__apps">
           <p class="footer__mini-title">Descarga la app</p>
           <div class="footer__stores">
-            <a [href]="stores.googlePlay.url" target="_blank" rel="noopener" class="footer__store">
+            <a [href]="stores.googlePlay.url" [comingSoon]="stores.googlePlay.soon" target="_blank" rel="noopener" class="footer__store">
               <img [src]="stores.googlePlay.image" [alt]="stores.googlePlay.label" />
             </a>
-            <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="footer__store">
+            <a [href]="stores.appStore.url" [comingSoon]="stores.appStore.soon" target="_blank" rel="noopener" class="footer__store">
               <img [src]="stores.appStore.image" [alt]="stores.appStore.label" />
             </a>
           </div>
@@ -29,9 +29,17 @@
           <p class="footer__mini-title">Síguenos</p>
           <div class="footer__socials">
             @for (social of socials; track social.id) {
-              <a [href]="social.url" target="_blank" rel="noopener" class="footer__social" [attr.aria-label]="social.label">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
-              </a>
+              <!-- A profile that does not exist yet is a button that says
+                   «Próximamente»; with its address it becomes a link. -->
+              @if (social.url) {
+                <a [href]="social.url" target="_blank" rel="noopener" class="footer__social" [attr.aria-label]="social.label">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
+                </a>
+              } @else {
+                <button type="button" class="footer__social" [attr.aria-label]="social.label" [comingSoon]="social.soon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="social.path" /></svg>
+                </button>
+              }
             }
           </div>
         </div>

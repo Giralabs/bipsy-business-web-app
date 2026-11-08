@@ -6,6 +6,8 @@ import { SiteFooterComponent } from './components/site-footer/site-footer.compon
 import { MaintenanceBadgeComponent } from './maintenance/maintenance-badge.component';
 import { MaintenancePageComponent } from './maintenance/maintenance-page.component';
 import { MaintenanceService } from './maintenance/maintenance.service';
+import { DevNoticeComponent } from './components/dev-notice/dev-notice.component';
+import { ComingSoonToastComponent } from './shared/coming-soon';
 
 /**
  * Routes that are the product, not the brochure: they bring their own chrome.
@@ -46,6 +48,8 @@ function bringsOwnChrome(url: string): boolean {
     SiteFooterComponent,
     MaintenancePageComponent,
     MaintenanceBadgeComponent,
+    DevNoticeComponent,
+    ComingSoonToastComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',

@@ -5,6 +5,7 @@ import { LEGAL_INDEX } from '../../data/legal/legal.index';
 import { FEATURES } from '../../data/features.data';
 import { BUSINESS_TYPES, FEATURED_TYPE_SLUGS } from '../../data/business-types.data';
 import { HELP_URL, SOCIAL_LINKS, STORE_LINKS } from '../../data/site.data';
+import { ComingSoonDirective } from '../../shared/coming-soon';
 
 interface FooterLink {
   label: string;
@@ -41,7 +42,7 @@ const TOP_FEATURES = [
 @Component({
   selector: 'app-site-footer',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ComingSoonDirective],
   templateUrl: './site-footer.component.html',
   styleUrl: './site-footer.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

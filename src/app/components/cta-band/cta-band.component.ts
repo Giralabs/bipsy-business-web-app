@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { BipRigComponent } from '../bip-rig/bip-rig.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { STORE_LINKS, TRIAL_LABEL } from '../../data/site.data';
+import { ComingSoonDirective } from '../../shared/coming-soon';
 
 /**
  * The closing call to action that ends most pages: headline, the two buttons
@@ -13,7 +14,7 @@ import { STORE_LINKS, TRIAL_LABEL } from '../../data/site.data';
 @Component({
   selector: 'app-cta-band',
   standalone: true,
-  imports: [RouterLink, BipRigComponent, RevealDirective],
+  imports: [RouterLink, BipRigComponent, RevealDirective, ComingSoonDirective],
   templateUrl: './cta-band.component.html',
   styleUrl: './cta-band.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

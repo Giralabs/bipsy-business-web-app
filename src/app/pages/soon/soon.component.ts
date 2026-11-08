@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
 import { STORE_LINKS } from '../../data/site.data';
+import { ComingSoonDirective } from '../../shared/coming-soon';
 
 /**
  * Temporary destination of "Probar gratis" and "Iniciar sesión" until sign-up
@@ -11,7 +12,7 @@ import { STORE_LINKS } from '../../data/site.data';
 @Component({
   selector: 'app-soon',
   standalone: true,
-  imports: [RouterLink, BipSlotComponent],
+  imports: [RouterLink, BipSlotComponent, ComingSoonDirective],
   templateUrl: './soon.component.html',
   styleUrl: './soon.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,7 +6,8 @@ import { BipSlotComponent } from '../../components/bip-slot/bip-slot.component';
 import { CtaBandComponent } from '../../components/cta-band/cta-band.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { TiltDirective } from '../../shared/tilt.directive';
-import { CLIENT_WEB_URL, STORE_LINKS } from '../../data/site.data';
+import { CLIENT_STORE_LINKS, CLIENT_WEB_URL } from '../../data/site.data';
+import { ComingSoonDirective } from '../../shared/coming-soon';
 
 /**
  * Bipsy, the customer app, explained to the business: what its clients can
@@ -15,13 +16,14 @@ import { CLIENT_WEB_URL, STORE_LINKS } from '../../data/site.data';
 @Component({
   selector: 'app-clients-app',
   standalone: true,
-  imports: [RouterLink, PageHeroComponent, PhoneComponent, BipSlotComponent, CtaBandComponent, RevealDirective, TiltDirective],
+  imports: [RouterLink, PageHeroComponent, PhoneComponent, BipSlotComponent, CtaBandComponent, RevealDirective, TiltDirective, ComingSoonDirective],
   templateUrl: './clients-app.component.html',
   styleUrl: './clients-app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClientsAppComponent {
-  readonly stores = STORE_LINKS;
+  /** This page presents the customers' app, so its badges are that app's. */
+  readonly stores = CLIENT_STORE_LINKS;
   readonly clientWeb = CLIENT_WEB_URL;
 
   readonly features = [
