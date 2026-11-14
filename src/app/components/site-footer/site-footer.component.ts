@@ -24,7 +24,7 @@ const TOP_FEATURES = [
   'agenda-y-reservas-online',
   'lista-de-espera',
   'proteccion-contra-plantones',
-  'finanzas',
+  'cobrar-citas',
   'gestion-de-equipo',
   'fichaje',
 ];

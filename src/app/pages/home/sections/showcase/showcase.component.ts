@@ -14,7 +14,7 @@ interface ShowcaseTab {
 const TABS: Array<{ label: string; icon: string; screen: ScreenId; slug: string }> = [
   { label: 'Agenda', icon: 'calendar_month', screen: 'agenda', slug: 'agenda-y-reservas-online' },
   { label: 'Clientes', icon: 'contacts', screen: 'clientes', slug: 'agenda-de-clientes' },
-  { label: 'Finanzas', icon: 'account_balance_wallet', screen: 'finanzas', slug: 'finanzas' },
+  { label: 'Cobros', icon: 'payments', screen: 'cobros', slug: 'cobrar-citas' },
   { label: 'Equipo', icon: 'groups', screen: 'equipo', slug: 'gestion-de-equipo' },
   { label: 'Tu ficha', icon: 'storefront', screen: 'ficha', slug: 'ficha-en-bipsy' },
   { label: 'Lista de espera', icon: 'hourglass_top', screen: 'espera', slug: 'lista-de-espera' },

@@ -45,7 +45,7 @@ const SUBSCRIPTION: LegalDocument = {
         'Hoy se ofrecen dos planes de pago mensual:',
       ],
       bullets: [
-        `Bipsy Business, ${priceOf('BIPSY')} € al mes: agenda y reservas, servicios, equipo, clientes, mensajes, reseñas, fichaje, finanzas, lista de espera y un portfolio de hasta ${BUSINESS_PHOTOS} fotos.`,
+        `Bipsy Business, ${priceOf('BIPSY')} € al mes: agenda y reservas, servicios, equipo, clientes, mensajes, reseñas, fichaje, cobros, lista de espera y un portfolio de hasta ${BUSINESS_PHOTOS} fotos.`,
         `Quality, ${priceOf('QUALITY')} € al mes: todo lo anterior y además portada animada, prioridad dentro de su franja de distancia en los resultados y en la fila de Destacados, y un portfolio de hasta ${QUALITY_PHOTOS} fotos. Cómo afecta esa prioridad al orden de los resultados se explica en el apartado 5 de los Términos y condiciones.`,
       ],
       closingParagraphs: [
@@ -169,7 +169,7 @@ const PROCESSING: LegalDocument = {
       title: '2. Naturaleza, finalidad y duración',
       paragraphs: [
         'Naturaleza: alojamiento, registro, organización, consulta, comunicación a los propios interesados (avisos de cita, mensajes del chat) y supresión de los datos, con medios automatizados.',
-        'Finalidad: única y exclusivamente prestar al negocio el servicio de Bipsy Business —agenda y reservas, gestión de clientes y equipo, mensajes, fichaje, finanzas y cobros— tal y como está descrito en la aplicación.',
+        'Finalidad: única y exclusivamente prestar al negocio el servicio de Bipsy Business —agenda y reservas, gestión de clientes y equipo, mensajes, fichaje y cobros— tal y como está descrito en la aplicación.',
         'Duración: la del contrato, es decir, mientras el negocio tenga su cuenta en Bipsy, más el tiempo necesario para su fin conforme al apartado 8.',
       ],
     },
@@ -244,7 +244,7 @@ const PROCESSING: LegalDocument = {
       id: 'fin-encargo',
       title: '8. Fin del encargo',
       paragraphs: [
-        `Antes de darse de baja, el negocio puede exportar sus registros de Finanzas a una hoja de cálculo y pedirnos en ${LEGAL_COMPANY.privacyEmail} una copia del resto de los datos tratados por su cuenta en un formato estructurado y de uso común. Esa es la forma de devolución de los datos.`,
+        `Antes de darse de baja, el negocio puede pedirnos en ${LEGAL_COMPANY.privacyEmail} una copia de los datos tratados por su cuenta en un formato estructurado y de uso común. Esa es la forma de devolución de los datos.`,
         `Cuando el negocio pide la baja tiene ${DELETION_GRACE_DAYS} días para anularla. Pasado ese plazo suprimimos o anonimizamos de forma irreversible los datos tratados por su cuenta, salvo los que una ley nos obligue a conservar, que quedarán bloqueados durante el plazo que esta fije y después se suprimirán.`,
       ],
     },

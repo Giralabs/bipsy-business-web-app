@@ -9,9 +9,8 @@
 // transparent), public/mr_bip/<CODE>.webp, the file BipSlotComponent looks for,
 // and public/app_shots/<name>.webp, the screenshots PhoneComponent shows.
 //
-// There is no real screenshot of Finanzas yet, so MB-12 uses the drawn screen of
-// the site (design/shots/finanzas-mock.png). Drop a business-finanzas.jpeg in
-// recursos_capturas_bips and it takes over on the next run.
+// MB-12 used to show the Finanzas screen. Finance was removed from the app, so it
+// is no longer built and the site no longer shows it (Cobros uses MB-06).
 //
 // ---------------------------------------------------------------------------
 // How it works
@@ -30,7 +29,7 @@
 //    the difference is absorbed by stretching, which does not show; the rest is
 //    cropped from the sides, where the app only has margin.
 import sharp from 'sharp';
-import { existsSync, mkdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,9 +38,6 @@ const SHOTS = resolve(ROOT, '..', 'recursos_capturas_bips');
 const PNG_DIR = join(ROOT, 'design', 'mr_bip-png');
 const WEBP_DIR = join(ROOT, 'public', 'mr_bip');
 const APP_SHOTS_DIR = join(ROOT, 'public', 'app_shots');
-const FINANZAS = existsSync(join(SHOTS, 'business-finanzas.jpeg'))
-  ? join(SHOTS, 'business-finanzas.jpeg')
-  : join(ROOT, 'design', 'shots', 'finanzas-mock.png');
 
 /** Screenshot → name on the site. `.ph` is 282 px wide, so this is 2.3x. */
 const APP_SHOTS = {
@@ -70,7 +66,6 @@ const BIPS = [
   { code: 'MB-02', shot: 'business-agenta-deldia.jpeg', push: NEW_BOOKING },
   { code: 'MB-10', shot: 'business-agenda-hoy.jpeg' },
   { code: 'MB-11', shot: 'business-cliente-detail.jpeg' },
-  { code: 'MB-12', shot: FINANZAS, holes: [[396, 905]] },
   { code: 'MB-13', shot: 'business-registro-fichajes.jpeg' },
   { code: 'MB-14', shot: 'business-portfolio.jpeg', holes: [[401, 1178]] },
 ];

@@ -42,16 +42,18 @@
         <p class="body">Si alguien cancela, el hueco se ofrece solo.</p>
       </a>
 
-      <!-- Finanzas -->
-      <a routerLink="/funcionalidades/finanzas" class="card card--glow tile" appTilt appReveal>
-        <div class="tile__art tile__art--bars" aria-hidden="true">
-          @for (h of bars; track $index) {
-            <span [style.--h]="h" [style.--i]="$index"></span>
-          }
+      <!-- Cobros -->
+      <a routerLink="/funcionalidades/cobrar-citas" class="card card--glow tile" appTilt appReveal>
+        <div class="tile__art tile__art--pay" aria-hidden="true">
+          <span class="pay-amount">45,00 €</span>
+          <span class="pay-state">
+            <span class="pay-state__wait"><span class="material-symbols-rounded">hourglass_top</span>Esperando a que pague</span>
+            <span class="pay-state__done"><span class="material-symbols-rounded">check_circle</span>Pagada</span>
+          </span>
         </div>
-        <span class="icon-tile"><span class="material-symbols-rounded">account_balance_wallet</span></span>
-        <h3 class="title tile__title">Finanzas y caja</h3>
-        <p class="body">Cobros, gastos, propinas y comisiones, sin hojas de cálculo.</p>
+        <span class="icon-tile"><span class="material-symbols-rounded">payments</span></span>
+        <h3 class="title tile__title">Cobros</h3>
+        <p class="body">Tu cliente paga desde su móvil, al reservar o al terminar la cita.</p>
       </a>
 
       <!-- Mensajes -->

@@ -18,5 +18,4 @@ import { TiltDirective } from '../../../../shared/tilt.directive';
 })
 export class BentoSectionComponent {
   readonly slots = ['09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '16:30', '17:00', '17:30', '18:00'];
-  readonly bars = [40, 62, 48, 74, 58, 88, 70];
 }

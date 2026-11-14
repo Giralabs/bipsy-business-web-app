@@ -88,30 +88,26 @@
         </div>
       }
 
-      <!-- ----- FINANZAS ----- -->
-      @case ('finanzas') {
+      <!-- ----- COBROS · «Cobrar la cita» (collect_booking_sheet) ----- -->
+      @case ('cobros') {
         <div class="ph__body ph-enter">
           <div class="ph-nav" style="--i:0">
-            <span class="material-symbols-rounded">chevron_left</span>Finanzas<span class="material-symbols-rounded">tune</span>
+            <span class="material-symbols-rounded">close</span>Cobrar la cita<span></span>
           </div>
-          <div class="ph-seg" style="--i:1; --n:3; --at:2">
-            <span class="ph-seg__thumb"></span><span>Hoy</span><span>Semana</span><span>Mes</span>
+          <div class="ph-card" style="--i:1; margin-top:10px; display:flex; align-items:center; gap:9px; padding:10px 12px">
+            <span class="ph-avatar">MA</span>
+            <span class="ph-row__main"><b>Marina Alcaide</b><small>Facial · hoy 09:00</small></span>
+            <span style="font-family:var(--ff-display); font-size:15px; font-weight:800">45,00 €</span>
           </div>
-          <div class="ph-card" style="--i:2; margin-top:10px">
-            <p style="font-size:10px; font-weight:600; color:var(--clr-text-2)">Ingresos de septiembre</p>
-            <p style="font-family:var(--ff-display); font-size:26px; font-weight:800; letter-spacing:-1px; line-height:1.15">3.482,50 €</p>
-            <span class="ph-pill ph-pill--success"><span class="material-symbols-rounded">trending_up</span>12 % más que agosto</span>
-            <div class="ph-bars">
-              @for (h of bars; track $index) {
-                <span [style.--h]="h" [style.--d]="$index"></span>
-              }
-            </div>
+          <p class="ph-over" style="--i:2">Cómo se cobra</p>
+          <div class="ph-group" style="--i:3">
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">phone_iphone</span></span><span class="ph-row__main"><b>Pedírselo a su app</b><small>Le sale en su móvil</small></span><span class="material-symbols-rounded" style="font-size:18px; color:var(--clr-accent-text)">check_circle</span></div>
+            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">payments</span></span><span class="ph-row__main"><b>Ya está cobrada</b><small>En efectivo o fuera de la app</small></span><span class="material-symbols-rounded ph-chev">chevron_right</span></div>
           </div>
-          <div class="ph-group" style="--i:3; margin-top:10px">
-            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">point_of_sale</span></span><span class="ph-row__main"><b>Caja del día</b><small>Abierta desde las 09:15</small></span><span class="ph-row__end">215,00 €</span></div>
-            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">pending_actions</span></span><span class="ph-row__main"><b>Pendiente de cobro</b><small>Citas terminadas</small></span><span class="ph-pill ph-pill--accent">3</span></div>
-            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">receipt_long</span></span><span class="ph-row__main"><b>Gastos</b><small>Con foto del ticket</small></span><span class="ph-row__end">642,10 €</span></div>
-            <div class="ph-row"><span class="ph-row__icon"><span class="material-symbols-rounded">groups</span></span><span class="ph-row__main"><b>Comisiones</b><small>María, Javi y Lucía</small></span><span class="material-symbols-rounded ph-chev">chevron_right</span></div>
+          <div class="ph-card" style="--i:4; margin-top:10px">
+            <span class="ph-pill ph-pill--accent"><span class="material-symbols-rounded">hourglass_top</span>Esperando a que pague · 14 min</span>
+            <p style="margin-top:8px; font-size:10.5px; line-height:1.45; color:var(--clr-text-2)">Le ha salido en su móvil. En cuanto pague, lo verás aquí.</p>
+            <p style="margin-top:8px; font-size:10.5px; font-weight:700; color:var(--clr-text-2)">Retirar la petición</p>
           </div>
         </div>
       }

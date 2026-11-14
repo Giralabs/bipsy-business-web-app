@@ -50,7 +50,7 @@ export const BUSINESS_TYPES: BusinessType[] = [
       { title: 'Clientes de siempre', text: 'Desde Bipsy repiten cita en un toque con «Volver a reservar», sin escribirte por WhatsApp.' },
       { title: 'Varios barberos', text: 'Cada uno con su agenda en su móvil y tú con la vista de todos. Añadirlos no te cuesta nada.' },
     ],
-    highlights: ['proteccion-contra-plantones', 'agenda-y-reservas-online', 'gestion-de-equipo', 'finanzas'],
+    highlights: ['proteccion-contra-plantones', 'agenda-y-reservas-online', 'gestion-de-equipo', 'cobrar-citas'],
     services: [
       { name: 'Corte clásico', minutes: 30, price: '15 €' },
       { name: 'Corte + barba', minutes: 45, price: '22 €' },
@@ -109,14 +109,14 @@ export const BUSINESS_TYPES: BusinessType[] = [
     icon: 'auto_awesome',
     name: 'Centros de estética',
     yours: 'tu centro de estética',
-    headline: 'Tu centro de estética, organizado de cabina a caja',
-    intro: 'Tratamientos largos, bonos, productos en el mostrador y clientas con alergias que no puedes olvidar. Todo en la ficha y en la caja.',
+    headline: 'Tu centro de estética, organizado de la cabina al cobro',
+    intro: 'Tratamientos largos y clientas con alergias que no puedes olvidar. Todo en la ficha de cada una, y cada cita cobrada desde su móvil.',
     pains: [
       { title: 'Notas que importan', text: 'Alergias, tipo de piel o preferencias en las notas privadas de cada clienta.' },
-      { title: 'Productos a la venta', text: 'Cremas y productos con su stock y aviso de mínimo, cobrados en la misma venta que el tratamiento.' },
+      { title: 'Cobrar sin datáfono', text: 'Al terminar el tratamiento, la clienta paga desde su app y tú lo ves al momento.' },
       { title: 'Normas claras', text: 'Llegar 10 minutos antes, avisar de embarazo o alergias: publícalas en tu ficha antes de que reserven.' },
     ],
-    highlights: ['agenda-de-clientes', 'finanzas', 'ficha-en-bipsy', 'proteccion-contra-plantones'],
+    highlights: ['agenda-de-clientes', 'cobrar-citas', 'ficha-en-bipsy', 'proteccion-contra-plantones'],
     services: [
       { name: 'Limpieza facial', minutes: 60, price: '45 €' },
       { name: 'Higiene y peeling', minutes: 75, price: '55 €' },
@@ -198,13 +198,13 @@ export const BUSINESS_TYPES: BusinessType[] = [
     name: 'Depilación',
     yours: 'tu centro de depilación láser',
     headline: 'Depilación láser: sesiones en serie, agenda sin huecos',
-    intro: 'Tratamientos de varias sesiones y cabinas que tienen que rendir. Bipsy Business ordena el calendario y la caja.',
+    intro: 'Tratamientos de varias sesiones y cabinas que tienen que rendir. Bipsy Business ordena el calendario y los cobros.',
     pains: [
       { title: 'Sesiones en serie', text: 'La ficha de cada clienta guarda su historial de citas y tus notas del tratamiento.' },
       { title: 'Cabinas que rinden', text: 'La lista de espera llena las cancelaciones de última hora.' },
-      { title: 'Cuentas claras', text: 'Cobros, gastos e informe de IVA desde Finanzas.' },
+      { title: 'Cobros sin perseguir a nadie', text: 'Cada sesión se cobra desde la app de la clienta, al reservar o al terminar.' },
     ],
-    highlights: ['agenda-de-clientes', 'lista-de-espera', 'finanzas', 'agenda-y-reservas-online'],
+    highlights: ['agenda-de-clientes', 'lista-de-espera', 'cobrar-citas', 'agenda-y-reservas-online'],
     services: [
       { name: 'Axilas', minutes: 15, price: '25 €' },
       { name: 'Piernas completas', minutes: 45, price: '90 €' },
@@ -248,7 +248,7 @@ export const BUSINESS_TYPES: BusinessType[] = [
       { title: 'Cambios de hora', text: 'El cliente cambia día u hora desde la app, dentro de tus reglas.' },
       { title: 'Cobros', text: 'Registra cada sesión cobrada y mira tus ingresos del mes.' },
     ],
-    highlights: ['agenda-y-reservas-online', 'finanzas', 'proteccion-contra-plantones', 'chat-con-clientes'],
+    highlights: ['agenda-y-reservas-online', 'cobrar-citas', 'proteccion-contra-plantones', 'chat-con-clientes'],
     services: [
       { name: 'Sesión individual', minutes: 60, price: '35 €' },
       { name: 'Sesión en pareja', minutes: 60, price: '50 €' },

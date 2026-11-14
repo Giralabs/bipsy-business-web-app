@@ -83,8 +83,6 @@ export class PhoneComponent implements OnChanges {
     { letter: 'D', people: [{ name: 'Diego Martín', meta: 'En lista de espera' }, { name: 'Daniela Ortiz', meta: 'Última cita: 5 sep' }] },
   ];
 
-  readonly bars = [38, 52, 44, 68, 57, 81, 63, 90, 72, 86, 96, 78];
-
   readonly team = [
     { name: 'María López', status: 'Trabajando desde 09:30', on: true },
     { name: 'Javi Romero', status: 'Trabajando desde 10:00', on: true },

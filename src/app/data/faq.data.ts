@@ -28,7 +28,7 @@ function priceOf(code: Plan['code']): string {
 export const HOME_FAQ: FaqItem[] = [
   {
     q: '¿Qué es Bipsy Business?',
-    a: 'Es la app para gestionar un negocio que trabaja con cita: agenda, reservas online, clientes, equipo, fichaje y finanzas. Tus clientes reservan desde Bipsy, la app gratuita para ellos, y tú lo recibes todo en Bipsy Business.',
+    a: 'Es la app para gestionar un negocio que trabaja con cita: agenda, reservas online, clientes, equipo, fichaje y cobros. Tus clientes reservan desde Bipsy, la app gratuita para ellos, y tú lo recibes todo en Bipsy Business.',
   },
   {
     q: '¿Cuánto cuesta?',
@@ -141,7 +141,7 @@ export const HELP_FAQ: FaqGroup[] = [
       },
       {
         q: '¿Bipsy emite facturas a mis clientes?',
-        a: 'No. Finanzas es un registro interno de cobros, gastos, caja y comisiones con informe de IVA, pero no emite facturas ni las envía a Hacienda.',
+        a: 'No. Bipsy Business cobra las citas y lleva el dinero a tu cuenta, pero no emite facturas ni las envía a Hacienda: eso lo sigues haciendo con tu programa de facturación o tu gestoría.',
       },
     ],
   },
