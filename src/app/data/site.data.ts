@@ -33,16 +33,19 @@ export interface ExternalLink {
 export const CLIENT_WEB_URL = 'https://bipsy.es';
 
 /**
- * Whether the apps are published in the stores. Until they are, every store
- * badge says «Próximamente…» when clicked (shared/coming-soon.ts) instead of
- * going anywhere. They used to point at youtube.com, left over from a
+ * Whether the apps are published in each store. A badge whose store is not
+ * live yet says «Próximamente…» when clicked (shared/coming-soon.ts) instead
+ * of going anywhere. They used to point at youtube.com, left over from a
  * template: a badge that looks right and lands somewhere else.
  *
- * The day they are published: set this to true. The URLs below are already
- * the real listings (the App Store ids are the «Apple ID» in App Store
- * Connect; the Play ones come from each app's `applicationId`).
+ * The day Android is published: set PLAY_STORE_READY to true. The URLs below
+ * are already the real listings (the App Store ids are the «Apple ID» in App
+ * Store Connect; the Play ones come from each app's `applicationId`).
  */
-export const STORE_LINKS_READY = false;
+/** Both apps went live on the App Store in November 2026. */
+export const APP_STORE_READY = true;
+/** Android lands a few weeks later: until then, Google Play says «Próximamente…». */
+export const PLAY_STORE_READY = false;
 
 const PLAY_BADGE = 'assets_apps/donwload_play_store.webp';
 const APP_STORE_BADGE = 'assets_apps/download_app_store.webp';
@@ -53,27 +56,27 @@ export interface StoreLink extends ExternalLink {
   soon: string | null;
 }
 
-const store = (label: string, url: string, image: string, soon: string): StoreLink => ({
+const store = (label: string, url: string, image: string, soon: string, ready: boolean): StoreLink => ({
   label,
   url,
   image,
-  soon: STORE_LINKS_READY ? null : soon,
+  soon: ready ? null : soon,
 });
 
 /** Bipsy Business, the app this site sells. */
 export const STORE_LINKS = {
   googlePlay: store('Consíguelo en Google Play',
-    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi_business', PLAY_BADGE, SOON.googlePlay),
+    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi_business', PLAY_BADGE, SOON.googlePlay, PLAY_STORE_READY),
   appStore: store('Descárgalo en el App Store',
-    'https://apps.apple.com/es/app/id6828380398', APP_STORE_BADGE, SOON.appStore),
+    'https://apps.apple.com/es/app/bipsy-business/id6828380398', APP_STORE_BADGE, SOON.appStore, APP_STORE_READY),
 } as const;
 
 /** Bipsy, the customers' app: only the page that presents it links to it. */
 export const CLIENT_STORE_LINKS = {
   googlePlay: store('Consigue Bipsy en Google Play',
-    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi', PLAY_BADGE, SOON.googlePlay),
+    'https://play.google.com/store/apps/details?id=com.gipsi.gipsi', PLAY_BADGE, SOON.googlePlay, PLAY_STORE_READY),
   appStore: store('Descarga Bipsy en el App Store',
-    'https://apps.apple.com/es/app/id6828380156', APP_STORE_BADGE, SOON.appStore),
+    'https://apps.apple.com/es/app/bipsy/id6828380156', APP_STORE_BADGE, SOON.appStore, APP_STORE_READY),
 } as const;
 
 export interface SocialLink {
