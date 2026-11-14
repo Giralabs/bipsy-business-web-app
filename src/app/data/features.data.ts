@@ -18,7 +18,7 @@ export type FeatureGroupId = 'agenda' | 'clientes' | 'cobros' | 'equipo' | 'esca
 export type ScreenId =
   | 'agenda'
   | 'clientes'
-  | 'finanzas'
+  | 'cobros'
   | 'equipo'
   | 'ficha'
   | 'espera'
@@ -78,10 +78,10 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
   },
   {
     id: 'cobros',
-    label: 'Cobros y finanzas',
+    label: 'Cobros',
     icon: 'payments',
-    blurb: 'Caja, gastos, comisiones y protección frente a los plantones.',
-    bip: { code: 'MB-12', pose: 'sonríe con el pulgar arriba junto al panel de Finanzas', screen: 'Finanzas › Panel' },
+    blurb: 'Cobra las citas desde la app y recibe el dinero en tu banco, sin comisión de Bipsy.',
+    bip: { code: 'MB-06', pose: 'sostiene una hucha con las dos manos', screen: '' },
   },
   {
     id: 'equipo',
@@ -215,43 +215,46 @@ export const FEATURES: Feature[] = [
   },
 
   // ----- COBROS -----------------------------------------------------------
+  // What the app collects today: the booking itself (at booking time or when
+  // it ends) and the no-show fees. There is no finance section (cash drawer,
+  // expenses, commissions, stock, tax report): it was removed from the app
+  // and is not promised here until it comes back.
   {
-    slug: 'finanzas',
+    slug: 'cobrar-citas',
     group: 'cobros',
-    icon: 'account_balance_wallet',
-    name: 'Finanzas',
-    summary: 'Cobros, caja del día, gastos, propinas, comisiones e IVA.',
-    headline: 'Las cuentas de tu negocio, sin hojas de cálculo',
+    icon: 'point_of_sale',
+    name: 'Cobrar las citas',
+    summary: 'Tu cliente paga desde su móvil, al reservar o al terminar la cita.',
+    headline: 'Cobra la cita sin datáfono y sin perseguir a nadie',
     intro:
-      'Registra cada cobro al terminar la cita, abre y cierra la caja, apunta los gastos con la foto del ticket y mira cuánto has ganado este mes. Incluido en todos los planes.',
+      'Decide si tus clientes pagan al reservar y, al terminar la cita, pídeles el pago en su app: les sale en el móvil, pagan con su tarjeta y tú lo ves al momento. Si te pagan en mano, la marcas como cobrada.',
     points: [
-      { icon: 'point_of_sale', title: 'Cobra al terminar la cita', text: 'Efectivo, tarjeta, Bizum o transferencia, incluso mezclados en un mismo cobro, con descuentos y propinas.' },
-      { icon: 'savings', title: 'Caja del día', text: 'Abre con el cambio, apunta entradas y salidas y ciérrala sabiendo si sobra o falta.' },
-      { icon: 'receipt_long', title: 'Gastos con ticket', text: 'Haz una foto al ticket y el gasto queda apuntado en su categoría.' },
-      { icon: 'groups', title: 'Comisiones y propinas', text: 'Calcula la comisión de cada trabajador sobre bruto o neto y reparte las propinas.' },
-      { icon: 'inventory_2', title: 'Productos y stock', text: 'Lo que vendes en el mostrador, con coste, margen y aviso de stock mínimo.' },
-      { icon: 'description', title: 'Informe de IVA y exportación', text: 'El resumen para tu gestoría y la exportación a hoja de cálculo.' },
+      { icon: 'event_available', title: 'Pago al reservar', text: 'Tú eliges: que no paguen al reservar, que puedan hacerlo si quieren o que sea obligatorio para reservar.' },
+      { icon: 'phone_iphone', title: 'Pídeselo a su app', text: 'Al terminar la cita le llega la petición al móvil y paga con tarjeta o Apple Pay. Ves en directo cuándo ha pagado.' },
+      { icon: 'payments', title: 'Cobrada en mano', text: 'Si te paga en efectivo o por otro medio, márcala como «Ya cobrada» y la agenda queda al día.' },
+      { icon: 'euro', title: 'Por cobrar, a la vista', text: 'Cada cita dice si está por cobrar o cobrada, y la ficha de cada cliente guarda sus pagos.' },
+      { icon: 'undo', title: 'Devoluciones', text: 'Devuelve un cobro entero o solo una parte desde la app, con su motivo.' },
     ],
-    facts: ['Incluido en todos los planes', 'Exporta hasta 5.000 filas', 'Registro interno: no emite facturas'],
-    screen: 'finanzas',
+    facts: ['Pago al reservar: no, opcional u obligatorio', 'Tarjeta y Apple Pay', 'Sin comisión de Bipsy'],
+    screen: 'cobros',
   },
   {
     slug: 'cobros-con-tarjeta',
     group: 'cobros',
     icon: 'credit_score',
-    name: 'Cobros con tarjeta',
-    summary: 'Recibe en tu banco las tarifas por cancelación y no presentados.',
-    headline: 'El dinero de los plantones, en tu cuenta',
+    name: 'Tu cuenta de cobros',
+    summary: 'Lo que cobras con tarjeta llega a tu banco, sin comisión de Bipsy.',
+    headline: 'El dinero de tus citas, directo a tu cuenta',
     intro:
-      'Conecta tu cuenta bancaria una vez y las tarifas de cancelación tardía, cambios de última hora y no presentados se cobran a la tarjeta del cliente y llegan a tu banco.',
+      'Conecta tu cuenta bancaria una vez y todo lo que se cobra con tarjeta —las citas pagadas desde la app y las tarifas de cancelación tardía o no presentados— llega a tu banco.',
     points: [
       { icon: 'account_balance', title: 'Alta en minutos', text: 'Titular, domicilio e IBAN. Los pagos los procesa Stripe, uno de los mayores procesadores de pago del mundo.' },
       { icon: 'price_check', title: 'Sin comisión de Bipsy', text: 'Bipsy no se queda nada. Solo se descuenta la tarifa del procesador de pagos.' },
       { icon: 'history', title: 'Saldo y movimientos', text: 'Mira lo que está de camino, lo que está listo para ingresar y cada cobro con su detalle.' },
-      { icon: 'undo', title: 'Devoluciones', text: 'Si algo no fue culpa del cliente, devuélvele el cobro desde la app.' },
+      { icon: 'sync_alt', title: 'Cambia de cuenta cuando quieras', text: 'Pon otro IBAN y los cobros pasan a ingresarse en la cuenta nueva.' },
     ],
-    facts: ['0 % de comisión de Bipsy', 'Pagos con Stripe', 'Devoluciones desde la app'],
-    screen: 'finanzas',
+    facts: ['0 % de comisión de Bipsy', 'Pagos con Stripe', 'Ingresos en tu cuenta bancaria'],
+    screen: 'cobros',
   },
 
   // ----- EQUIPO -----------------------------------------------------------
@@ -269,7 +272,7 @@ export const FEATURES: Feature[] = [
       { icon: 'pin', title: 'Invitación con código', text: 'Un código de 6 dígitos que caduca en 12 horas. Tu trabajador lo escribe al registrarse y ya está dentro.' },
       { icon: 'content_cut', title: 'Servicios por persona', text: 'Asigna quién hace cada servicio para que el cliente elija bien, o reserve con «cualquiera disponible».' },
       { icon: 'admin_panel_settings', title: 'Permisos a medida', text: 'Aceptar citas solo, horas extra, usar el chat, gestionar la lista de espera o cobrar sus citas.' },
-      { icon: 'visibility_off', title: 'Cada uno ve lo suyo', text: 'Un trabajador puede cobrar sus citas sin ver los números del negocio.' },
+      { icon: 'visibility_off', title: 'Cada uno ve lo suyo', text: 'Un trabajador puede cobrar sus citas sin tocar la cuenta de cobros del negocio.' },
     ],
     facts: ['0 € por trabajador', 'Código de invitación de 6 dígitos', 'Permisos por trabajador'],
     screen: 'equipo',

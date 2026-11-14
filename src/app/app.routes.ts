@@ -22,6 +22,9 @@ const siteRoutes: Routes = [
     title: 'Funcionalidades · Bipsy Business',
     loadComponent: () => import('./pages/features/features.component').then((m) => m.FeaturesComponent),
   },
+  // Finance was removed from the app; whoever had the old page lands on what
+  // the app does collect today.
+  { path: 'funcionalidades/finanzas', redirectTo: 'funcionalidades/cobrar-citas', pathMatch: 'full' },
   {
     path: 'funcionalidades/:slug',
     loadComponent: () =>

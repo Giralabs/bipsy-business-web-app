@@ -47,7 +47,7 @@ export const PLANS: Plan[] = [
     portfolioLimit: BUSINESS_PHOTOS,
     diamond: 'assets_bipsy_business/Plans/diamond_business.webp',
     tagline: 'Toda la app para gestionar tu negocio.',
-    description: 'Citas, equipo, clientes, reseñas, fichaje y finanzas. Sin funciones escondidas.',
+    description: 'Citas, equipo, clientes, reseñas, fichaje y cobros. Sin funciones escondidas.',
     includesLabel: 'Incluye',
     features: [
       'Agenda y reservas online 24/7',
@@ -57,7 +57,7 @@ export const PLANS: Plan[] = [
       'Agenda de clientes y mensajes',
       'Reseñas verificadas con respuesta',
       'Fichaje del equipo',
-      'Finanzas: caja, gastos y comisiones',
+      'Cobros desde la app, sin comisión de Bipsy',
       'Lista de espera',
       `Portfolio de ${BUSINESS_PHOTOS} fotos`,
     ],
@@ -115,13 +115,13 @@ export const COMPARISON: ComparisonGroup[] = [
     ],
   },
   {
-    label: 'Equipo y finanzas',
+    label: 'Equipo y cobros',
     rows: [
       { label: 'Trabajadores', hint: 'Entran con código de invitación', bipsy: 'Gratis', quality: 'Gratis' },
       { label: 'Permisos por trabajador', bipsy: true, quality: true },
       { label: 'Ausencias y vacaciones', bipsy: true, quality: true },
       { label: 'Fichaje', bipsy: true, quality: true },
-      { label: 'Finanzas, caja y comisiones', bipsy: true, quality: true },
+      { label: 'Cobrar las citas desde la app', hint: 'Al reservar o al terminar', bipsy: true, quality: true },
       { label: 'Cobros con tarjeta', hint: 'Sin comisión de Bipsy', bipsy: true, quality: true },
     ],
   },

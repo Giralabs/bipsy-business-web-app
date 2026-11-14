@@ -25,7 +25,7 @@ export class WhyComponent {
   /** Signed in: the call to action goes to the panel, not to sign-up. */
   readonly session = inject(SiteSession);
   readonly reasons = [
-    { icon: 'apps', title: 'Todo en una sola app', text: 'Agenda, clientes, mensajes, equipo, fichaje y finanzas. Sin saltar entre cinco herramientas que no se hablan.' },
+    { icon: 'apps', title: 'Todo en una sola app', text: 'Agenda, clientes, mensajes, equipo, fichaje y cobros. Sin saltar entre cinco herramientas que no se hablan.' },
     { icon: 'travel_explore', title: 'Con clientes buscando', text: 'Tu negocio aparece en Bipsy, la app gratuita donde la gente busca y reserva cita cerca de casa.' },
     { icon: 'group_add', title: 'Tu equipo, gratis', text: 'Un plan por negocio. Tus trabajadores entran con tu código de invitación sin pagar nada más.' },
     { icon: 'percent', title: 'Sin comisiones', text: 'Ni por reserva ni por los cobros de tarifas: Bipsy no se queda con una parte de tu trabajo.' },

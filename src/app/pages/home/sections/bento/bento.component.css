@@ -136,19 +136,44 @@
 @keyframes queue-3 { 0%, 45% { left: 36px; } 70%, 100% { left: 72px; } }
 @keyframes queue-4 { 0%, 45% { left: 0; opacity: 0.4; } 70%, 100% { left: 36px; opacity: 1; } }
 
-/* ----- BARS --------------------------------------------------------- */
-.tile__art--bars { align-items: flex-end; gap: 8px; padding: 0 12px; }
-.tile__art--bars span {
-  flex: 1;
-  height: calc(var(--h) * 1%);
-  border-radius: 8px 8px 4px 4px;
-  background: var(--clr-accent-dim);
-  transform-origin: bottom;
-  animation: bar-breathe 4s ease-in-out infinite;
-  animation-delay: calc(var(--i) * 140ms);
+/* ----- PAY: a booking going from "waiting" to "paid" ---------------- */
+.tile__art--pay { flex-direction: column; justify-content: center; gap: 12px; }
+.pay-amount {
+  font-family: var(--ff-display);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
 }
-.tile__art--bars span:nth-child(6) { background: var(--clr-accent); }
-@keyframes bar-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.72); } }
+.pay-state { position: relative; width: 200px; height: 34px; }
+.pay-state > span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.pay-state .material-symbols-rounded { font-size: 17px; }
+.pay-state__wait { background: var(--clr-subtle); color: var(--clr-text-2); animation: pay-wait 4.8s var(--ease-out) infinite; }
+.pay-state__done { background: var(--clr-accent); color: var(--clr-on-accent); animation: pay-done 4.8s var(--ease-back) infinite; }
+@keyframes pay-wait {
+  0%, 45% { opacity: 1; transform: none; }
+  52%, 94% { opacity: 0; transform: scale(0.94); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes pay-done {
+  0%, 46% { opacity: 0; transform: scale(0.8); }
+  56%, 92% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(0.94); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pay-state__wait { animation: none; opacity: 0; }
+  .pay-state__done { animation: none; opacity: 1; }
+}
 
 /* ----- CHAT --------------------------------------------------------- */
 .tile__art--chat { flex-direction: column; align-items: stretch; justify-content: center; gap: 8px; padding-inline: 8px; }

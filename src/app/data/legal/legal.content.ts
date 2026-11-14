@@ -172,8 +172,8 @@ const TERMS: LegalDocument = {
           '(nombre, contacto y citas con ese negocio) y a las valoraciones que recibe; no accede a las ' +
           'citas que sus clientes tengan con otros negocios. Bipsy accede a todos los datos de la ' +
           'plataforma solo en la medida necesaria para prestar el servicio, y no los cede a terceros.',
-        `Puedes exportar tus registros de Finanzas a una hoja de cálculo desde Bipsy Business y, si dejas ` +
-          `de usar Bipsy, pedirnos en ${LEGAL_COMPANY.email} una copia del resto de datos de tu negocio ` +
+        `Si dejas ` +
+          `de usar Bipsy, puedes pedirnos en ${LEGAL_COMPANY.email} una copia de los datos de tu negocio ` +
           '(ficha, servicios, clientes y citas) en un formato estructurado y de uso común.',
         'Nada en estas condiciones te impide ofrecer tus servicios por otros canales, ni hacerlo en ' +
           'condiciones o precios distintos de los que publicas en Bipsy.',

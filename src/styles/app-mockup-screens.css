@@ -3,27 +3,6 @@
    Split from app-mockup.css only to keep each file readable.
    ============================================================ */
 
-/* ----- FINANZAS: bar chart ----------------------------------------- */
-.ph-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 64px;
-  margin-top: 12px;
-}
-.ph-bars span {
-  flex: 1;
-  height: calc(var(--h) * 1%);
-  border-radius: 4px 4px 2px 2px;
-  background: var(--clr-accent-dim);
-  transform-origin: bottom;
-  animation: ph-bar 900ms var(--ease-back) both;
-  animation-delay: calc(var(--d) * 50ms + 300ms);
-}
-.ph-bars span:nth-last-child(2) { background: var(--clr-accent); }
-
-@keyframes ph-bar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-
 /* ----- EQUIPO -------------------------------------------------------- */
 .ph-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--clr-text-3); }
 .ph-dot--on { background: var(--clr-success); box-shadow: 0 0 0 0 rgba(95, 185, 138, 0.5); animation: ph-live 2s ease-out infinite; }
@@ -312,6 +291,6 @@
 .ph-swatches .ph-swatches__on { box-shadow: 0 0 0 2px var(--clr-base), 0 0 0 3.5px var(--clr-text); }
 
 @media (prefers-reduced-motion: reduce) {
-  .ph-bars span, .ph-dot--on, .ph-offer::after, .ph-thread > *, .ph-q__card, .ph-q__cover,
+  .ph-dot--on, .ph-offer::after, .ph-thread > *, .ph-q__card, .ph-q__cover,
   .ph-q__avatar, .ph-q__name, .ph-fx__anim::after { animation: none; }
 }
