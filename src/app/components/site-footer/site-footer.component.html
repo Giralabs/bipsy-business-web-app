@@ -93,7 +93,10 @@
           <strong>Tus datos:</strong> tratamos los datos de tus clientes y de tu equipo por cuenta de tu negocio.
           <a routerLink="/legal/encargo-tratamiento">Encargo del tratamiento</a> ·
           <a routerLink="/legal/privacidad">Privacidad</a> ·
-          <a routerLink="/legal/cookies">Cookies</a>.
+          <a routerLink="/legal/cookies">Cookies</a>@if (analytics.enabled) {
+            · <button type="button" (click)="analytics.reopen()"
+                style="all: unset; cursor: pointer; color: var(--clr-text); font-weight: 700; text-decoration: underline; text-underline-offset: 2px">Configurar cookies</button>
+          }.
         </p>
       </div>
     </div>
