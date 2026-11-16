@@ -36,7 +36,7 @@ export interface ExternalLink {
  * and the cookie policy lists it. When you set it, update the `updatedAt`
  * date of the cookie policy (data/legal/legal.content.ts).
  */
-export const GA_MEASUREMENT_ID = '';
+export const GA_MEASUREMENT_ID: string = 'G-ZCRLW1VQD3';
 
 /** The customer-facing web (bipsy-web-app). */
 export const CLIENT_WEB_URL = 'https://bipsy.es';
