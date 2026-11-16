@@ -101,7 +101,7 @@ export class ImportarComponent {
       const text = importedContactsMessage(
         await this.store.referralCode(),
         profile?.name,
-        profile ? businessLink(profile.id, profile.name) : null,
+        profile ? businessLink(profile.id, profile.name, profile.subdomain) : null,
       );
       if (typeof navigator.share === 'function') {
         await navigator.share({ text });

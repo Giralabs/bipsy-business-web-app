@@ -11,7 +11,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { Api } from '../core/api/api';
 import { AuthService } from '../core/auth/auth.service';
-import { businessSlug } from '../core/business-link';
+import { businessLinkLabel } from '../core/business-link';
 import {
   BusinessDetail,
   PageResponse,
@@ -278,7 +278,7 @@ export class VistaPreviaComponent implements OnDestroy {
   readonly publicUrl = computed(() => {
     const b = this.business();
     if (!b) return 'bipsy.es';
-    return `bipsy.es/negocio/${businessSlug(b.id, b.name)}`;
+    return businessLinkLabel(b.id, b.name, b.subdomain ?? this.auth.businessSubdomain());
   });
 
   /** Just the host, for Safari's address bar: it does not show the path. */

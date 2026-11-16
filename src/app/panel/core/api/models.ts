@@ -48,6 +48,8 @@ export interface MeResponse {
 export interface BusinessProfile {
   id: number;
   name: string;
+  /** Its subdomain, <subdomain>.bipsy.es (backend V131): what it shares. Null the first minute after sign-up. */
+  subdomain?: string | null;
   autonomous: boolean;
   /**
    * False when the business works alone. `autonomous` is the panel's old name
@@ -1242,6 +1244,8 @@ export interface BrandingView {
 export interface BusinessDetail {
   id: number;
   name: string;
+  /** Subdomain, <subdomain>.bipsy.es (backend V131). */
+  subdomain?: string | null;
   phone: string | null;
   address: string | null;
   city: string | null;
