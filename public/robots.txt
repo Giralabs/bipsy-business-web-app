@@ -1,0 +1,17 @@
+# Bipsy Business (web para negocios). Se indexa la parte pública: la home,
+# funcionalidades, negocios, precios, blog, ayuda y documentos legales.
+# El panel, el acceso y los enlaces personales (invitaciones del equipo, que
+# llevan un token en la dirección) no tienen nada que buscar.
+User-agent: *
+Disallow: /panel
+Disallow: /admin
+Disallow: /acceder
+Disallow: /registro
+Disallow: /unirse
+Disallow: /recuperar-contrasena
+Disallow: /equipo/
+Disallow: /invitacion/
+Disallow: /error
+Disallow: /descargas/
+
+Sitemap: https://business.bipsy.es/sitemap.xml

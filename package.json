@@ -4,7 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "node scripts/build-sitemap.mjs",
     "build": "ng build",
+    "postbuild": "node scripts/build-spa-shell.mjs",
     "watch": "ng build --watch --configuration development",
     "hero:manifest": "node scripts/build-hero-manifest.mjs",
     "test": "ng test"
@@ -18,7 +20,9 @@
     "@angular/forms": "^18.2.0",
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/platform-server": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@angular/ssr": "^18.2.21",
     "firebase": "^12.19.0",
     "maplibre-gl": "6.16.0",
     "qrcode-generator": "2.0.4",
@@ -31,6 +35,7 @@
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^18.18.0",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

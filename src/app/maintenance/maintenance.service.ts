@@ -1,5 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { DestroyRef, Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { TimeoutError, firstValueFrom, timeout } from 'rxjs';
 import { Api } from '../panel/core/api/api';
 import { API_URL } from '../panel/core/api/api.config';
@@ -74,6 +75,12 @@ const MAX_MISSES = 3;
 export class MaintenanceService {
   private readonly http = inject(HttpClient);
   private readonly api = inject(Api);
+  /**
+   * False while the public pages are rendered to HTML at build time. There is
+   * nobody to ask there and nothing to store: the pages are rendered open (the
+   * browser asks the server as soon as it starts, as always).
+   */
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** The token, only when the browser refuses to store it. */
   private memoryToken: string | null = null;
@@ -85,7 +92,9 @@ export class MaintenanceService {
   /** Navigations held at the gate until the site opens (see `maintenanceGate`). */
   private waiting: Array<() => void> = [];
 
-  private readonly known = signal<Known>(readKnown());
+  private readonly known = signal<Known>(
+    this.browser ? readKnown() : { maintenance: false, bypass: false, message: null },
+  );
 
   /** The site is in maintenance, whether or not this browser may pass. */
   readonly maintenance = computed(() => this.known().maintenance);
@@ -101,6 +110,7 @@ export class MaintenanceService {
   readonly lastCheckFailed = signal(false);
 
   constructor() {
+    if (!this.browser) return;
     void this.check();
 
     // A hidden tab does not ask: it will when someone looks at it again.

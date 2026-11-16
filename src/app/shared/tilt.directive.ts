@@ -60,7 +60,8 @@ export class TiltDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    cancelAnimationFrame(this.frame);
+    // Also destroyed when a page is rendered to HTML at build time, with no window
+    if (this.frame) cancelAnimationFrame(this.frame);
     this.cleanups.forEach((fn) => fn());
   }
 }
