@@ -9,7 +9,6 @@ import { MaintenanceService } from './maintenance/maintenance.service';
 import { DevNoticeComponent } from './components/dev-notice/dev-notice.component';
 import { ComingSoonToastComponent } from './shared/coming-soon';
 import { SeoService } from './shared/seo';
-import { CookieConsentComponent } from './components/cookie-consent/cookie-consent.component';
 
 /**
  * Routes that are the product, not the brochure: they bring their own chrome.
@@ -52,7 +51,6 @@ function bringsOwnChrome(url: string): boolean {
     MaintenanceBadgeComponent,
     DevNoticeComponent,
     ComingSoonToastComponent,
-    CookieConsentComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',

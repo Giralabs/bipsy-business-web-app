@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AnalyticsService } from '../../shared/analytics';
 
 const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
 
@@ -14,18 +16,27 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
  *
  * The first visit shows it open; closing it leaves the pill, and that is
  * remembered in this browser. The pill itself stays: it is a notice, not an ad.
+ *
+ * It also asks about analytics cookies, so the visitor gets one card and not
+ * two: while there is no answer the card stays open with the question under
+ * the notice, and answering closes it like the cross does. The two buttons
+ * look the same on purpose (the AEPD wants «no» as easy as «yes»); until
+ * «Aceptar», nothing from Google loads.
  */
 @Component({
   selector: 'app-dev-notice',
   standalone: true,
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside class="dev" [class.dev--raised]="raised" aria-label="Aviso: web en desarrollo">
-      @if (open()) {
-        <div class="dev__card" id="dev-notice-card" role="status">
-          <button type="button" class="dev__close" (click)="close()" aria-label="Cerrar el aviso">
-            <span class="material-symbols-rounded">close</span>
-          </button>
+      @if (open() || analytics.needsChoice()) {
+        <div class="dev__card" [class.dev__card--ask]="analytics.needsChoice()" id="dev-notice-card" role="status">
+          @if (!analytics.needsChoice()) {
+            <button type="button" class="dev__close" (click)="close()" aria-label="Cerrar el aviso">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          }
           <p class="dev__title">
             <span class="material-symbols-rounded" aria-hidden="true">construction</span>
             Web en desarrollo
@@ -35,6 +46,18 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
             del todo. Si ves algo raro, escríbenos a
             <a href="mailto:soporte@bipsy.es">soporte&#64;bipsy.es</a>.
           </p>
+          @if (analytics.needsChoice()) {
+            <div class="dev__ask">
+              <p class="dev__text">
+                <strong>¿Aceptas cookies de análisis?</strong> Solo para saber qué páginas se visitan.
+                <a routerLink="/legal/cookies">Más información</a>
+              </p>
+              <div class="dev__actions">
+                <button type="button" class="btn btn--subtle btn--sm" (click)="answer(false)">Rechazar</button>
+                <button type="button" class="btn btn--subtle btn--sm" (click)="answer(true)">Aceptar</button>
+              </div>
+            </div>
+          }
         </div>
       }
       <button type="button" class="dev__pill" (click)="toggle()"
@@ -117,6 +140,12 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
         color: var(--clr-text-2);
         cursor: pointer;
       }
+      .dev__card--ask { width: 320px; padding-right: 16px; }
+      /* Phones: the full width, not a 320px card hanging off the right edge */
+      @media (max-width: 480px) { .dev__card--ask { width: calc(100vw - 32px); } }
+      .dev__ask { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--clr-border); }
+      .dev__ask strong { color: var(--clr-text); font-weight: 800; }
+      .dev__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
       .dev__close:hover { background: var(--clr-subtle); color: var(--clr-text); }
       .dev__close .material-symbols-rounded { font-size: 18px; }
       @keyframes dev-in {
@@ -131,7 +160,15 @@ export class DevNoticeComponent {
   /** The maintenance badge is in the same corner. */
   @Input() raised = false;
 
+  readonly analytics = inject(AnalyticsService);
   readonly open = signal(!readSeen());
+
+  /** Answering the cookie question also counts as having read the notice. */
+  answer(accept: boolean): void {
+    if (accept) this.analytics.accept();
+    else this.analytics.reject();
+    this.close();
+  }
 
   toggle(): void {
     this.open.update((v) => !v);
