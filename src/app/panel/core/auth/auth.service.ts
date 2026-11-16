@@ -10,6 +10,8 @@ export type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated';
 export interface EmployerSummary {
   id: number;
   name: string;
+  /** Its subdomain, <subdomain>.bipsy.es (backend V131). */
+  subdomain?: string | null;
   profileImageUrl?: string | null;
   categories?: CategoryRef[];
   /** Public in `BusinessResponse`: whether the business runs a waiting list at all. */
@@ -76,6 +78,11 @@ export class AuthService {
 
   /** A worker that signed up but has not redeemed an invitation yet. */
   readonly needsBusiness = computed(() => this.isWorker() && this.businessId() == null);
+
+  /** The business's subdomain (<subdomain>.bipsy.es): its own for the owner, the employer's for a worker. */
+  readonly businessSubdomain = computed<string | null>(() =>
+    (this.isWorker() ? this.employer()?.subdomain : this.profile()?.subdomain) ?? null,
+  );
 
   readonly businessName = computed(() =>
     this.isWorker()

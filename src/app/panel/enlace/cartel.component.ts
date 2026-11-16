@@ -248,7 +248,7 @@ export class CartelComponent {
   readonly name = computed(() => this.auth.businessName());
   readonly link = computed(() => {
     const id = this.auth.businessId();
-    return id == null ? '' : businessLink(id, this.name());
+    return id == null ? '' : businessLink(id, this.name(), this.auth.businessSubdomain());
   });
 
   constructor() {
