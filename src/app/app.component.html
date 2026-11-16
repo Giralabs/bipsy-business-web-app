@@ -20,10 +20,10 @@
   <app-maintenance-badge />
 }
 
-<!-- «Web en desarrollo», on every page while Bipsy Business is being finished.
-     It also carries the cookie question, so there is only ever one notice. -->
+<!-- «En desarrollo» inside the panel only. It also carries the cookie question,
+     so there is only ever one notice; on the public site it is just that question. -->
 @if (!showMaintenance()) {
-  <app-dev-notice [raised]="maintenance.bypass()" />
+  <app-dev-notice [raised]="maintenance.bypass()" [panel]="inPanel()" />
 }
 
 <!-- «Próximamente…» for the store badges and the social icons. -->

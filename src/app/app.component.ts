@@ -82,6 +82,12 @@ export class AppComponent {
    */
   readonly showSiteChrome = computed(() => !bringsOwnChrome(this.url()) && !this.atTeamDoor());
 
+  /** The panel itself, where the «en desarrollo» notice lives. */
+  readonly inPanel = computed(() => {
+    const path = pathOf(this.url());
+    return path === '/panel' || path.startsWith('/panel/');
+  });
+
   /**
    * In maintenance the maintenance page replaces EVERYTHING — site, access
    * pages and panel — on every URL but the team's door. The router outlet is
