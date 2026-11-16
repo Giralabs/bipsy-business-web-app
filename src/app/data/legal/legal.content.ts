@@ -349,7 +349,7 @@ const PRIVACY: LegalDocument = {
   // Google Fonts), el papel de encargado frente a los negocios y los plazos
   // reales de la baja.
   version: '2.1',
-  updatedAt: '7 de noviembre de 2026',
+  updatedAt: '16 de noviembre de 2026',
   sections: [
     {
       id: 'responsable',
@@ -696,7 +696,7 @@ const COOKIES: LegalDocument = {
   // las de business.bipsy.es, que son otras, y Google Fonts, que sí se carga al
   // entrar. Si se añade una clave a localStorage, va aquí.
   version: '1.1',
-  updatedAt: '7 de noviembre de 2026',
+  updatedAt: '16 de noviembre de 2026',
   sections: [
     {
       id: 'que-son',
