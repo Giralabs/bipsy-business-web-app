@@ -5,8 +5,12 @@ import { AnalyticsService } from '../../shared/analytics';
 const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
 
 /**
- * «Web en desarrollo». A pill in the bottom right corner that opens into a
- * card with the explanation, on the marketing site and the panel alike.
+ * «En desarrollo». A pill in the bottom right corner that opens into a card
+ * with the explanation. Only inside the panel (`panel`): the public site is
+ * finished, what is still moving is the product.
+ *
+ * Outside the panel it is only the cookie question, while there is no answer,
+ * in the same card and corner and with no pill; once answered nothing is left.
  *
  * It floats instead of being a strip: the site already has its trial strip and
  * a sticky bar, and the panel fills the screen height, so one more band pushed
@@ -29,23 +33,28 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <aside class="dev" [class.dev--raised]="raised" aria-label="Aviso: web en desarrollo">
-      @if (open() || analytics.needsChoice()) {
-        <div class="dev__card" [class.dev__card--ask]="analytics.needsChoice()" id="dev-notice-card" role="status">
-          @if (!analytics.needsChoice()) {
+    @if (panel || analytics.needsChoice()) {
+    <aside class="dev" [class.dev--raised]="raised"
+           [attr.aria-label]="panel ? 'Aviso: panel en desarrollo' : 'Cookies de análisis'">
+      @if ((panel && open()) || analytics.needsChoice()) {
+        <div class="dev__card" [class.dev__card--ask]="analytics.needsChoice()"
+             [class.dev__card--bare]="!panel" id="dev-notice-card" role="status">
+          @if (panel && !analytics.needsChoice()) {
             <button type="button" class="dev__close" (click)="close()" aria-label="Cerrar el aviso">
               <span class="material-symbols-rounded">close</span>
             </button>
           }
-          <p class="dev__title">
-            <span class="material-symbols-rounded" aria-hidden="true">construction</span>
-            Web en desarrollo
-          </p>
-          <p class="dev__text">
-            Estamos terminando Bipsy Business. Puede que algunas cosas cambien o todavía no funcionen
-            del todo. Si ves algo raro, escríbenos a
-            <a href="mailto:soporte@bipsy.es">soporte&#64;bipsy.es</a>.
-          </p>
+          @if (panel) {
+            <p class="dev__title">
+              <span class="material-symbols-rounded" aria-hidden="true">construction</span>
+              Panel en desarrollo
+            </p>
+            <p class="dev__text">
+              Estamos terminando Bipsy Business. Puede que algunas cosas cambien o todavía no funcionen
+              del todo. Si ves algo raro, escríbenos a
+              <a href="mailto:soporte@bipsy.es">soporte&#64;bipsy.es</a>.
+            </p>
+          }
           @if (analytics.needsChoice()) {
             <div class="dev__ask">
               <p class="dev__text">
@@ -60,12 +69,15 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
           }
         </div>
       }
-      <button type="button" class="dev__pill" (click)="toggle()"
-              [attr.aria-expanded]="open()" aria-controls="dev-notice-card">
-        <span class="dev__dot" aria-hidden="true"></span>
-        En desarrollo
-      </button>
+      @if (panel) {
+        <button type="button" class="dev__pill" (click)="toggle()"
+                [attr.aria-expanded]="open()" aria-controls="dev-notice-card">
+          <span class="dev__dot" aria-hidden="true"></span>
+          En desarrollo
+        </button>
+      }
     </aside>
+    }
   `,
   styles: [
     `
@@ -144,6 +156,8 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
       /* Phones: the full width, not a 320px card hanging off the right edge */
       @media (max-width: 480px) { .dev__card--ask { width: calc(100vw - 32px); } }
       .dev__ask { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--clr-border); }
+      /* Only the cookie question: no notice above it to separate from */
+      .dev__card--bare .dev__ask { margin-top: 0; padding-top: 0; border-top: 0; }
       .dev__ask strong { color: var(--clr-text); font-weight: 800; }
       .dev__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
       .dev__close:hover { background: var(--clr-subtle); color: var(--clr-text); }
@@ -159,6 +173,8 @@ const STORAGE_KEY = 'bipsy_business_dev_notice_seen';
 export class DevNoticeComponent {
   /** The maintenance badge is in the same corner. */
   @Input() raised = false;
+  /** Inside the panel: the «en desarrollo» notice. Elsewhere, only the cookie question. */
+  @Input() panel = false;
 
   readonly analytics = inject(AnalyticsService);
   readonly open = signal(!readSeen());
