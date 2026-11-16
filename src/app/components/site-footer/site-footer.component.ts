@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LEGAL_COMPANY } from '../../data/legal/legal.models';
 import { LEGAL_INDEX } from '../../data/legal/legal.index';
@@ -6,6 +6,7 @@ import { FEATURES } from '../../data/features.data';
 import { BUSINESS_TYPES, FEATURED_TYPE_SLUGS } from '../../data/business-types.data';
 import { HELP_URL, SOCIAL_LINKS, STORE_LINKS } from '../../data/site.data';
 import { ComingSoonDirective } from '../../shared/coming-soon';
+import { AnalyticsService } from '../../shared/analytics';
 
 interface FooterLink {
   label: string;
@@ -51,6 +52,8 @@ export class SiteFooterComponent {
   readonly company = LEGAL_COMPANY;
   readonly year = new Date().getFullYear();
   readonly stores = STORE_LINKS;
+  /** «Configurar cookies» asks the cookie question again (only with an Analytics ID). */
+  readonly analytics = inject(AnalyticsService);
   readonly socials = SOCIAL_LINKS;
 
   readonly columns: FooterColumn[] = [

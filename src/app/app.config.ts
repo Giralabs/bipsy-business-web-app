@@ -2,6 +2,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection } from '@angular/core';
 import {
   PreloadAllModules,
+  TitleStrategy,
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
@@ -13,6 +14,7 @@ import {
 import { routes } from './app.routes';
 import { authInterceptor } from './panel/core/auth/auth.interceptor';
 import { AppErrorHandler, onNavigationError } from './shared/app-error-handler';
+import { SeoTitleStrategy } from './shared/seo';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,5 +38,7 @@ export const appConfig: ApplicationConfig = {
       // is up, so a click opens it at once instead of waiting for its chunk.
       withPreloading(PreloadAllModules),
     ),
+    // Titles of the public pages come from shared/seo.ts, written for search
+    { provide: TitleStrategy, useClass: SeoTitleStrategy },
   ],
 };

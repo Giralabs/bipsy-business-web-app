@@ -90,6 +90,8 @@ export class FrameSequenceComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    // Also destroyed when a page is rendered to HTML at build time, with no window
+    if (typeof window === 'undefined') return;
     cancelAnimationFrame(this.rafId);
     this.observer?.disconnect();
     document.removeEventListener('visibilitychange', this.onVisibilityChange);

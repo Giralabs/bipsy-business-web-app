@@ -4,6 +4,11 @@ import { Meta } from '@angular/platform-browser';
 /** How many live components are asking for it: the tag goes when the last one does. */
 let holders = 0;
 
+/** Whether a screen is holding noindex right now (SeoService must not lift it). */
+export function noindexHeld(): boolean {
+  return holders > 0;
+}
+
 /**
  * Keeps search engines away from the page for as long as the calling component
  * is alive. For the screens that are not content: not found, errors,

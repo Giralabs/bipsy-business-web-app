@@ -1,4 +1,12 @@
 import { LegalDocument, LEGAL_COMPANY, TERMS_VERSION } from './legal.models';
+import { GA_MEASUREMENT_ID } from '../site.data';
+
+/**
+ * Whether Google Analytics is on (an ID in site.data.ts). The privacy and
+ * cookie policies say so only then; with no ID they read exactly as before.
+ * ⚠️ When you set the ID, update `updatedAt` of the cookie policy.
+ */
+const GA = !!GA_MEASUREMENT_ID;
 
 /**
  * Los cuatro documentos legales publicados.
@@ -481,8 +489,12 @@ const PRIVACY: LegalDocument = {
       paragraphs: [
         'Esta web usa únicamente almacenamiento técnico y de preferencias: la sesión iniciada y que has ' +
           'cerrado un aviso, por ejemplo. El detalle, clave por clave, está en la Política de cookies.',
-        'No usamos cookies de publicidad ni de analítica de terceros, así que no necesitamos pedirte ' +
-          'consentimiento para ellas. Si eso cambiara, te lo pediríamos antes de instalarlas.',
+        GA
+          ? 'No usamos cookies de publicidad. Usamos Google Analytics para saber qué páginas se visitan, ' +
+            'pero solo si lo aceptas en el aviso de cookies: hasta entonces no se carga. Puedes cambiar de ' +
+            'opinión en cualquier momento desde «Configurar cookies», al pie de la web.'
+          : 'No usamos cookies de publicidad ni de analítica de terceros, así que no necesitamos pedirte ' +
+            'consentimiento para ellas. Si eso cambiara, te lo pediríamos antes de instalarlas.',
         'Las aplicaciones móviles no usan cookies: guardan la sesión en el almacenamiento seguro del ' +
           'dispositivo.',
       ],
@@ -706,10 +718,16 @@ const COOKIES: LegalDocument = {
       id: 'resumen',
       title: '2. Resumen',
       paragraphs: [
-        'Bipsy no usa cookies de publicidad, de analítica ni de seguimiento entre sitios. No verás un banner ' +
-          'de consentimiento porque no hay nada que consentir: todo lo que guardamos es necesario para ' +
-          'prestar el servicio que pides o para recordar una preferencia que tú has elegido, y la normativa ' +
-          'exime a esos usos del consentimiento previo.',
+        GA
+          ? 'Bipsy no usa cookies de publicidad ni de seguimiento entre sitios. Lo único que necesita tu ' +
+            'permiso es Google Analytics, que nos dice qué páginas se visitan: te lo preguntamos en un aviso ' +
+            'y no se carga hasta que aceptas. El resto de lo que guardamos es necesario para prestar el ' +
+            'servicio que pides o para recordar una preferencia que tú has elegido, y la normativa exime a ' +
+            'esos usos del consentimiento previo.'
+          : 'Bipsy no usa cookies de publicidad, de analítica ni de seguimiento entre sitios. No verás un banner ' +
+            'de consentimiento porque no hay nada que consentir: todo lo que guardamos es necesario para ' +
+            'prestar el servicio que pides o para recordar una preferencia que tú has elegido, y la normativa ' +
+            'exime a esos usos del consentimiento previo.',
         'Lo que sí conviene que sepas es que algunas funciones cargan código de terceros (Google y Stripe), ' +
           'y esos proveedores pueden guardar cosas por su cuenta. Se detallan abajo.',
       ],
@@ -760,6 +778,14 @@ const COOKIES: LegalDocument = {
           'ellas Stripe rechaza la operación.',
         'Firebase Authentication (Google) — solo si eliges entrar con Google o con Apple. Guarda en el ' +
           'navegador el estado de esa autenticación mientras dura.',
+        ...(GA
+          ? [
+              'Google Analytics (Google Ireland Limited) — solo si lo aceptas en el aviso de cookies. Instala ' +
+                'las cookies _ga y _ga_<identificador>, que distinguen visitas de forma seudónima para contar ' +
+                'qué páginas se ven y cómo se llega a ellas. Duran hasta 2 años. Si no aceptas, no se carga; ' +
+                'si cambias de opinión desde «Configurar cookies», dejan de usarse y se borran.',
+            ]
+          : []),
       ],
       closingParagraphs: [
         'Estos proveedores actúan como encargados del tratamiento o, en lo que hacen por cuenta propia, como ' +
@@ -772,7 +798,9 @@ const COOKIES: LegalDocument = {
       paragraphs: ['Para que quede escrito y sea exigible:'],
       bullets: [
         'No usamos cookies publicitarias ni de personalización de anuncios.',
-        'No usamos Google Analytics ni ninguna otra herramienta de analítica de terceros.',
+        ...(GA
+          ? ['No usamos ninguna herramienta de analítica aparte de Google Analytics, y esta solo con tu permiso.']
+          : ['No usamos Google Analytics ni ninguna otra herramienta de analítica de terceros.']),
         'No usamos píxeles de redes sociales ni botones que rastreen tu navegación.',
         'No vendemos ni cedemos datos de navegación a terceros con fines comerciales.',
       ],

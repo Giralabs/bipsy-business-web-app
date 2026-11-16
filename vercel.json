@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/((?!descargas/).*)", "destination": "/index.html" }],
+  "buildCommand": "npm run build",
+  "rewrites": [{ "source": "/((?!descargas/).*)", "destination": "/spa.html" }],
   "headers": [
     {
       "source": "/descargas/(.*)\\.exe",

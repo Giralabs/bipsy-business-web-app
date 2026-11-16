@@ -3,4 +3,9 @@
   min-height: 100vh;
 }
 
-.main { display: block; outline: none; }
+/* `clip`, not `hidden`: the hero glows and the marquee run past the edges, and
+   on a phone that made the page wider than the screen (674 px on a 390 px
+   iPhone): sideways scrolling, fixed notices out of view and Google's "content
+   wider than screen". `clip` cuts them without making <main> a scroll box, so
+   sticky positioning inside still works. */
+.main { display: block; outline: none; overflow-x: clip; }

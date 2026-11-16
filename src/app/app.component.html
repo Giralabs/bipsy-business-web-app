@@ -27,3 +27,11 @@
 
 <!-- «Próximamente…» for the store badges and the social icons. -->
 <app-coming-soon-toast />
+
+<!-- Cookie notice: only with a Google Analytics ID and no answer yet. Deferred
+     so it never weighs on the first load of the page. -->
+@if (!showMaintenance()) {
+  @defer (on idle) {
+    <app-cookie-consent />
+  }
+}

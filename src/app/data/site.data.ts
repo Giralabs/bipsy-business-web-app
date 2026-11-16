@@ -29,6 +29,15 @@ export interface ExternalLink {
   url: string;
 }
 
+/**
+ * Google Analytics 4 of business.bipsy.es: the «G-XXXXXXX» measurement ID of
+ * its property. Empty = nothing loads and no cookie notice shows. With an ID,
+ * the notice asks first and GA loads only after «Aceptar» (shared/analytics.ts),
+ * and the cookie policy lists it. When you set it, update the `updatedAt`
+ * date of the cookie policy (data/legal/legal.content.ts).
+ */
+export const GA_MEASUREMENT_ID = '';
+
 /** The customer-facing web (bipsy-web-app). */
 export const CLIENT_WEB_URL = 'https://bipsy.es';
 
