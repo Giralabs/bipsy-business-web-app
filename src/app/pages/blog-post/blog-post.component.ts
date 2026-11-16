@@ -5,11 +5,13 @@ import { CtaBandComponent } from '../../components/cta-band/cta-band.component';
 import { RevealDirective } from '../../shared/reveal.directive';
 import { BLOG_POSTS, BlogPost, postBySlug } from '../../data/blog.data';
 import { Feature, featureBySlug } from '../../data/features.data';
+import { CLIENT_STORE_LINKS, STORE_LINKS } from '../../data/site.data';
+import { StoryCarouselComponent } from '../../components/story-carousel/story-carousel.component';
 
 @Component({
   selector: 'app-blog-post',
   standalone: true,
-  imports: [RouterLink, CtaBandComponent, RevealDirective],
+  imports: [RouterLink, CtaBandComponent, RevealDirective, StoryCarouselComponent],
   templateUrl: './blog-post.component.html',
   styleUrl: './blog-post.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +20,8 @@ export class BlogPostComponent {
   post?: BlogPost;
   feature?: Feature;
   more: BlogPost[] = [];
+  readonly stores = STORE_LINKS;
+  readonly clientStores = CLIENT_STORE_LINKS;
 
   constructor(
     private readonly title: Title,

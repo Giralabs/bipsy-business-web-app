@@ -4,6 +4,8 @@
  * true today.
  */
 
+import { StorySlide } from '../components/story-carousel/story-carousel.component';
+
 export interface BlogSection {
   heading: string;
   paragraphs: string[];
@@ -14,7 +16,7 @@ export interface BlogPost {
   slug: string;
   title: string;
   excerpt: string;
-  category: 'Agenda' | 'Equipo' | 'Clientes' | 'Escaparate' | 'Gestión';
+  category: 'Novedades' | 'Agenda' | 'Equipo' | 'Clientes' | 'Escaparate' | 'Gestión';
   icon: string;
   readMinutes: number;
   /** ISO date, for sorting and for <time datetime>. */
@@ -23,9 +25,66 @@ export interface BlogPost {
   sections: BlogSection[];
   /** Related feature, linked at the end of the article. */
   featureSlug: string;
+  /** Slides shown as a story-style carousel under the header (4:5 posts). */
+  gallery?: StorySlide[];
+  /** Shows the App Store badges of both apps after the gallery. */
+  downloads?: boolean;
 }
 
+/** The first post is the featured one on /blog: newest first. */
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    slug: 'bipsy-business-ya-en-el-app-store',
+    title: 'Bipsy Business ya está en el App Store',
+    excerpt: 'Las dos apps ya se pueden descargar en iPhone y iPad: Bipsy para tus clientes y Bipsy Business para tu negocio. Android llega en unas semanas.',
+    category: 'Novedades',
+    icon: 'rocket_launch',
+    readMinutes: 3,
+    date: '2026-11-16',
+    dateLabel: '16 de noviembre de 2026',
+    featureSlug: 'agenda-y-reservas-online',
+    downloads: true,
+    gallery: [
+      { src: 'blog/bipsy-ya-en-el-app-store/carrusel-1.webp', alt: 'Dos apps. Ya en iPhone: Bipsy y Bipsy Business en dos móviles' },
+      { src: 'blog/bipsy-ya-en-el-app-store/carrusel-2.webp', alt: 'Bipsy, para quien reserva: encuentra barberías, peluquerías y centros de estética, mira las horas libres y reserva sin llamar' },
+      { src: 'blog/bipsy-ya-en-el-app-store/carrusel-3.webp', alt: 'Bipsy Business, para quien atiende: la agenda del día, la ficha de cada cliente y el equipo, con el aviso de una nueva cita' },
+      { src: 'blog/bipsy-ya-en-el-app-store/carrusel-4.webp', alt: '¿Cómo empiezo? Abre el App Store, busca Bipsy o Bipsy Business y descárgala' },
+      { src: 'blog/bipsy-ya-en-el-app-store/carrusel-5.webp', alt: '¿Tienes Android? Llega en unas semanas. Bip saluda' },
+    ],
+    sections: [
+      {
+        heading: 'Ya puedes descargarla',
+        paragraphs: [
+          'Bipsy Business ya está en el App Store para iPhone y iPad, y con ella Bipsy, la app gratuita con la que tus clientes reservan. Son dos apps que funcionan juntas: lo que reserva un cliente en Bipsy aparece al momento en tu agenda como «Nueva cita».',
+          'Búscala en el App Store como «Bipsy Business», crea tu cuenta y da de alta tu negocio desde el móvil. El primer mes es gratis y no hay permanencia.',
+        ],
+      },
+      {
+        heading: 'Lo que tienes desde el primer día',
+        paragraphs: ['Todo lo que cuenta esta web está ya en la app:'],
+        bullets: [
+          'Reservas online a cualquier hora y una agenda con Hoy, Pendientes y la semana entera.',
+          'Lista de espera que ofrece sola los huecos que se liberan.',
+          'Protección contra plantones con tarjeta al reservar.',
+          'Cobro de las citas desde la app del cliente, sin comisión de Bipsy.',
+          'Ficha de cada cliente, mensajes, reseñas verificadas y tu ficha en Bipsy.',
+          'Todo tu equipo gratis con un código de invitación, con fichaje y ausencias.',
+        ],
+      },
+      {
+        heading: 'Invita a tus clientes',
+        paragraphs: [
+          'Para que tus clientes te reserven, que se descarguen Bipsy (búscala en el App Store como «Bipsy») y te encuentren por tu nombre o en el mapa. Desde la ficha de cada cliente puedes mandarles la invitación con un mensaje ya escrito.',
+        ],
+      },
+      {
+        heading: '¿Y Android?',
+        paragraphs: [
+          'Las dos apps llegan a Google Play en unas semanas, con las mismas funciones que en iPhone. Si tu equipo o tus clientes usan Android, síguenos en Instagram (@bipsy_es) y te avisamos el primer día.',
+        ],
+      },
+    ],
+  },
   {
     slug: 'como-reducir-los-plantones',
     title: 'Cómo reducir los plantones sin perder clientes',

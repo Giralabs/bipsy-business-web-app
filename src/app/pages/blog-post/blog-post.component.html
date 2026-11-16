@@ -21,6 +21,30 @@
         </div>
       </header>
 
+      @if (p.gallery?.length) {
+        <figure class="launch" appReveal>
+          <app-story-carousel class="launch__carousel" [slides]="p.gallery!" label="Carrusel del lanzamiento" />
+          @if (p.downloads) {
+            <figcaption class="launch__side">
+              <p class="launch__title">Descárgalas en el App Store</p>
+              <p class="launch__row">
+                <span><b>Bipsy Business</b><small>Para tu negocio</small></span>
+                <a [href]="stores.appStore.url" target="_blank" rel="noopener" class="launch__badge">
+                  <img [src]="stores.appStore.image" [alt]="stores.appStore.label" />
+                </a>
+              </p>
+              <p class="launch__row">
+                <span><b>Bipsy</b><small>Para tus clientes</small></span>
+                <a [href]="clientStores.appStore.url" target="_blank" rel="noopener" class="launch__badge">
+                  <img [src]="clientStores.appStore.image" [alt]="clientStores.appStore.label" />
+                </a>
+              </p>
+              <p class="launch__note">Android llega a Google Play en unas semanas.</p>
+            </figcaption>
+          }
+        </figure>
+      }
+
       <div class="article__body">
         @for (section of p.sections; track section.heading) {
           <section appReveal>
